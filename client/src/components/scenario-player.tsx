@@ -137,20 +137,36 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
   };
 
   const playScenario = async () => {
+    if (steps.length === 0) {
+      console.warn('❌ Aucune étape à jouer dans le scénario');
+      return;
+    }
+
+    console.log('🎬 Démarrage du scénario complet avec', steps.length, 'étapes');
     setIsPlaying(true);
     
-    for (let i = 0; i < steps.length; i++) {
-      await playStep(i);
-      
-      // Small pause between steps
-      if (i < steps.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      for (let i = 0; i < steps.length; i++) {
+        console.log(`🎯 Lecture de l'étape ${i + 1}/${steps.length}: ${steps[i].title}`);
+        await playStep(i);
+        
+        // Pause between steps with progress reset
+        if (i < steps.length - 1) {
+          setProgress(0);
+          await new Promise(resolve => setTimeout(resolve, 800));
+        }
       }
+      
+      console.log('✅ Scénario terminé avec succès');
+      onComplete?.();
+      
+    } catch (error) {
+      console.error('❌ Erreur pendant la lecture du scénario:', error);
+      alert('Une erreur est survenue pendant la lecture du scénario.');
+    } finally {
+      setIsPlaying(false);
+      setProgress(0);
     }
-    
-    setIsPlaying(false);
-    setProgress(0);
-    onComplete?.();
   };
 
   const playCurrentStep = () => {

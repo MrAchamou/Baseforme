@@ -6,6 +6,7 @@ interface AnimationContext {
   text: string;
   animationFrame: number;
   startTime: number;
+  image?: HTMLImageElement;
 }
 
 export class EffectLoader {
@@ -84,7 +85,7 @@ export class EffectLoader {
     }
   }
 
-  executeEffect(effectId: string, text: string): boolean {
+  executeEffect(effectId: string, text: string, image?: HTMLImageElement): boolean {
     if (!this.canvas) {
       console.error('❌ No canvas set');
       return false;
@@ -98,7 +99,8 @@ export class EffectLoader {
 
     const effectFunction = this.loadedEffects.get(effectId);
     if (!effectFunction) {
-      console.error(`❌ Effect ${effectId} not loaded`);
+      console.error(`❌ Effect ${effectId} not loaded - using fallback`);
+      this.createFallbackAnimation(text);
       return false;
     }
 
@@ -114,24 +116,36 @@ export class EffectLoader {
         canvas: this.canvas,
         text,
         animationFrame: 0,
-        startTime: Date.now()
+        startTime: Date.now(),
+        image
       };
 
       // Clear canvas first
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // Set default background
-      ctx.fillStyle = '#000000';
+      // Set default background with gradient
+      const gradient = ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+      gradient.addColorStop(0, '#0f0f23');
+      gradient.addColorStop(1, '#1a1a2e');
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // Execute the effect
+      // Execute the effect with timeout protection
+      const timeout = setTimeout(() => {
+        console.warn(`⚠️ Effect ${effectId} timeout - switching to fallback`);
+        this.stopAnimation();
+        this.createFallbackAnimation(text);
+      }, 15000);
+
       const animateFunction = effectFunction(this.currentContext);
 
       if (typeof animateFunction === 'function') {
         console.log(`🎬 Starting animation for effect ${effectId}`);
+        clearTimeout(timeout);
         animateFunction();
       } else {
         console.log(`🎨 Direct execution for effect ${effectId}`);
+        clearTimeout(timeout);
       }
 
       return true;
@@ -139,52 +153,100 @@ export class EffectLoader {
     } catch (error) {
       console.error(`❌ Error executing effect ${effectId}:`, error);
 
-      // Fallback to basic animation
-      this.createFallbackAnimation(text);
+      // Enhanced fallback with error details
+      this.createFallbackAnimation(text, `Erreur: ${effectId}`);
       return false;
     }
   }
 
-  private createFallbackAnimation(text: string): void {
-    if (!this.canvas || !this.currentContext) return;
+  private createFallbackAnimation(text: string, errorInfo?: string): void {
+    if (!this.canvas) return;
 
-    const { ctx, canvas } = this.currentContext;
+    const ctx = this.canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Update context for fallback
+    this.currentContext = {
+      ctx,
+      canvas: this.canvas,
+      text,
+      animationFrame: 0,
+      startTime: Date.now()
+    };
+
     let frame = 0;
 
     const animate = () => {
       // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // Background gradient
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      // Enhanced background gradient
+      const gradient = ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
       gradient.addColorStop(0, '#1a1a2e');
-      gradient.addColorStop(1, '#16213e');
+      gradient.addColorStop(0.5, '#16213e');
+      gradient.addColorStop(1, '#0f0f23');
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // Animated text
+      // Animated text with multiple effects
+      const x = this.canvas.width / 2;
+      const y = this.canvas.height / 2;
+
+      // Main text
       ctx.font = 'bold 48px Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      const hue = (frame * 2) % 360;
-      ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+      const hue = (frame * 3) % 360;
+      const scale = 1 + Math.sin(frame * 0.08) * 0.15;
+      const rotation = Math.sin(frame * 0.02) * 0.1;
 
-      const x = canvas.width / 2;
-      const y = canvas.height / 2;
-      const scale = 1 + Math.sin(frame * 0.1) * 0.1;
-
+      // Shadow effect
       ctx.save();
-      ctx.translate(x, y);
+      ctx.translate(x + 3, y + 3);
+      ctx.rotate(rotation);
       ctx.scale(scale, scale);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.fillText(text, 0, 0);
       ctx.restore();
+
+      // Main text with color animation
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = `hsl(${hue}, 70%, 65%)`;
+      ctx.fillText(text, 0, 0);
+
+      // Add glow effect
+      ctx.shadowColor = `hsl(${hue}, 70%, 65%)`;
+      ctx.shadowBlur = 20;
+      ctx.fillText(text, 0, 0);
+      ctx.restore();
+
+      // Error info if provided
+      if (errorInfo) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillText(errorInfo, x, y + 80);
+      }
+
+      // Particles effect
+      for (let i = 0; i < 5; i++) {
+        const particleX = x + Math.sin((frame + i * 50) * 0.05) * 100;
+        const particleY = y + Math.cos((frame + i * 30) * 0.03) * 60;
+        
+        ctx.fillStyle = `hsl(${(hue + i * 60) % 360}, 70%, 60%)`;
+        ctx.beginPath();
+        ctx.arc(particleX, particleY, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       frame++;
       this.animationFrame = requestAnimationFrame(animate);
     };
 
-    console.log(`🔄 Starting fallback animation for text: "${text}"`);
+    console.log(`🔄 Starting enhanced fallback animation for text: "${text}"`);
     animate();
   }
 

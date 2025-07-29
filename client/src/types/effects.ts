@@ -4,9 +4,9 @@ export interface Effect {
   description: string;
   script?: string;
   path: string;
-  type: 'animation' | 'transition' | 'special';
-  scriptUrl: string;
-  category: 'text' | 'image' | 'both';
+  type?: 'animation' | 'transition' | 'special';
+  scriptUrl?: string;
+  category?: 'text' | 'image' | 'both';
 }
 
 export interface EffectConfig {

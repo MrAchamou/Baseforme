@@ -59,51 +59,72 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
   };
 
   const handlePlayScenario = () => {
-    if (!scenario.logoText && !scenario.storyText && !scenario.mainText && !scenario.sloganText) {
-      console.warn('Aucun contenu à jouer dans le scénario');
+    // Validation plus robuste
+    const hasContent = scenario.logoText.trim() || 
+                      scenario.storyText.trim() || 
+                      scenario.mainText.trim() || 
+                      scenario.sloganText.trim();
+    
+    if (!hasContent) {
+      alert('⚠️ Veuillez ajouter au moins un texte dans une des sections pour créer votre scénario.');
       return;
     }
+
+    // Validation des effets
+    const sections = [];
+    if (scenario.logoText.trim() && !scenario.logoEffect) {
+      sections.push('Logo');
+    }
+    if (scenario.storyText.trim() && !scenario.storyEffect) {
+      sections.push('Histoire');
+    }
+    if (scenario.mainText.trim() && !scenario.mainEffect) {
+      sections.push('Effet Principal');
+    }
+    if (scenario.sloganText.trim() && !scenario.sloganEffect) {
+      sections.push('Slogan');
+    }
+
+    if (sections.length > 0) {
+      alert(`⚠️ Veuillez sélectionner un effet pour : ${sections.join(', ')}`);
+      return;
+    }
+
     console.log('🎬 Lancement du scénario:', scenario);
-    console.log('📊 Effets disponibles:', {
-      total: effects.length,
-      logo: logoEffects.length,
-      text: textEffects.length,
-      visual: visualEffects.length,
-      image: imageEffects.length
-    });
     onScenarioPlay(scenario);
   };
 
-  // Filter effects by category for better organization
+  // Filter effects by category and type for better organization
   const logoEffects = effects.filter(e => 
     e.category === 'both' || e.category === 'text' ||
-    e.name.includes('LOGO') || 
+    e.name.includes('GLOW') || 
     e.name.includes('APPEAR') || 
     e.name.includes('FADE') ||
-    e.name.includes('GLOW') ||
-    e.name.includes('SPARKLE')
+    e.name.includes('AURA')
   );
 
   const textEffects = effects.filter(e => 
-    e.category === 'text' || e.category === 'both' ||
-    e.name.includes('WRITE') || 
-    e.name.includes('TYPE') || 
-    e.name.includes('ECHO') ||
-    e.name.includes('TYPEWRITER')
+    e.category === 'text' || 
+    (e.category === 'both' && (
+      e.name.includes('WRITE') || 
+      e.name.includes('TYPE') || 
+      e.name.includes('ECHO') ||
+      e.name.includes('SPARKLE')
+    ))
   );
 
   const visualEffects = effects.filter(e => 
-    e.category === 'image' || e.category === 'both' ||
+    e.category === 'both' ||
     e.name.includes('FIRE') || 
     e.name.includes('ELECTRIC') || 
     e.name.includes('CRYSTAL') ||
     e.name.includes('PLASMA') ||
-    e.name.includes('WAVE') ||
-    e.name.includes('SMOKE')
+    e.name.includes('ENERGY')
   );
 
   const imageEffects = effects.filter(e => 
-    e.category === 'image' || e.category === 'both'
+    e.category === 'image' || 
+    (e.category === 'both' && e.name.includes('MORPH'))
   );
 
 
@@ -170,7 +191,7 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                         <SelectItem key={effect.id} value={effect.id}>
                           <div className="flex items-center space-x-2">
                             <span className="text-xs px-1 py-0.5 rounded bg-blue-600 text-white">
-                              {effect.type === 'image' ? 'IMG' : effect.type === 'text' ? 'TXT' : 'UNI'}
+                              {effect.category === 'image' ? '🖼️' : effect.category === 'text' ? '✏️' : '🎨'}
                             </span>
                             <span>{effect.name}</span>
                           </div>
@@ -212,8 +233,11 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                     {textEffects.map(effect => (
                       <SelectItem key={effect.id} value={effect.id}>
                         <div className="flex items-center space-x-2">
-                          <span className="text-xs px-1 py-0.5 rounded bg-purple-600 text-white">
-                            {effect.type === 'text' ? 'TXT' : 'UNI'}
+                          <span className="text-lg">
+                            {effect.name.includes('TYPE') || effect.name.includes('WRITE') ? '⌨️' : 
+                             effect.name.includes('ECHO') ? '🔊' : 
+                             effect.name.includes('SPARKLE') ? '✨' : 
+                             effect.name.includes('FIRE') ? '🔥' : '📝'}
                           </span>
                           <span>{effect.name}</span>
                         </div>
@@ -278,8 +302,14 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                       {imageEffects.map(effect => (
                         <SelectItem key={effect.id} value={effect.id}>
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs px-1 py-0.5 rounded bg-green-600 text-white">
-                              {effect.type === 'image' ? 'IMG' : 'UNI'}
+                            <span className="text-lg">
+                              {effect.name.includes('FIRE') ? '🔥' : 
+                               effect.name.includes('ELECTRIC') ? '⚡' : 
+                               effect.name.includes('CRYSTAL') ? '💎' : 
+                               effect.name.includes('PLASMA') ? '🌀' : 
+                               effect.name.includes('MORPH') ? '🔮' : 
+                               effect.name.includes('LIQUID') ? '💧' : 
+                               effect.name.includes('ENERGY') ? '⚡' : '🎭'}
                             </span>
                             <span>{effect.name}</span>
                           </div>
@@ -317,11 +347,14 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                 <SelectValue placeholder="Choisir un effet..." />
               </SelectTrigger>
               <SelectContent>
-                {textEffects.concat(visualEffects).slice(0, 15).map((effect) => (
+                {textEffects.slice(0, 15).map((effect) => (
                   <SelectItem key={effect.id} value={effect.id}>
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs px-1 py-0.5 rounded bg-orange-600 text-white">
-                        {effect.category === 'text' ? 'TXT' : effect.category === 'image' ? 'IMG' : 'UNI'}
+                      <span className="text-lg">
+                        {effect.name.includes('GLOW') ? '✨' : 
+                         effect.name.includes('SPARKLE') ? '💫' : 
+                         effect.name.includes('AURA') ? '🌟' : 
+                         effect.name.includes('RAINBOW') ? '🌈' : '🎯'}
                       </span>
                       <span>{effect.name}</span>
                     </div>
@@ -339,12 +372,22 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
       <div className="text-center">
         <Button
           onClick={handlePlayScenario}
-          disabled={isPlaying || (!scenario.logoText && !scenario.storyText && !scenario.mainText && !scenario.sloganText)}
+          disabled={isPlaying}
           size="lg"
           data-testid="button-play-scenario"
-          className="w-full md:w-auto"
+          className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
         >
-          {isPlaying ? 'Lecture en cours...' : 'Lancer le Scénario Complet'}
+          {isPlaying ? (
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span>🎬 Lecture en cours...</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <span>🚀</span>
+              <span>Lancer le Scénario Complet</span>
+            </div>
+          )}
         </Button>
       </div>
     </div>
