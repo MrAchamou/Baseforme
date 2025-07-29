@@ -45,13 +45,40 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
   }, [effect, text, isPlaying]);
 
   const executeEffect = async () => {
-    if (!effect || !text) return;
+    if (!effect || !text || !canvasRef.current) return;
 
     try {
+      console.log(`🎬 Executing effect: ${effect.name} with text: "${text}"`);
+      
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Set canvas background
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Load and execute the effect
       await effectLoader.loadEffect(effect);
-      effectLoader.executeEffect(effect.id, text);
+      
+      // Start the animation with the current text
+      const result = effectLoader.executeEffect(effect.id, text);
+      
+      if (result) {
+        console.log(`✅ Effect ${effect.name} started successfully`);
+        setIsEffectLoaded(true);
+        setError(null);
+      } else {
+        throw new Error(`Failed to start effect ${effect.name}`);
+      }
+      
     } catch (error) {
       console.error('Failed to execute effect:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error');
+      setIsEffectLoaded(false);
     }
   };
 
@@ -121,7 +148,7 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
   }, [effect, text]);
 
   useEffect(() => {
-    if (!isEffectLoaded || !isPlaying) return;
+    if (!effect || !text || !isPlaying) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -130,15 +157,18 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
     canvas.width = containerDimensions.width;
     canvas.height = containerDimensions.height;
 
-    // Animation logic would go here
-    console.log('Starting animation for:', effect?.name, 'Size:', containerDimensions);
+    console.log(`🎯 Animation setup:`, {
+      effect: effect.name,
+      text: text,
+      size: `${containerDimensions.width}x${containerDimensions.height}`,
+      playing: isPlaying,
+      loaded: isEffectLoaded
+    });
 
-    if (effect && text && canvasRef.current && isPlaying) {
-      executeEffect();
-    } else if (!isPlaying) {
-      effectLoader.stopAnimation();
-    }
-  }, [isPlaying, isEffectLoaded, effect, containerDimensions]);
+    // Execute effect immediately when playing
+    executeEffect();
+    
+  }, [isPlaying, effect, text, containerDimensions]);
 
   return (
     <div className="relative aspect-video bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg overflow-hidden">
