@@ -1,4 +1,3 @@
-
 const GITHUB_API_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
 const GITHUB_REPO_OWNER = 'MrAchamou';
 const GITHUB_REPO_NAME = 'Premium_Effect';
@@ -148,11 +147,11 @@ async function loadSingleEffectWithRetry(effectName: string, effectPath: string,
 async function loadSingleEffect(effectName: string, effectPath: string, effects: Effect[]): Promise<boolean> {
   try {
     console.info(`Attempting to load effect: ${effectName} from path: ${effectPath}`);
-    
+
     if (!GITHUB_API_TOKEN) {
       console.warn('No GitHub token provided - API rate limits will be very restrictive');
     }
-    
+
     const dirResponse = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${encodeURIComponent(effectPath)}`, 
       { 
@@ -183,7 +182,7 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
       file.name && 
       file.name.toLowerCase().endsWith('.js')
     );
-    
+
     const descFile = files.find((file: any) => 
       file.type === 'file' && 
       file.name && 
@@ -230,14 +229,43 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
         console.warn(`Failed to load description for ${effectName}:`, error);
       }
     }
+    const effectName = file.name.replace('.js', '').replace(/-/g, ' ').toUpperCase();
 
-    effects.push({
-      id: effectName,
-      name: formatEffectName(effectName),
-      description,
-      path: effectPath,
-      script: jsFile.download_url
-    });
+          // Categorize effects based on keywords
+          let category: 'text' | 'image' | 'both' = 'both';
+          let type: 'animation' | 'transition' | 'special' = 'animation';
+
+          const fileName = file.name.toLowerCase();
+
+          // Text effects keywords
+          const textKeywords = ['typewriter', 'write', 'text', 'type', 'letter', 'word', 'font'];
+          // Image effects keywords  
+          const imageKeywords = ['image', 'photo', 'picture', 'visual', 'graphic'];
+          // Animation type keywords
+          const transitionKeywords = ['fade', 'dissolve', 'morph', 'transform', 'transition'];
+          const specialKeywords = ['quantum', 'reality', 'glitch', 'neural', 'plasma'];
+
+          if (textKeywords.some(keyword => fileName.includes(keyword))) {
+            category = 'text';
+          } else if (imageKeywords.some(keyword => fileName.includes(keyword))) {
+            category = 'image';
+          }
+
+          if (transitionKeywords.some(keyword => fileName.includes(keyword))) {
+            type = 'transition';
+          } else if (specialKeywords.some(keyword => fileName.includes(keyword))) {
+            type = 'special';
+          }
+
+          effects.push({
+            id: file.name.replace('.js', ''),
+            name: effectName,
+            description: `${type.charAt(0).toUpperCase() + type.slice(1)} effect: ${file.name.replace('.js', '')}`,
+            scriptUrl: jsFile.download_url!,
+            path: effectPath,
+            category,
+            type
+          });
 
     console.info(`✅ Successfully loaded effect: ${effectName}`);
     return true;
@@ -277,7 +305,7 @@ async function discoverEffectsFromRepository(): Promise<string[]> {
 
     for (let i = 0; i < directories.length; i += maxConcurrent) {
       const batch = directories.slice(i, i + maxConcurrent);
-      
+
       const promises = batch.map(async (item) => {
         try {
           const dirResponse = await fetch(

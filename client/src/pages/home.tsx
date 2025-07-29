@@ -80,6 +80,12 @@ export default function Home() {
   const handleRandomEffect = () => {
     if (effects.length === 0) return;
 
+    // TODO: Filter effects based on text or image type here
+    // Example:
+    // const textEffects = effects.filter(effect => effect.type === 'text');
+    // const imageEffects = effects.filter(effect => effect.type === 'image');
+    // Then select a random effect from the appropriate array based on the input
+
     const randomEffect = getRandomEffect();
     setSelectedEffect(randomEffect);
     setCurrentEffectIndex(effects.indexOf(randomEffect));

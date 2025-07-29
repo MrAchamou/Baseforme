@@ -43,6 +43,9 @@ export function EffectControls({
   const [autoMode, setAutoMode] = useState(true);
   const [detectedEffect, setDetectedEffect] = useState<string | null>(null);
   const [selectedFormat, setSelectedFormat] = useState("9:16"); // Default format
+    const [selectedCategory, setSelectedCategory] = useState<string>("all");
+    const [filteredEffects, setFilteredEffects] = useState<Effect[]>(effects);
+
 
   useEffect(() => {
     if (autoMode && text) {
@@ -52,6 +55,24 @@ export function EffectControls({
       setDetectedEffect(null);
     }
   }, [text, autoMode]);
+
+    useEffect(() => {
+        if (selectedCategory === "all") {
+            setFilteredEffects(effects);
+        } else {
+            setFilteredEffects(effects.filter(e => e.category === selectedCategory));
+        }
+    }, [effects, selectedCategory]);
+
+    const groupedEffects = filteredEffects.reduce((acc: { [key: string]: Effect[] }, effect) => {
+        const type = effect.type || 'special'; // Default to 'special' if type is not defined
+        if (!acc[type]) {
+            acc[type] = [];
+        }
+        acc[type].push(effect);
+        return acc;
+    }, {});
+
 
   const detectEffectFromKeywords = (inputText: string): string | null => {
     const words = inputText.toLowerCase().split(/\s+/);
