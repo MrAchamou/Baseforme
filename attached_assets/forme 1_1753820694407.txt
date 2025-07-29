@@ -1,0 +1,61 @@
+🎯 OBJECTIF :
+
+Créer une application web interactive permettant de générer des statuts animés adaptés aux réseaux sociaux (WhatsApp, Instagram, TikTok, YouTube Shorts), avec :
+
+- Sélection du format (ratio) parmi 9:16, 1:1, 4:5, 16:9, 3:4  
+- Templates scénarisés en 4 niveaux (basic, standard, premium, masterclass)  
+- Gestion dynamique et responsive des zones de contenu (logo, texte principal, promo/secondaire, bouton contact)  
+- Upload et intégration d’un logo PNG transparent, avec effets d’animation possibles  
+- Texte dynamique généré selon scénario choisi, avec variables utilisateurs (nom boutique, activité, promo, téléphone…)  
+- Effets visuels animés appliqués au texte et au logo (ex : effets JS déjà présents dans le dépôt GitHub : https://github.com/MrAchamou/Premium_Effect.git)  
+- Interface utilisateur intuitive pour configurer tout ça simplement
+
+---
+
+📐 STRUCTURE DU TEMPLATE :
+
+Le contenu s’organise dans un cadre (`#effect-container`) dont la taille et ratio s’ajustent selon le format choisi.
+
+Zones dédiées dans ce cadre :
+
+1. `#logo-area` : en haut à gauche ou centre haut, taille modifiable, support PNG transparent, animé si possible  
+2. `#main-text` : zone centrale pour texte principal (ex : nom boutique, accroche)  
+3. `#secondary-text` : sous le texte principal, pour promo, contact ou message secondaire  
+4. `#action-button` : bouton discret en bas ou coin, affichant le contact WhatsApp ou numéro, cliquable  
+5. Zone d’animation générale appliquant les effets JS sur texte et logo
+
+---
+
+⚙️ FONCTIONNALITÉS TECHNIQUES :
+
+- Un `select` pour choisir le format : 9:16, 1:1, 4:5, 16:9, 3:4  
+- Le cadre `#effect-container` se redimensionne dynamiquement selon format choisi  
+- Upload de logo via input type `file` acceptant PNG transparent, affiché dans `#logo-area` avec option d’animer via effets JS  
+- Formulaire simple demandant les variables nécessaires selon scénario choisi (ex : nom boutique, activité, promo, téléphone…)  
+- Scripts textes préprogrammés pour chaque scénario (basic, standard, premium, masterclass), intégrant les variables utilisateurs, avec mise en forme dans `#main-text` et `#secondary-text`  
+- Application d’un effet JS sur texte et logo : choix aléatoire ou sélectionné dans la bibliothèque d’effets du dépôt GitHub (à intégrer)  
+- Bouton `#action-button` cliquable ouvrant WhatsApp avec le numéro fourni  
+- Design responsive et propre, avec styles CSS modernes et animations fluides
+
+---
+
+💻 LIVRABLES :
+
+- Fichiers HTML, CSS, JS organisés clairement  
+- Commentaires dans le code pour expliquer les zones et fonctionnalités  
+- Instructions pour connecter la bibliothèque d’effets JS depuis GitHub  
+- Exemple d’utilisation avec un effet appliqué au logo et texte  
+- Tests basiques pour valider le rendu dans plusieurs formats
+
+---
+
+📌 NOTES :
+
+- Le système doit pouvoir facilement s’étendre avec plus d’effets et scénarios  
+- Priorise la clarté du code et facilité d’utilisation pour un utilisateur non technique  
+- Pense à l’export futur (GIF, MP4) même si ce n’est pas immédiat  
+- Garde une UI simple mais élégante, avec un aperçu en temps réel des modifications
+
+---
+
+Merci de me fournir le code complet pour cette application web, prêt à être lancé sur Replit.  
