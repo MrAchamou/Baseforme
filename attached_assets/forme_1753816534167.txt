@@ -1,0 +1,81 @@
+🎯 OBJECTIF :
+Ajouter un système de sélection de **format d'affichage** (cadre visuel) dans mon application de visualisation d’effets JS, pour générer des rendus adaptés aux plateformes comme WhatsApp, Instagram, TikTok ou YouTube Shorts.
+
+📦 CONTEXTE :
+- L’application affiche dynamiquement des effets JavaScript issus de mon dépôt GitHub : https://github.com/MrAchamou/Premium_Effect.git
+- Chaque effet est visualisé dans un conteneur HTML (`<div>` ou `<canvas>`) appelé ici `#effect-container`
+- Je veux permettre à l’utilisateur de **choisir un ratio (cadre)**, avant de lancer l’effet
+
+---
+
+🧱 CE QUE TU DOIS AJOUTER :
+
+### 1. Interface UI :
+
+Ajoute un `select` avec ID `format-select` contenant les options suivantes :
+
+```html
+<select id="format-select">
+  <option value="9:16">📱 WhatsApp Status (9:16)</option>
+  <option value="1:1">🟩 Instagram Post (1:1)</option>
+  <option value="4:5">📸 Insta Portrait (4:5)</option>
+  <option value="16:9">📺 YouTube (16:9)</option>
+  <option value="3:4">📱 TikTok (3:4)</option>
+</select>
+
+Place-le en haut ou à gauche de la zone d’aperçu pour une sélection facile.
+
+2. Script de gestion JS :
+Ajoute ce script JS pour que le format sélectionné redimensionne automatiquement le conteneur d’effet :
+
+const formatMap = {
+  "9:16": [720, 1280],
+  "1:1": [1080, 1080],
+  "4:5": [1080, 1350],
+  "16:9": [1280, 720],
+  "3:4": [810, 1080],
+};
+
+const container = document.getElementById("effect-container");
+
+document.getElementById("format-select").addEventListener("change", (e) => {
+  const [w, h] = formatMap[e.target.value];
+  container.style.width = w + "px";
+  container.style.height = h + "px";
+});
+
+
+💡 Astuce : utilise container.style.transform ou scale si besoin d’adapter sans casser le layout.
+
+3. Style CSS :
+Assure-toi que #effect-container a bien :
+
+#effect-container {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  background: black; /* ou transparent */
+}
+
+
+📌 IMPORTANT :
+
+L’effet JS doit pouvoir s’adapter dynamiquement à la taille du container
+
+Tu peux exposer container.clientWidth et container.clientHeight à l’effet
+
+Ce système doit être indépendant du nom de l’effet choisi
+
+✅ BONUS FUTUR :
+
+Ajouter un bouton "Exporter ce rendu" en GIF/MP4 une fois l’effet affiché
+
+Lire les préférences de ratio dans le config.json de chaque effet plus tard
+
+
+---
+
+Tu peux maintenant **coller ça dans Replit AI** une fois qu’il a chargé les effets.  
+Il va créer un sélecteur de cadre automatique comme dans les vrais éditeurs vidéo 🎬
+
+Tu veux qu’on ajoute ensuite un **mode de test pour simuler un rendu WhatsApp complet** ? (avec bouton "envoyer", fond WhatsApp, etc.)

@@ -1,0 +1,63 @@
+🎯 OBJECTIF :
+Créer une application web simple, responsive et bien structurée qui :
+1. Charge dynamiquement une bibliothèque d'effets visuels JS depuis un dépôt GitHub
+2. Affiche une interface pour tester chaque effet (texte/logo personnalisé)
+3. Permet de voir un rendu animé dans un canvas ou une div dédiée
+4. Prépare une base pour exporter l’animation plus tard (GIF ou MP4)
+
+📂 RÉPERTOIRE GITHUB :
+- Contient 61 dossiers (un par effet)
+- Chaque dossier a :
+  - `effect.js` (script principal de l’animation)
+  - `description.md` (texte décrivant l’effet)
+  - (bientôt `config.json` pour les paramètres)
+- Exemple de structure :
+
+/Effets/
+├── liquid-morph/
+│ ├── effect.js
+│ └── description.md
+├── fire-write/
+│ ├── effect.js
+│ └── description.md
+…
+
+
+🧱 COMPOSANTS DE L’APPLICATION À GÉNÉRER :
+1. `index.html`
+ - Zone d’entrée de texte (nom d’un business)
+ - Dropdown de sélection d’effet (ou choix aléatoire)
+ - Canvas ou div animée pour afficher l’effet
+ - Bouton "Voir l’effet suivant"
+ - (plus tard : bouton "Exporter en GIF/MP4")
+
+2. `main.js`
+ - Logique pour :
+   - Parcourir les dossiers dans `/Effets/`
+   - Charger dynamiquement `effect.js`
+   - Injecter le script dans la page
+   - Récupérer `description.md` et l’afficher
+   - Ajouter des paramètres dynamiques via `config.json` (optionnel)
+
+3. `style.css`
+ - Interface propre, sombre, moderne (inspirée Tailwind ou custom)
+ - Responsive (mobile-first)
+ - Animation fluide du canvas
+
+🧠 FONCTIONNALITÉS :
+- Sélection automatique d’un effet JS si le champ texte contient un mot-clé (ex : "coiffeur" → `Neon_Glow`)
+- Si aucun mot-clé : choisir un effet au hasard
+- Afficher la description de l’effet (tirée de `description.md`)
+- Afficher un rendu en live dans un canvas ou une div
+- Garder la structure modulable pour ajouter un bouton "Exporter en GIF" plus tard
+
+📌 LIBRAIRIES PERMISES :
+- Vanilla JS (de préférence)
+- Optionnel : utiliser Tailwind CSS
+- Pas besoin de backend pour le moment (client-side only)
+
+⚠️ IMPORTANT :
+- Le système doit être prêt à évoluer pour intégrer un moteur d’export `.gif` ou `.mp4` dans une seconde étape.
+- Utiliser `fetch()` pour récupérer les fichiers de chaque dossier GitHub
+- L’interface doit être claire, rapide, fluide
+

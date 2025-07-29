@@ -1,0 +1,59 @@
+🎯 OBJECTIF :
+Connecter l’application à mon dépôt GitHub pour charger dynamiquement tous les effets JS disponibles, les afficher dans l’interface, et permettre le test direct de chaque effet.
+
+📦 LIEN DU DÉPÔT :
+https://github.com/MrAchamou/Premium_Effect.git
+
+📁 STRUCTURE DU DÉPÔT :
+- Le dossier principal est `/Effets/`
+- Chaque sous-dossier contient :
+  - `effect.js` (le code de l'effet animé)
+  - `description.md` (explication technique)
+  - Bientôt : `config.json` (avec les paramètres dynamiques)
+
+✅ Exemple :
+/Premium_Effect/
+├── fire-write/
+│ ├── effect.js
+│ └── description.txt
+├── liquid-morph/
+│ ├── effect.js
+│ └── description.txt
+
+
+---
+
+🧱 TÂCHES À EFFECTUER :
+
+1. 🔗 **Lier l’application au dépôt GitHub** en utilisant l’URL RAW de GitHub :
+   - Exemple pour `effect.js` :
+     ```
+     https://raw.githubusercontent.com/MrAchamou/Premium_Effect/main/Effets/liquid-morph/effect.js
+     ```
+
+2. 📄 **Récupérer dynamiquement tous les noms des dossiers dans `/Effets/`**
+   - Pour l’instant, tu peux créer un tableau statique `[ "liquid-morph", "fire-write", ... ]`
+   - Plus tard, ce tableau pourra être généré automatiquement
+
+3. 🧠 **Créer une fonction JS qui :**
+   - Charge le script JS de l’effet (via `fetch + document.createElement('script')`)
+   - Affiche la `description.md` dans une zone dédiée
+   - Prépare un bouton "Essayer l’effet" qui recharge le canvas ou la div d’affichage
+
+4. 🎨 **Mettre à jour l’interface utilisateur pour :**
+   - Ajouter un dropdown de sélection d’effet (ou bouton aléatoire)
+   - Ajouter un champ "Texte ou nom d’activité" pour voir l’animation personnalisée
+   - Afficher la description à côté de l’effet
+   - Ajouter un bouton "Effet suivant"
+
+5. 🔌 **Prévoir que plus tard on pourra :**
+   - Ajouter un bouton "Exporter en GIF"
+   - Lire le `config.json` et afficher les réglages possibles
+
+---
+
+📌 IMPORTANT :
+- Utiliser uniquement **Vanilla JS + fetch()**
+- L’URL `https://raw.githubusercontent.com/MrAchamou/Premium_Effect/main/Effets/...` est **publique** et peut être utilisée librement
+- Ne pas importer tous les effets en même temps : charger dynamiquement à la demande
+

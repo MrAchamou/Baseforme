@@ -1,0 +1,51 @@
+const fetch = require("node-fetch");
+const fs = require("fs");
+
+const username = "MrAchamou";
+const repo = "Premium_Effect";
+const branch = "main";
+require('dotenv').config();
+const token = process.env.GITHUB_TOKEN;
+
+async function generateIndex() {
+  const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/`;
+  const res = await fetch(apiUrl, {
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: "application/vnd.github.v3+json"
+    }
+  });
+
+  if (!res.ok) {
+    console.error("Erreur lors de l'accès au dépôt :", res.statusText);
+    return;
+  }
+
+  const data = await res.json();
+  const folders = data.filter(item => item.type === "dir");
+
+  const configPaths = [];
+
+  for (const folder of folders) {
+    const configUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder.name}/config.json`;
+    const resConfig = await fetch(configUrl, {
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json"
+      }
+    });
+
+    if (resConfig.ok) {
+      configPaths.push(`${folder.name}/config.json`);
+      console.log("✅ Ajouté :", folder.name);
+    } else {
+      console.log("⛔ Aucun config.json dans :", folder.name);
+    }
+  }
+
+  // Écriture du fichier index.json
+  fs.writeFileSync("index.json", JSON.stringify(configPaths, null, 2));
+  console.log("🎉 Fichier index.json généré avec", configPaths.length, "effets.");
+}
+
+generateIndex();
