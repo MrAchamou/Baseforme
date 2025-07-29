@@ -156,7 +156,7 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
       `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${encodeURIComponent(effectPath)}`, 
       { 
         headers,
-        signal: AbortSignal.timeout(15000)
+        signal: AbortSignal.timeout(20000) // Increased timeout
       }
     );
 
@@ -199,16 +199,16 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
     try {
       const scriptTest = await fetch(jsFile.download_url, { 
         method: 'HEAD',
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(8000) // Increased timeout
       });
 
       if (!scriptTest.ok) {
         console.warn(`Script file not accessible for ${effectName}: ${scriptTest.status}`);
-        return false;
+        // Don't return false here - try to continue anyway
       }
     } catch (error) {
       console.warn(`Failed to verify script accessibility for ${effectName}:`, error);
-      return false;
+      // Continue anyway - the script might still work
     }
 
     let description = 'Aucune description disponible';
@@ -230,57 +230,111 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
       }
     }
     // Generate proper effect name from the effect path/directory name
-    const effectName = effectPath.replace(/[-_]/g, ' ').toUpperCase();
+    const formattedEffectName = effectPath.replace(/[-_]/g, ' ').toUpperCase();
 
     // Categorize effects based on keywords from description and name
     let category: 'text' | 'image' | 'both' = 'both';
     let type: 'animation' | 'transition' | 'special' = 'animation';
 
     const fileName = jsFile.name.toLowerCase();
-    const lowerName = effectName.toLowerCase();
+    const lowerName = formattedEffectName.toLowerCase();
     const lowerDesc = description.toLowerCase();
+    const lowerPath = effectPath.toLowerCase();
 
-    // Text effects keywords
-    const textKeywords = ['typewriter', 'write', 'text', 'type', 'letter', 'word', 'font'];
-    // Image effects keywords  
-    const imageKeywords = ['image', 'photo', 'picture', 'visual', 'graphic', 'métamorphoses'];
-    // Animation type keywords
-    const transitionKeywords = ['fade', 'dissolve', 'morph', 'transform', 'transition'];
-    const specialKeywords = ['quantum', 'reality', 'glitch', 'neural', 'plasma'];
+    // Enhanced keywords for better categorization
+    const textKeywords = [
+      'typewriter', 'write', 'text', 'type', 'letter', 'word', 'font', 
+      'écriture', 'texte', 'police', 'caractère', 'alphabet'
+    ];
+    
+    const imageKeywords = [
+      'image', 'photo', 'picture', 'visual', 'graphic', 'métamorphoses',
+      'visuel', 'graphique', 'img', 'pic', 'illustration'
+    ];
+    
+    const transitionKeywords = [
+      'fade', 'dissolve', 'morph', 'transform', 'transition',
+      'fondu', 'disparition', 'transformation'
+    ];
+    
+    const specialKeywords = [
+      'quantum', 'reality', 'glitch', 'neural', 'plasma',
+      'réalité', 'effet', 'spécial'
+    ];
 
-    // Check in filename, effect name and description
+    // More comprehensive keyword checking
     const hasTextKeywords = textKeywords.some(keyword => 
-      fileName.includes(keyword) || lowerName.includes(keyword) || lowerDesc.includes(keyword)
+      fileName.includes(keyword) || 
+      lowerName.includes(keyword) || 
+      lowerDesc.includes(keyword) ||
+      lowerPath.includes(keyword)
     );
+    
     const hasImageKeywords = imageKeywords.some(keyword => 
-      fileName.includes(keyword) || lowerName.includes(keyword) || lowerDesc.includes(keyword)
+      fileName.includes(keyword) || 
+      lowerName.includes(keyword) || 
+      lowerDesc.includes(keyword) ||
+      lowerPath.includes(keyword)
     );
 
+    // Smart categorization logic
     if (hasTextKeywords && !hasImageKeywords) {
       category = 'text';
     } else if (hasImageKeywords && !hasTextKeywords) {
       category = 'image';
+    } else if (hasTextKeywords && hasImageKeywords) {
+      category = 'both'; // Explicitly both when both types are detected
     } else {
-      category = 'both'; // Default for ambiguous or universal effects
+      // Default categorization based on common effect patterns
+      const universalEffects = [
+        'particle', 'energy', 'glow', 'aura', 'sparkle', 'star', 
+        'crystal', 'fire', 'ice', 'liquid', 'smoke', 'electric'
+      ];
+      
+      const isUniversal = universalEffects.some(keyword => 
+        lowerName.includes(keyword) || lowerDesc.includes(keyword)
+      );
+      
+      category = isUniversal ? 'both' : 'both'; // Default to both for safety
     }
 
-    if (transitionKeywords.some(keyword => lowerName.includes(keyword) || lowerDesc.includes(keyword))) {
+    // Determine effect type
+    if (transitionKeywords.some(keyword => 
+      lowerName.includes(keyword) || 
+      lowerDesc.includes(keyword) ||
+      lowerPath.includes(keyword)
+    )) {
       type = 'transition';
-    } else if (specialKeywords.some(keyword => lowerName.includes(keyword) || lowerDesc.includes(keyword))) {
+    } else if (specialKeywords.some(keyword => 
+      lowerName.includes(keyword) || 
+      lowerDesc.includes(keyword) ||
+      lowerPath.includes(keyword)
+    )) {
       type = 'special';
+    } else {
+      type = 'animation'; // Default type
     }
 
-    effects.push({
+    // Create the effect object
+    const effectObject: Effect = {
       id: jsFile.name.replace('.js', ''),
-      name: effectName,
+      name: formattedEffectName,
       description: description,
       scriptUrl: jsFile.download_url!,
       path: effectPath,
       category,
       type
-    });
+    };
 
-    console.info(`✅ Successfully loaded effect: ${effectName}`);
+    effects.push(effectObject);
+
+    // Validate the effect object before adding
+    if (!effectObject.id || !effectObject.name || !effectObject.scriptUrl) {
+      console.error(`❌ Invalid effect object for ${effectName}:`, effectObject);
+      return false;
+    }
+
+    console.info(`✅ Successfully loaded effect: ${formattedEffectName} (Category: ${category}, Type: ${type})`);
     return true;
 
   } catch (error) {
