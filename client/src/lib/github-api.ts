@@ -246,56 +246,47 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
       'typewriter', 'write', 'text', 'type', 'letter', 'word', 'font', 
       'écriture', 'texte', 'police', 'caractère', 'alphabet'
     ];
-    
+
     const imageKeywords = [
       'image', 'photo', 'picture', 'visual', 'graphic', 'métamorphoses',
       'visuel', 'graphique', 'img', 'pic', 'illustration'
     ];
-    
+
     const transitionKeywords = [
       'fade', 'dissolve', 'morph', 'transform', 'transition',
       'fondu', 'disparition', 'transformation'
     ];
-    
+
     const specialKeywords = [
       'quantum', 'reality', 'glitch', 'neural', 'plasma',
       'réalité', 'effet', 'spécial'
     ];
 
-    // More comprehensive keyword checking
+    // Text effects - plus de mots-clés pour une meilleure détection
     const hasTextKeywords = textKeywords.some(keyword => 
-      fileName.includes(keyword) || 
-      lowerName.includes(keyword) || 
-      lowerDesc.includes(keyword) ||
-      lowerPath.includes(keyword)
-    );
-    
-    const hasImageKeywords = imageKeywords.some(keyword => 
-      fileName.includes(keyword) || 
-      lowerName.includes(keyword) || 
-      lowerDesc.includes(keyword) ||
-      lowerPath.includes(keyword)
-    );
+      fileName.includes(keyword) || lowerName.includes(keyword) || lowerDesc.includes(keyword)
+    ) || lowerName.includes('write') || lowerName.includes('echo') || 
+        lowerName.includes('sparkle') || lowerDesc.includes('texte') ||
+        lowerDesc.includes('écriture') || lowerDesc.includes('lettre');
 
-    // Smart categorization logic
+    // Image effects - détection améliorée
+    const hasImageKeywords = imageKeywords.some(keyword => 
+      fileName.includes(keyword) || lowerName.includes(keyword) || lowerDesc.includes(keyword)
+    ) || lowerName.includes('crystal') || lowerName.includes('fire') ||
+        lowerName.includes('electric') || lowerName.includes('plasma') ||
+        lowerName.includes('smoke') || lowerName.includes('wave') ||
+        lowerDesc.includes('visuel') || lowerDesc.includes('transformation');
+
+    // Catégorisation plus précise
     if (hasTextKeywords && !hasImageKeywords) {
       category = 'text';
     } else if (hasImageKeywords && !hasTextKeywords) {
       category = 'image';
     } else if (hasTextKeywords && hasImageKeywords) {
-      category = 'both'; // Explicitly both when both types are detected
+      category = 'both';
     } else {
-      // Default categorization based on common effect patterns
-      const universalEffects = [
-        'particle', 'energy', 'glow', 'aura', 'sparkle', 'star', 
-        'crystal', 'fire', 'ice', 'liquid', 'smoke', 'electric'
-      ];
-      
-      const isUniversal = universalEffects.some(keyword => 
-        lowerName.includes(keyword) || lowerDesc.includes(keyword)
-      );
-      
-      category = isUniversal ? 'both' : 'both'; // Default to both for safety
+      // Effets universels par défaut
+      category = 'both';
     }
 
     // Determine effect type
@@ -477,4 +468,3 @@ function getMockEffects(): Effect[] {
     }
   ];
 }
-

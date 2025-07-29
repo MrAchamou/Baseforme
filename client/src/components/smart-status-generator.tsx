@@ -560,7 +560,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
 
       // 🎯 APPLICATION D'ÉMOJIS INTELLIGENTS PAR SECTEUR
       mainText = applyContextualEmojis(mainText, templateKey, secteur);
-      secondaryText = applyContactEmojis(secondaryText, secteur);
+      secondaryText = applyContactEmojis(secondaryText, secteur);ecteur);
 
       // Sélectionne 2-3 effets différents pour chaque scénario
       const scenarioEffects = relevantEffects.slice(index * 2, (index * 2) + 3);

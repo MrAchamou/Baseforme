@@ -60,34 +60,51 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
 
   const handlePlayScenario = () => {
     if (!scenario.logoText && !scenario.storyText && !scenario.mainText && !scenario.sloganText) {
+      console.warn('Aucun contenu à jouer dans le scénario');
       return;
     }
+    console.log('🎬 Lancement du scénario:', scenario);
+    console.log('📊 Effets disponibles:', {
+      total: effects.length,
+      logo: logoEffects.length,
+      text: textEffects.length,
+      visual: visualEffects.length,
+      image: imageEffects.length
+    });
     onScenarioPlay(scenario);
   };
 
-  // Filter effects by type for better organization
+  // Filter effects by category for better organization
   const logoEffects = effects.filter(e => 
+    e.category === 'both' || e.category === 'text' ||
     e.name.includes('LOGO') || 
     e.name.includes('APPEAR') || 
     e.name.includes('FADE') ||
-    e.name.includes('GLOW')
-  );
-
-  const textEffects = effects.filter(e => 
-    e.name.includes('WRITE') || 
-    e.name.includes('TYPE') || 
-    e.name.includes('ECHO') ||
+    e.name.includes('GLOW') ||
     e.name.includes('SPARKLE')
   );
 
+  const textEffects = effects.filter(e => 
+    e.category === 'text' || e.category === 'both' ||
+    e.name.includes('WRITE') || 
+    e.name.includes('TYPE') || 
+    e.name.includes('ECHO') ||
+    e.name.includes('TYPEWRITER')
+  );
+
   const visualEffects = effects.filter(e => 
+    e.category === 'image' || e.category === 'both' ||
     e.name.includes('FIRE') || 
     e.name.includes('ELECTRIC') || 
     e.name.includes('CRYSTAL') ||
-    e.name.includes('PLASMA')
+    e.name.includes('PLASMA') ||
+    e.name.includes('WAVE') ||
+    e.name.includes('SMOKE')
   );
 
-    const imageEffects = effects.filter(e => e.type === 'image');
+  const imageEffects = effects.filter(e => 
+    e.category === 'image' || e.category === 'both'
+  );
 
 
   return (
@@ -300,8 +317,15 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                 <SelectValue placeholder="Choisir un effet..." />
               </SelectTrigger>
               <SelectContent>
-                {effects.slice(-10).map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>{effect.name}</SelectItem>
+                {textEffects.concat(visualEffects).slice(0, 15).map((effect) => (
+                  <SelectItem key={effect.id} value={effect.id}>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs px-1 py-0.5 rounded bg-orange-600 text-white">
+                        {effect.category === 'text' ? 'TXT' : effect.category === 'image' ? 'IMG' : 'UNI'}
+                      </span>
+                      <span>{effect.name}</span>
+                    </div>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
