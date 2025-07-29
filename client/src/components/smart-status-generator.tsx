@@ -228,6 +228,146 @@ const EMOJI_VARIATIONS = {
   classique: ['🎩', '📜', '🏛️', '⚜️', '🎯', '📞', '✨', '👔', '🖋️', '📚']
 };
 
+// 🎨 SYSTÈME DE PALETTES DE COULEURS MÉTIER PREMIUM
+const SECTEUR_COLOR_PALETTES = {
+  restaurant: {
+    name: 'Gastronomie',
+    primary: ['#FF6B35', '#F7931E', '#FF4444', '#E74C3C', '#D2691E'],
+    secondary: ['#FFE5CC', '#FFF3E0', '#FFEBEE', '#FDF2E9', '#FFF8DC'],
+    accent: ['#8B4513', '#A0522D', '#CD853F', '#DEB887', '#F4A460'],
+    gradient: ['from-orange-500 to-red-500', 'from-amber-500 to-orange-600', 'from-red-400 to-pink-500'],
+    description: 'Couleurs chaleureuses qui évoquent la cuisine et l\'appétit'
+  },
+  coiffeur: {
+    name: 'Coiffure & Beauté',
+    primary: ['#E91E63', '#FF69B4', '#DA70D6', '#BA55D3', '#9370DB'],
+    secondary: ['#FFF0F5', '#FCE4EC', '#F8BBD9', '#F3E5F5', '#EDE7F6'],
+    accent: ['#4A148C', '#6A1B9A', '#7B1FA2', '#8E24AA', '#9C27B0'],
+    gradient: ['from-pink-500 to-purple-500', 'from-rose-400 to-pink-600', 'from-purple-400 to-pink-500'],
+    description: 'Palette élégante et féminine pour les métiers de la beauté'
+  },
+  beaute: {
+    name: 'Beauté & Soins',
+    primary: ['#FF69B4', '#FFB6C1', '#FFC0CB', '#FF1493', '#C71585'],
+    secondary: ['#FFF0F5', '#FFEFF0', '#FFE4E1', '#FDF2F8', '#FCE7F3'],
+    accent: ['#B8860B', '#DAA520', '#FFD700', '#F0E68C', '#FAFAD2'],
+    gradient: ['from-pink-400 to-rose-500', 'from-rose-300 to-pink-500', 'from-amber-300 to-pink-400'],
+    description: 'Couleurs douces et luxueuses pour l\'esthétique et les soins'
+  },
+  mode: {
+    name: 'Mode & Style',
+    primary: ['#000000', '#2C2C2C', '#4A4A4A', '#696969', '#808080'],
+    secondary: ['#F5F5F5', '#FFFFFF', '#FFFACD', '#F0F8FF', '#F8F8FF'],
+    accent: ['#FFD700', '#FF69B4', '#00CED1', '#FF6347', '#32CD32'],
+    gradient: ['from-gray-900 to-gray-600', 'from-black to-gray-800', 'from-slate-800 to-gray-900'],
+    description: 'Palette sophistiquée noir/blanc avec accents colorés'
+  },
+  sport: {
+    name: 'Sport & Fitness',
+    primary: ['#FF4500', '#32CD32', '#1E90FF', '#FFD700', '#DC143C'],
+    secondary: ['#F0F8FF', '#F0FFF0', '#E0FFFF', '#FFFACD', '#FFF0F5'],
+    accent: ['#000080', '#008000', '#800000', '#FF8C00', '#4169E1'],
+    gradient: ['from-blue-500 to-green-500', 'from-red-500 to-orange-500', 'from-green-400 to-blue-500'],
+    description: 'Couleurs énergiques et dynamiques pour le sport'
+  },
+  tech: {
+    name: 'Tech & Digital',
+    primary: ['#0066CC', '#00BFFF', '#1E90FF', '#4169E1', '#6495ED'],
+    secondary: ['#F0F8FF', '#E6F3FF', '#CCE7FF', '#B3DAFF', '#99CCFF'],
+    accent: ['#000080', '#191970', '#483D8B', '#6A5ACD', '#7B68EE'],
+    gradient: ['from-blue-600 to-cyan-500', 'from-indigo-500 to-blue-600', 'from-cyan-400 to-blue-500'],
+    description: 'Palette moderne et technologique en tons bleus'
+  },
+  sante: {
+    name: 'Santé & Médical',
+    primary: ['#008B8B', '#20B2AA', '#48D1CC', '#00CED1', '#5F9EA0'],
+    secondary: ['#F0FFFF', '#E0FFFF', '#AFEEEE', '#B0E0E6', '#E6F3FF'],
+    accent: ['#006400', '#228B22', '#32CD32', '#7CFC00', '#9AFF9A'],
+    gradient: ['from-teal-500 to-green-500', 'from-cyan-500 to-teal-600', 'from-green-400 to-teal-500'],
+    description: 'Couleurs apaisantes et professionnelles pour la santé'
+  },
+  immobilier: {
+    name: 'Immobilier',
+    primary: ['#8B4513', '#A0522D', '#CD853F', '#DEB887', '#F4A460'],
+    secondary: ['#FFF8DC', '#FFFACD', '#FFEFD5', '#FFE4B5', '#FFDAB9'],
+    accent: ['#2F4F4F', '#696969', '#708090', '#778899', '#B0C4DE'],
+    gradient: ['from-amber-600 to-yellow-600', 'from-yellow-500 to-amber-500', 'from-orange-400 to-yellow-500'],
+    description: 'Palette terre et prestige pour l\'immobilier'
+  },
+  default: {
+    name: 'Universel',
+    primary: ['#6366F1', '#8B5CF6', '#A855F7', '#C084FC', '#DDD6FE'],
+    secondary: ['#F8FAFC', '#F1F5F9', '#E2E8F0', '#CBD5E1', '#94A3B8'],
+    accent: ['#1E40AF', '#7C3AED', '#DB2777', '#DC2626', '#EA580C'],
+    gradient: ['from-purple-500 to-blue-500', 'from-indigo-500 to-purple-600', 'from-blue-500 to-indigo-600'],
+    description: 'Palette polyvalente pour tous types d\'activités'
+  }
+};
+
+// 🌈 SYSTÈME D'AMBIANCES COULEUR INTELLIGENT
+const AMBIANCE_COLOR_MODIFIERS = {
+  elegant: {
+    saturationMultiplier: 0.8,
+    brightnessAdjust: -10,
+    preferredHues: ['purple', 'indigo', 'blue', 'gray'],
+    description: 'Tons sophistiqués et raffinés'
+  },
+  flashy: {
+    saturationMultiplier: 1.3,
+    brightnessAdjust: 15,
+    preferredHues: ['red', 'orange', 'yellow', 'pink'],
+    description: 'Couleurs vives et énergiques'
+  },
+  doux: {
+    saturationMultiplier: 0.6,
+    brightnessAdjust: 20,
+    preferredHues: ['pink', 'rose', 'purple', 'blue'],
+    description: 'Couleurs pastels et apaisantes'
+  },
+  dynamique: {
+    saturationMultiplier: 1.1,
+    brightnessAdjust: 5,
+    preferredHues: ['red', 'orange', 'green', 'blue'],
+    description: 'Couleurs équilibrées et actives'
+  },
+  moderne: {
+    saturationMultiplier: 0.9,
+    brightnessAdjust: -5,
+    preferredHues: ['blue', 'cyan', 'indigo', 'gray'],
+    description: 'Palette technologique et contemporaine'
+  },
+  classique: {
+    saturationMultiplier: 0.7,
+    brightnessAdjust: 0,
+    preferredHues: ['brown', 'gray', 'blue', 'green'],
+    description: 'Couleurs intemporelles et traditionnelles'
+  }
+};
+
+// 🎯 PALETTES SAISONNIÈRES INTELLIGENTES
+const SEASONAL_COLOR_VARIATIONS = {
+  spring: {
+    name: 'Printemps',
+    colors: ['#98FB98', '#FFB6C1', '#87CEEB', '#F0E68C', '#DDA0DD'],
+    description: 'Couleurs fraîches et renouvelées'
+  },
+  summer: {
+    name: 'Été',
+    colors: ['#FF6347', '#FFD700', '#00CED1', '#FF69B4', '#32CD32'],
+    description: 'Couleurs chaudes et ensoleillées'
+  },
+  autumn: {
+    name: 'Automne',
+    colors: ['#D2691E', '#CD853F', '#B22222', '#DAA520', '#A0522D'],
+    description: 'Couleurs chaudes et terreuses'
+  },
+  winter: {
+    name: 'Hiver',
+    colors: ['#4682B4', '#2F4F4F', '#6495ED', '#B0C4DE', '#708090'],
+    description: 'Couleurs froides et élégantes'
+  }
+};
+
 const FORMATS = {
   '9:16': { width: 720, height: 1280, name: 'Stories (9:16)' },
   '1:1': { width: 1080, height: 1080, name: 'Post carré (1:1)' },
@@ -516,6 +656,12 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
       return;
     }
 
+    // 🎨 GÉNÉRATION DE LA PALETTE COULEUR MÉTIER
+    const secteur = detectSecteur(businessData.activite);
+    const businessPalette = generateBusinessColorPalette(secteur, businessData.ambiance);
+    
+    console.log(`🎨 Palette générée pour ${secteur} en mode ${businessData.ambiance}:`, businessPalette);
+
     // Sélectionne le meilleur effet ou fait un fallback intelligent
     let selectedEffect = scenario.effects[0];
     
@@ -526,6 +672,9 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
         await effectLoader.loadEffect(selectedEffect, scenario.mainText);
         
         if (canvasRef.current) {
+          // 🌈 APPLICATION DES COULEURS MÉTIER AU CANVAS
+          applyBusinessColors(canvasRef.current, businessPalette);
+          
           // Attendre un frame pour s'assurer que le canvas est prêt
           await new Promise(resolve => requestAnimationFrame(resolve));
           effectLoader.executeEffect(selectedEffect.id, scenario.mainText);
@@ -540,14 +689,23 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
         // Si c'est le dernier effet et qu'il échoue aussi, utilise un fallback
         if (i === scenario.effects.length - 1) {
           console.error('All effects failed, using fallback');
-          // Créer un effet de base en fallback
+          // 🎨 Créer un effet de base en fallback avec les couleurs métier
           if (canvasRef.current) {
             const ctx = canvasRef.current.getContext('2d');
             if (ctx) {
               ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+              
+              // Application du gradient métier
+              const gradient = ctx.createLinearGradient(0, 0, canvasRef.current.width, canvasRef.current.height);
+              gradient.addColorStop(0, businessPalette.computed.dominantColor);
+              gradient.addColorStop(1, businessPalette.computed.complementaryColor);
+              ctx.fillStyle = gradient;
+              ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+              
+              // Texte avec couleur optimale
               ctx.font = '48px Inter, sans-serif';
               ctx.textAlign = 'center';
-              ctx.fillStyle = '#6366f1';
+              ctx.fillStyle = businessPalette.computed.textColor;
               ctx.fillText(scenario.mainText, canvasRef.current.width / 2, canvasRef.current.height / 2);
             }
           }
@@ -674,6 +832,86 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
     }
     
     return 'default';
+  };
+
+  // 🎨 GÉNÉRATEUR DE PALETTE COULEUR MÉTIER PREMIUM
+  const generateBusinessColorPalette = (secteur: string, ambiance: string): any => {
+    const basePalette = SECTEUR_COLOR_PALETTES[secteur as keyof typeof SECTEUR_COLOR_PALETTES] || SECTEUR_COLOR_PALETTES.default;
+    const ambianceModifier = AMBIANCE_COLOR_MODIFIERS[ambiance as keyof typeof AMBIANCE_COLOR_MODIFIERS];
+    
+    // Sélection intelligente de la saison actuelle
+    const currentMonth = new Date().getMonth();
+    const currentSeason = 
+      currentMonth >= 2 && currentMonth <= 4 ? 'spring' :
+      currentMonth >= 5 && currentMonth <= 7 ? 'summer' :
+      currentMonth >= 8 && currentMonth <= 10 ? 'autumn' : 'winter';
+    
+    const seasonalColors = SEASONAL_COLOR_VARIATIONS[currentSeason].colors;
+    
+    // Algorithme d'adaptation couleur intelligent
+    const adaptedPalette = {
+      ...basePalette,
+      computed: {
+        dominantColor: basePalette.primary[0],
+        complementaryColor: basePalette.accent[0],
+        textColor: getOptimalTextColor(basePalette.primary[0]),
+        backgroundGradient: basePalette.gradient[0],
+        seasonalAccent: seasonalColors[Math.floor(Math.random() * seasonalColors.length)],
+        ambianceDescription: ambianceModifier?.description || 'Style standard'
+      }
+    };
+
+    // Application des modificateurs d'ambiance
+    if (ambianceModifier) {
+      adaptedPalette.computed.saturation = Math.round((ambianceModifier.saturationMultiplier * 100));
+      adaptedPalette.computed.brightness = ambianceModifier.brightnessAdjust;
+    }
+
+    return adaptedPalette;
+  };
+
+  // 🎯 FONCTION DE COULEUR DE TEXTE OPTIMALE
+  const getOptimalTextColor = (backgroundColor: string): string => {
+    // Conversion hex vers RGB pour calcul de luminosité
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    // Calcul de luminosité relative
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    
+    // Retourne blanc ou noir selon la luminosité
+    return luminance > 0.5 ? '#000000' : '#FFFFFF';
+  };
+
+  // 🌈 GÉNÉRATEUR DE CSS DYNAMIQUE POUR PALETTES
+  const generateDynamicStyles = (palette: any): string => {
+    return `
+      --business-primary: ${palette.computed.dominantColor};
+      --business-secondary: ${palette.secondary[0]};
+      --business-accent: ${palette.computed.complementaryColor};
+      --business-text: ${palette.computed.textColor};
+      --business-seasonal: ${palette.computed.seasonalAccent};
+      --business-gradient: ${palette.computed.backgroundGradient};
+    `;
+  };
+
+  // 🎨 APPLICATION DYNAMIQUE DES COULEURS AU CANVAS
+  const applyBusinessColors = (canvas: HTMLCanvasElement, palette: any) => {
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Application du gradient de fond
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, palette.computed.dominantColor);
+    gradient.addColorStop(1, palette.computed.complementaryColor);
+    
+    // Sauvegarde du style pour les effets
+    (canvas as any).businessPalette = palette;
+    (canvas as any).businessGradient = gradient;
   };
 
   // Fonction pour obtenir des émojis intelligents selon le contexte
@@ -1177,6 +1415,103 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                     ))}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 🎨 PALETTE COULEUR MÉTIER PREMIUM */}
+          {businessData.activite && businessData.ambiance && (
+            <Card className="bg-gradient-to-br from-violet-900/20 to-purple-900/20 border-violet-500/30">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <div className="w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded mr-2"></div>
+                  Palette Couleur Métier
+                  <Badge className="ml-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+                    {(() => {
+                      const secteur = detectSecteur(businessData.activite);
+                      const palette = SECTEUR_COLOR_PALETTES[secteur as keyof typeof SECTEUR_COLOR_PALETTES] || SECTEUR_COLOR_PALETTES.default;
+                      return palette.name;
+                    })()}
+                  </Badge>
+                </CardTitle>
+                <p className="text-sm text-violet-300">
+                  {(() => {
+                    const secteur = detectSecteur(businessData.activite);
+                    const palette = SECTEUR_COLOR_PALETTES[secteur as keyof typeof SECTEUR_COLOR_PALETTES] || SECTEUR_COLOR_PALETTES.default;
+                    return palette.description;
+                  })()}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(() => {
+                  const secteur = detectSecteur(businessData.activite);
+                  const businessPalette = generateBusinessColorPalette(secteur, businessData.ambiance);
+                  
+                  return (
+                    <>
+                      {/* Couleurs Principales */}
+                      <div>
+                        <Label className="text-sm font-medium text-violet-300 mb-2 block">Couleurs Principales:</Label>
+                        <div className="flex gap-2 flex-wrap">
+                          {businessPalette.primary.slice(0, 5).map((color: string, index: number) => (
+                            <div
+                              key={index}
+                              className="w-8 h-8 rounded-full border-2 border-white/20 shadow-lg"
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Gradient Recommandé */}
+                      <div>
+                        <Label className="text-sm font-medium text-violet-300 mb-2 block">Gradient Recommandé:</Label>
+                        <div 
+                          className={`h-6 rounded-full border border-white/20 bg-gradient-to-r ${businessPalette.gradient[0]}`}
+                          title={businessPalette.gradient[0]}
+                        />
+                      </div>
+
+                      {/* Informations Techniques */}
+                      <div className="grid grid-cols-2 gap-3 pt-3 border-t border-violet-500/20">
+                        <div className="text-center">
+                          <div 
+                            className="w-6 h-6 rounded-full mx-auto mb-1 border border-white/20"
+                            style={{ backgroundColor: businessPalette.computed.dominantColor }}
+                          />
+                          <div className="text-xs text-violet-300">Couleur Dominante</div>
+                          <div className="text-xs text-slate-400">{businessPalette.computed.dominantColor}</div>
+                        </div>
+                        <div className="text-center">
+                          <div 
+                            className="w-6 h-6 rounded-full mx-auto mb-1 border border-white/20"
+                            style={{ backgroundColor: businessPalette.computed.seasonalAccent }}
+                          />
+                          <div className="text-xs text-violet-300">Accent Saisonnier</div>
+                          <div className="text-xs text-slate-400">{(() => {
+                            const currentMonth = new Date().getMonth();
+                            const currentSeason = 
+                              currentMonth >= 2 && currentMonth <= 4 ? 'spring' :
+                              currentMonth >= 5 && currentMonth <= 7 ? 'summer' :
+                              currentMonth >= 8 && currentMonth <= 10 ? 'autumn' : 'winter';
+                            return SEASONAL_COLOR_VARIATIONS[currentSeason].name;
+                          })()}</div>
+                        </div>
+                      </div>
+
+                      {/* Style d'Ambiance */}
+                      <div className="text-center p-3 bg-violet-500/10 rounded-lg border border-violet-500/20">
+                        <div className="text-sm font-medium text-violet-300">
+                          Style {businessData.ambiance}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">
+                          {businessPalette.computed.ambianceDescription}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </CardContent>
             </Card>
           )}
