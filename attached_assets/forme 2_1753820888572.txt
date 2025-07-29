@@ -1,0 +1,69 @@
+🎯 OBJECTIF :
+
+Créer une application web interactive qui génère automatiquement des statuts animés destinés aux réseaux sociaux (WhatsApp, Instagram, TikTok, YouTube Shorts), combinant texte, logo et effets visuels animés issus d’une bibliothèque JS, avec :
+
+- Formulaire utilisateur pour saisir les données clés :  
+  - Nom de la boutique  
+  - Type d’activité (ex: restaurant, coiffeur, boutique mode, etc.)  
+  - Promo ou message spécifique  
+  - Numéro de contact  
+  - Ambiance/style souhaité (ex : élégant, flashy, doux, dynamique)
+
+- Système intelligent de sélection automatique d’effets animés adaptés, à partir d’une base d’effets tagués (ex : « flashy », « doux », « logo animé », « texte scintillant », etc.)
+
+- Génération dynamique d’un scénario complet :  
+  - Texte formaté selon un template lié au scénario (basic, standard, premium, masterclass)  
+  - Logo uploadé et animé si possible  
+  - Application d’effets JS adaptés au texte et au logo, depuis la bibliothèque (ex : https://github.com/MrAchamou/Premium_Effect.git)  
+  - Mise en page responsive dans un cadre aux formats populaires (9:16, 1:1, 16:9, etc.)
+
+- Fonctionnalité « Générer un autre scénario similaire » :  
+  - Propose une variante alternative en changeant les effets, animations ou formulation du texte, tout en restant cohérente avec les données saisies et l’ambiance choisie  
+  - Permet à l’utilisateur de naviguer entre plusieurs propositions jusqu’à trouver celle qui lui plaît
+
+- Bouton de sauvegarde/export du rendu (format GIF ou vidéo en option)  
+
+- Interface utilisateur claire et simple :  
+  - Formulaire de saisie  
+  - Aperçu en temps réel du statut animé  
+  - Boutons pour générer des variantes et sauvegarder
+
+---
+
+📐 STRUCTURE TECHNIQUE :
+
+- Backend ou frontend (selon ce qui est possible sur Replit) capable de charger dynamiquement les fichiers JS d’effets depuis GitHub  
+- Système de métadonnées ou JSON associant chaque effet à des tags et catégories (style, usage, intensité, type d’animation)  
+- Algorithme de recommandation qui sélectionne les effets les plus pertinents selon les inputs utilisateur  
+- Templates textuels pré-écrits par scénario, avec remplacement dynamique des variables  
+- Zones définies dans le template HTML/CSS pour :  
+  - Logo (uploadable, avec animation)  
+  - Texte principal  
+  - Texte secondaire/promo  
+  - Bouton contact cliquable (ex : lien WhatsApp)  
+- Responsive design avec ajustement automatique selon format choisi  
+- Effets animés intégrés via canvas/webGL ou manipulation DOM/Canvas selon les effets JS
+
+---
+
+💻 LIVRABLES ATTENDUS :
+
+- Code complet HTML, CSS, JS  
+- Documentation claire pour l’ajout futur d’effets dans la bibliothèque  
+- Instructions pour connecter le dépôt GitHub d’effets  
+- Exemple fonctionnel avec au moins 5 effets différents intégrés et scénarios générés automatiquement  
+- Interface utilisateur fonctionnelle, propre, intuitive et responsive
+
+---
+
+🔧 NOTE :
+
+- Priorise la modularité pour faciliter l’extension et la maintenance  
+- Commente le code pour faciliter la compréhension  
+- Pense à une structure propre (séparation logique fichiers, fonctions claires)  
+- Implémente la fonction « nouveau scénario similaire » avec un rafraîchissement fluide de l’animation et du texte sans recharger la page
+
+---
+
+Merci de fournir tout le code prêt à déployer sur Replit, avec un README expliquant l’usage et la structure.
+
