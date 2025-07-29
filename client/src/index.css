@@ -56,6 +56,19 @@
   --sidebar-ring: 217 33% 24%;
 }
 
+/* Smart Status Generator Styles */
+#smart-effect-container {
+  position: relative;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.smart-generator-panel .grid {
+  gap: 1.5rem;
+}
+
 /* Template Creator Styles */
 #effect-container {
   position: relative;

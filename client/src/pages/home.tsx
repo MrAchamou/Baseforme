@@ -11,8 +11,9 @@ import { EffectStatus } from '@/components/effect-status';
 import { ScenarioControls } from '@/components/scenario-controls';
 import { ScenarioPlayer } from '@/components/scenario-player';
 import { TemplateCreator } from '@/components/template-creator';
+import { SmartStatusGenerator } from '@/components/smart-status-generator';
 import { loadEffectsFromGitHub } from '@/lib/github-api';
-import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphone } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphone, Wand2 } from 'lucide-react';
 import type { Effect, EffectStats } from '@/types/effects';
 
 export default function Home() {
@@ -28,7 +29,7 @@ export default function Home() {
     avgLoadTime: '0s'
   });
   const [canExport, setCanExport] = useState(false);
-  const [currentTab, setCurrentTab] = useState<string>('simple');
+  const [currentTab, setCurrentTab] = useState<string>('smart');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -271,7 +272,11 @@ export default function Home() {
                 />
 
                 <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 bg-dark-surface border-dark-border">
+                  <TabsList className="grid w-full grid-cols-4 bg-dark-surface border-dark-border">
+                    <TabsTrigger value="smart" className="flex items-center gap-2">
+                      <Wand2 className="w-4 h-4" />
+                      IA Smart
+                    </TabsTrigger>
                     <TabsTrigger value="simple" className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4" />
                       Simple
@@ -285,6 +290,18 @@ export default function Home() {
                       Templates Pro
                     </TabsTrigger>
                   </TabsList>
+
+                  <TabsContent value="smart" className="space-y-4">
+                    <div className="p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                      <div className="flex items-center gap-2 text-purple-400 mb-2">
+                        <Wand2 className="w-4 h-4" />
+                        <span className="font-medium">Générateur IA Activé</span>
+                      </div>
+                      <p className="text-sm text-slate-400">
+                        Système intelligent qui sélectionne automatiquement les meilleurs effets selon votre activité et ambiance
+                      </p>
+                    </div>
+                  </TabsContent>
 
                   <TabsContent value="simple" className="space-y-4">
                     <EffectControls
@@ -335,9 +352,14 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right Panel - Animation Preview or Template Creator */}
+          {/* Right Panel - Animation Preview, Template Creator or Smart Generator */}
           <div className="lg:col-span-2">
-            {currentTab === 'templates' ? (
+            {currentTab === 'smart' ? (
+              /* Smart Generator Mode */
+              <div className="smart-generator-panel">
+                <SmartStatusGenerator effects={effects} />
+              </div>
+            ) : currentTab === 'templates' ? (
               /* Template Creator Mode */
               <div className="template-creator-panel">
                 <TemplateCreator effects={effects} />
@@ -413,6 +435,8 @@ export default function Home() {
                 </div>
               </div>
             </Card>
+            )
+            }
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4 mt-6">
