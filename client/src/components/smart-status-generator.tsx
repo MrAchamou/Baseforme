@@ -88,6 +88,88 @@ const SCENARIO_TEMPLATES = {
   }
 };
 
+// Templates de variation pour créer des alternatives
+const VARIATION_TEMPLATES = {
+  basic: [
+    {
+      mainText: "{{boutique}}",
+      secondaryText: "{{activite}} d'excellence\n📱 Nous contacter : {{telephone}}\n🎯 Votre partenaire de confiance"
+    },
+    {
+      mainText: "🌟 {{boutique}} 🌟",
+      secondaryText: "Spécialiste {{activite}}\n☎️ {{telephone}}\n💫 Service personnalisé"
+    },
+    {
+      mainText: "{{boutique}}",
+      secondaryText: "💎 {{activite}} professionnel\n📞 Contactez-nous : {{telephone}}\n🔝 Qualité garantie"
+    }
+  ],
+  promotion: [
+    {
+      mainText: "💥 {{promo}} 💥",
+      secondaryText: "{{boutique}} - {{activite}}\n📲 Profitez-en vite !\n⏳ Jusqu'à épuisement des stocks"
+    },
+    {
+      mainText: "🎁 {{promo}} 🎁",
+      secondaryText: "Chez {{boutique}}\n✨ {{activite}} de qualité\n📞 Réservation : {{telephone}}\n🏃‍♂️ Ne tardez plus !"
+    },
+    {
+      mainText: "⭐ {{promo}} ⭐",
+      secondaryText: "{{boutique}} vous propose\n🎯 {{activite}} exceptionnel\n📱 Appelez maintenant : {{telephone}}\n⚡ Offre flash"
+    }
+  ],
+  storytelling: [
+    {
+      mainText: "💫 {{boutique}} 💫",
+      secondaryText: "{{promo}}\n🌟 Excellence en {{activite}}\n📱 {{telephone}}\n🏆 Votre satisfaction, notre fierté"
+    },
+    {
+      mainText: "🎭 {{boutique}} 🎭",
+      secondaryText: "{{promo}}\n✨ Art de vivre & {{activite}}\n☎️ {{telephone}}\n💎 Tradition & modernité"
+    }
+  ],
+  urgency: [
+    {
+      mainText: "🚨 DERNIÈRE CHANCE 🚨",
+      secondaryText: "{{promo}} - {{boutique}}\n⚡ {{activite}} premium\n📞 Réservez IMMÉDIATEMENT : {{telephone}}\n⏰ Plus que quelques heures !"
+    },
+    {
+      mainText: "⏰ ULTIME MOMENT ⏰",
+      secondaryText: "{{promo}} chez {{boutique}}\n🔥 {{activite}} d'exception\n📱 Dernière opportunité : {{telephone}}\n🏃‍♂️ Foncez maintenant !"
+    }
+  ],
+  premium: [
+    {
+      mainText: "💎 {{boutique}} PRESTIGE 💎",
+      secondaryText: "{{promo}}\n👑 {{activite}} d'élite\n📱 {{telephone}}\n🌟 Le luxe accessible"
+    },
+    {
+      mainText: "🏆 {{boutique}} EXCELLENCE 🏆",
+      secondaryText: "{{promo}}\n✨ {{activite}} raffiné\n☎️ {{telephone}}\n💫 Standing supérieur"
+    }
+  ],
+  exclusive: [
+    {
+      mainText: "🔐 PRIVÉ {{boutique}} 🔐",
+      secondaryText: "{{promo}}\n💎 {{activite}} exclusif\n📞 Accès privilégié : {{telephone}}\n👑 Réservé aux connaisseurs"
+    },
+    {
+      mainText: "🎯 SÉLECT {{boutique}} 🎯",
+      secondaryText: "{{promo}}\n🌟 {{activite}} d'exception\n📱 Contact VIP : {{telephone}}\n🔒 Cercle fermé"
+    }
+  ]
+};
+
+// Alternatives d'émojis par ambiance
+const EMOJI_VARIATIONS = {
+  elegant: ['✨', '💎', '🌟', '💫', '🔮', '👑', '🎭'],
+  flashy: ['🔥', '⚡', '💥', '🌈', '🎆', '💫', '🚀'],
+  doux: ['🌸', '💕', '🌙', '☁️', '🕊️', '🦋', '🌺'],
+  dynamique: ['⚡', '🚀', '💥', '🌟', '🎯', '🔥', '💨'],
+  moderne: ['🚀', '💻', '⚡', '🔮', '🎯', '💎', '🌐'],
+  classique: ['🎩', '📜', '🏛️', '⚜️', '🎯', '📞', '✨']
+};
+
 const FORMATS = {
   '9:16': { width: 720, height: 1280, name: 'Stories (9:16)' },
   '1:1': { width: 1080, height: 1080, name: 'Post carré (1:1)' },
@@ -112,6 +194,14 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [canExport, setCanExport] = useState(false);
+  const [variations, setVariations] = useState<GeneratedScenario[]>([]);
+  const [currentVariationIndex, setCurrentVariationIndex] = useState(0);
+  const [isGeneratingVariations, setIsGeneratingVariations] = useState(false);
+  const [variationStats, setVariationStats] = useState({
+    totalGenerated: 0,
+    favoriteCount: 0,
+    uniqueEffectsUsed: 0
+  });
   const [performanceMetrics, setPerformanceMetrics] = useState({
     scenariosGenerated: 0,
     effectsApplied: 0,
@@ -409,28 +499,127 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
     await executeScenario(generatedScenarios[nextIndex]);
   };
 
-  const handleGenerateVariant = async () => {
+  const generateInfiniteVariations = async () => {
     if (generatedScenarios.length === 0) return;
 
-    // Génère une variante du scénario actuel avec un effet différent
-    const currentScenario = generatedScenarios[currentScenarioIndex];
+    setIsGeneratingVariations(true);
+    const baseScenario = generatedScenarios[currentScenarioIndex];
     const availableEffects = getRelevantEffects(businessData);
+    const newVariations: GeneratedScenario[] = [];
 
-    const newEffect = availableEffects[Math.floor(Math.random() * availableEffects.length)];
+    try {
+      // Génère 10 variations uniques
+      for (let i = 0; i < 10; i++) {
+        const variation = await createUniqueVariation(baseScenario, availableEffects, i);
+        newVariations.push(variation);
+      }
 
-    const variant: GeneratedScenario = {
-      ...currentScenario,
-      id: `variant-${Date.now()}`,
-      effects: [newEffect],
-      description: `${currentScenario.description} - Variante`
+      setVariations(newVariations);
+      setCurrentVariationIndex(0);
+      
+      // Execute la première variation
+      if (newVariations.length > 0) {
+        await executeScenario(newVariations[0]);
+      }
+
+      // Mise à jour des stats
+      setVariationStats(prev => ({
+        ...prev,
+        totalGenerated: prev.totalGenerated + newVariations.length,
+        uniqueEffectsUsed: new Set([...availableEffects.map(e => e.id)]).size
+      }));
+
+      console.log(`✨ Generated ${newVariations.length} unique variations!`);
+
+    } catch (error) {
+      console.error('Error generating variations:', error);
+    } finally {
+      setIsGeneratingVariations(false);
+    }
+  };
+
+  const createUniqueVariation = async (baseScenario: GeneratedScenario, effects: Effect[], index: number): Promise<GeneratedScenario> => {
+    // Algorithme de variation intelligent
+    const templateVariations = VARIATION_TEMPLATES[baseScenario.template as keyof typeof VARIATION_TEMPLATES] || [];
+    const selectedTemplate = templateVariations[index % templateVariations.length] || {
+      mainText: baseScenario.mainText,
+      secondaryText: baseScenario.secondaryText
     };
 
-    await executeScenario(variant);
+    // Variation des émojis selon l'ambiance
+    const ambianceEmojis = EMOJI_VARIATIONS[businessData.ambiance as keyof typeof EMOJI_VARIATIONS] || ['✨'];
+    const randomEmoji = ambianceEmojis[Math.floor(Math.random() * ambianceEmojis.length)];
 
-    // Remplace le scénario actuel par la variante
-    const newScenarios = [...generatedScenarios];
-    newScenarios[currentScenarioIndex] = variant;
-    setGeneratedScenarios(newScenarios);
+    // Applique des variations de texte intelligentes
+    let mainText = generateTemplate(selectedTemplate.mainText, businessData);
+    let secondaryText = generateTemplate(selectedTemplate.secondaryText, businessData);
+
+    // Variation d'émojis contextuelle
+    if (Math.random() > 0.5) {
+      mainText = replaceRandomEmoji(mainText, randomEmoji);
+      secondaryText = replaceRandomEmoji(secondaryText, randomEmoji);
+    }
+
+    // Sélection d'effets avec rotation intelligente
+    const effectIndex = (index * 2 + Math.floor(Math.random() * 3)) % effects.length;
+    const selectedEffects = effects.slice(effectIndex, effectIndex + 2);
+
+    return {
+      id: `variation-${baseScenario.id}-${index}-${Date.now()}`,
+      template: baseScenario.template,
+      mainText,
+      secondaryText,
+      effects: selectedEffects,
+      style: businessData.ambiance,
+      description: `${baseScenario.description} - Variation ${index + 1}`
+    };
+  };
+
+  const replaceRandomEmoji = (text: string, newEmoji: string): string => {
+    const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+    const emojis = text.match(emojiRegex);
+    
+    if (emojis && emojis.length > 0 && Math.random() > 0.7) {
+      const randomIndex = Math.floor(Math.random() * emojis.length);
+      return text.replace(emojis[randomIndex], newEmoji);
+    }
+    
+    return text;
+  };
+
+  const handleNextVariation = async () => {
+    if (variations.length === 0) return;
+
+    const nextIndex = (currentVariationIndex + 1) % variations.length;
+    setCurrentVariationIndex(nextIndex);
+    await executeScenario(variations[nextIndex]);
+  };
+
+  const handlePreviousVariation = async () => {
+    if (variations.length === 0) return;
+
+    const prevIndex = currentVariationIndex === 0 ? variations.length - 1 : currentVariationIndex - 1;
+    setCurrentVariationIndex(prevIndex);
+    await executeScenario(variations[prevIndex]);
+  };
+
+  const handleFavoriteVariation = () => {
+    setVariationStats(prev => ({
+      ...prev,
+      favoriteCount: prev.favoriteCount + 1
+    }));
+    
+    // Ajouter une animation de feedback
+    const button = document.getElementById('favorite-btn');
+    if (button) {
+      button.classList.add('animate-pulse');
+      setTimeout(() => button.classList.remove('animate-pulse'), 1000);
+    }
+  };
+
+  const handleGenerateVariant = async () => {
+    // Appelle la nouvelle fonction de variations infinies
+    await generateInfiniteVariations();
   };
 
   const handleWhatsAppContact = () => {
@@ -441,7 +630,9 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
     }
   };
 
-  const currentScenario = generatedScenarios[currentScenarioIndex];
+  const currentScenario = variations.length > 0 
+    ? variations[currentVariationIndex] 
+    : generatedScenarios[currentScenarioIndex];
 
   return (
     <div className="space-y-6">
@@ -639,12 +830,111 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
 
                   <Button
                     onClick={handleGenerateVariant}
-                    variant="outline"
-                    className="flex-1"
+                    disabled={isGeneratingVariations}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Variante
+                    {isGeneratingVariations ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Génération...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        10 Variations
+                      </>
+                    )}
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Variations Controls */}
+          {variations.length > 0 && (
+            <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <Sparkles className="w-5 h-5 text-purple-400 mr-2" />
+                  Variations Infinies
+                  <Badge className="ml-2 bg-purple-600 text-white">
+                    {variations.length} générées
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm">
+                    <div className="font-medium text-purple-300">
+                      {variations[currentVariationIndex]?.description}
+                    </div>
+                    <div className="text-slate-400">
+                      Variation {currentVariationIndex + 1} sur {variations.length}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      Style: {variations[currentVariationIndex]?.style}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <Button
+                    onClick={handlePreviousVariation}
+                    disabled={variations.length <= 1}
+                    variant="outline"
+                    size="sm"
+                  >
+                    ← Précédente
+                  </Button>
+
+                  <Button
+                    id="favorite-btn"
+                    onClick={handleFavoriteVariation}
+                    variant="outline"
+                    size="sm"
+                    className="border-pink-500/50 hover:bg-pink-500/10"
+                  >
+                    ❤️ J'aime
+                  </Button>
+
+                  <Button
+                    onClick={handleNextVariation}
+                    disabled={variations.length <= 1}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Suivante →
+                  </Button>
+                </div>
+
+                <div className="flex justify-center">
+                  <Button
+                    onClick={generateInfiniteVariations}
+                    disabled={isGeneratingVariations}
+                    variant="outline"
+                    className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 border-blue-500/50"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Nouvelles Variations
+                  </Button>
+                </div>
+
+                {/* Variation Stats */}
+                <div className="grid grid-cols-3 gap-3 pt-3 border-t border-purple-500/20">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-purple-400">{variationStats.totalGenerated}</div>
+                    <div className="text-xs text-slate-400">Générées</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-pink-400">{variationStats.favoriteCount}</div>
+                    <div className="text-xs text-slate-400">Favorites</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-400">{variationStats.uniqueEffectsUsed}</div>
+                    <div className="text-xs text-slate-400">Effets uniques</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
