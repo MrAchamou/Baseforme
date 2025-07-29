@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wand2, Sparkles, Upload, Play, Pause, RotateCcw, Download, Phone, RefreshCw } from 'lucide-react';
 import type { Effect } from '@/types/effects';
 import { effectLoader } from '@/lib/effect-loader';
+import { PhoneMockupPreview } from './phone-mockup-preview';
 
 interface SmartStatusGeneratorProps {
   effects: Effect[];
@@ -654,68 +655,22 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
         <div className="space-y-6">
           <Card className="bg-dark-surface border-dark-border">
             <CardHeader>
-              <CardTitle className="text-lg">Aperçu du Statut</CardTitle>
+              <CardTitle className="text-lg">Aperçu Réaliste du Statut</CardTitle>
               <p className="text-sm text-slate-400">
-                Format: {FORMATS[selectedFormat as keyof typeof FORMATS]?.name}
+                Simulation mobile temps réel - Format: {FORMATS[selectedFormat as keyof typeof FORMATS]?.name}
               </p>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-center">
-                <div
-                  id="smart-effect-container"
-                  className="relative bg-black border border-dark-border rounded-lg overflow-hidden"
-                  style={{
-                    width: '320px',
-                    height: '568px'
-                  }}
-                >
-                  {/* Logo Area */}
-                  <div className="absolute top-4 left-4 z-10">
-                    {logoPreview && (
-                      <img
-                        src={logoPreview}
-                        alt="Logo"
-                        className="max-w-16 max-h-16 object-contain"
-                      />
-                    )}
-                  </div>
-
-                  {/* Animation Canvas */}
-                  <canvas
-                    ref={canvasRef}
-                    width={FORMATS[selectedFormat as keyof typeof FORMATS]?.width || 720}
-                    height={FORMATS[selectedFormat as keyof typeof FORMATS]?.height || 1280}
-                    className="w-full h-full object-contain"
-                  />
-
-                  {/* Secondary Text Area */}
-                  <div className="absolute bottom-20 left-4 right-4 z-10">
-                    {currentScenario && (
-                      <div className="text-white text-sm font-medium text-center bg-black/50 p-3 rounded-lg backdrop-blur-sm">
-                        {currentScenario.secondaryText
-                          .split('\n')
-                          .map((line, i) => (
-                            <div key={i}>{line}</div>
-                          ))
-                        }
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div className="absolute bottom-4 right-4 z-10">
-                    {businessData.telephone && (
-                      <Button
-                        onClick={handleWhatsAppContact}
-                        className="bg-green-600 hover:bg-green-700 text-white rounded-full p-3"
-                        size="sm"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <PhoneMockupPreview
+                canvasRef={canvasRef}
+                mainText={currentScenario?.mainText || ''}
+                secondaryText={currentScenario?.secondaryText || ''}
+                logoPreview={logoPreview}
+                telephone={businessData.telephone}
+                boutique={businessData.boutique}
+                selectedFormat={selectedFormat}
+                onWhatsAppContact={handleWhatsAppContact}
+              />
             </CardContent>
           </Card>
 

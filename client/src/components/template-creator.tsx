@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, Smartphone, Sparkles, Eye, Download, Phone } from "lucide-react";
 import type { Effect } from '@/types/effects';
 import { effectLoader } from '@/lib/effect-loader';
+import { PhoneMockupPreview } from './phone-mockup-preview';
 
 interface TemplateCreatorProps {
   effects: Effect[];
@@ -407,68 +408,22 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
         <div className="space-y-6">
           <Card className="bg-dark-surface border-dark-border">
             <CardHeader>
-              <CardTitle className="text-lg">Aperçu du Statut</CardTitle>
+              <CardTitle className="text-lg">Aperçu Réaliste du Statut</CardTitle>
               <p className="text-sm text-slate-400">
-                Format: {FORMATS[selectedFormat as keyof typeof FORMATS]?.name}
+                Simulation mobile temps réel - Format: {FORMATS[selectedFormat as keyof typeof FORMATS]?.name}
               </p>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-center">
-                <div
-                  id="effect-container"
-                  className="relative bg-black border border-dark-border rounded-lg overflow-hidden"
-                  style={{
-                    width: '320px',
-                    height: '568px'
-                  }}
-                >
-                  {/* Logo Area */}
-                  <div id="logo-area" className="absolute top-4 left-4 z-10">
-                    {logoPreview && (
-                      <img
-                        src={logoPreview}
-                        alt="Logo"
-                        className="max-w-16 max-h-16 object-contain"
-                      />
-                    )}
-                  </div>
-
-                  {/* Animation Canvas */}
-                  <canvas
-                    ref={canvasRef}
-                    width={FORMATS[selectedFormat as keyof typeof FORMATS]?.width || 720}
-                    height={FORMATS[selectedFormat as keyof typeof FORMATS]?.height || 1280}
-                    className="w-full h-full object-contain"
-                  />
-
-                  {/* Secondary Text Area */}
-                  <div id="secondary-text" className="absolute bottom-20 left-4 right-4 z-10">
-                    {selectedTemplate && templateData && (
-                      <div className="text-white text-sm font-medium text-center bg-black/50 p-3 rounded-lg backdrop-blur-sm">
-                        {generateTemplate(selectedTemplate.secondaryTextTemplate, templateData)
-                          .split('\n')
-                          .map((line, i) => (
-                            <div key={i}>{line}</div>
-                          ))
-                        }
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Action Button */}
-                  <div id="action-button" className="absolute bottom-4 right-4 z-10">
-                    {templateData.telephone && (
-                      <Button
-                        onClick={handleWhatsAppContact}
-                        className="bg-green-600 hover:bg-green-700 text-white rounded-full p-3"
-                        size="sm"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <PhoneMockupPreview
+                canvasRef={canvasRef}
+                mainText={selectedTemplate ? generateTemplate(selectedTemplate.mainTextTemplate, templateData) : ''}
+                secondaryText={selectedTemplate ? generateTemplate(selectedTemplate.secondaryTextTemplate, templateData) : ''}
+                logoPreview={logoPreview}
+                telephone={templateData.telephone || ''}
+                boutique={templateData.boutique || selectedTemplate?.name || ''}
+                selectedFormat={selectedFormat}
+                onWhatsAppContact={handleWhatsAppContact}
+              />
             </CardContent>
           </Card>
 
