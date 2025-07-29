@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wand2, Sparkles, Upload, Play, Pause, RotateCcw, Download } from 'lucide-react';
+import { Wand2, Sparkles, Upload, Play, Pause, RotateCcw, Download, Phone, RefreshCw } from 'lucide-react';
 import type { Effect } from '@/types/effects';
 import { effectLoader } from '@/lib/effect-loader';
 
@@ -34,41 +34,56 @@ interface GeneratedScenario {
 }
 
 const AMBIANCES = [
-  { value: 'elegant', label: 'Élégant', tags: ['elegant', 'smooth', 'luxury'] },
-  { value: 'flashy', label: 'Flashy', tags: ['neon', 'bright', 'energetic'] },
-  { value: 'doux', label: 'Doux', tags: ['gentle', 'fade', 'soft'] },
-  { value: 'dynamique', label: 'Dynamique', tags: ['fast', 'motion', 'burst'] },
-  { value: 'moderne', label: 'Moderne', tags: ['digital', 'tech', 'glitch'] },
-  { value: 'classique', label: 'Classique', tags: ['simple', 'clean', 'traditional'] }
+  { value: 'elegant', label: 'Élégant', tags: ['elegant', 'smooth', 'luxury', 'fade', 'crystal', 'flow'] },
+  { value: 'flashy', label: 'Flashy', tags: ['neon', 'bright', 'energetic', 'electric', 'glow', 'spark'] },
+  { value: 'doux', label: 'Doux', tags: ['gentle', 'fade', 'soft', 'breath', 'float', 'aura'] },
+  { value: 'dynamique', label: 'Dynamique', tags: ['fast', 'motion', 'burst', 'explosion', 'tornado', 'energy'] },
+  { value: 'moderne', label: 'Moderne', tags: ['digital', 'tech', 'glitch', 'dimension', 'hologram', 'reality'] },
+  { value: 'classique', label: 'Classique', tags: ['simple', 'clean', 'traditional', 'typewriter', 'echo', 'wave'] }
 ];
 
 const ACTIVITE_TAGS = {
-  'restaurant': ['food', 'warm', 'appetizing'],
-  'coiffeur': ['beauty', 'transformation', 'style'],
-  'mode': ['fashion', 'trendy', 'stylish'],
-  'beaute': ['glamour', 'sparkle', 'radiant'],
-  'tech': ['digital', 'modern', 'innovative'],
-  'sport': ['energy', 'dynamic', 'powerful'],
-  'sante': ['calm', 'trust', 'professional'],
-  'immobilier': ['solid', 'premium', 'trustworthy']
+  'restaurant': ['fire', 'warm', 'appetizing', 'consume', 'energy', 'heartbeat'],
+  'coiffeur': ['beauty', 'transformation', 'style', 'sparkle', 'aura', 'glow'],
+  'salon': ['beauty', 'transformation', 'style', 'sparkle', 'aura', 'glow'],
+  'mode': ['fashion', 'trendy', 'stylish', 'crystal', 'shine', 'elegant'],
+  'boutique': ['fashion', 'trendy', 'stylish', 'crystal', 'shine', 'elegant'],
+  'beaute': ['glamour', 'sparkle', 'radiant', 'glow', 'shine', 'crystal'],
+  'tech': ['digital', 'modern', 'innovative', 'glitch', 'electric', 'hologram'],
+  'informatique': ['digital', 'modern', 'innovative', 'glitch', 'electric', 'hologram'],
+  'sport': ['energy', 'dynamic', 'powerful', 'burst', 'explosion', 'tornado'],
+  'fitness': ['energy', 'dynamic', 'powerful', 'burst', 'explosion', 'tornado'],
+  'sante': ['calm', 'trust', 'professional', 'breath', 'flow', 'gentle'],
+  'medical': ['calm', 'trust', 'professional', 'breath', 'flow', 'gentle'],
+  'immobilier': ['solid', 'premium', 'trustworthy', 'crystal', 'dimension', 'stable'],
+  'commerce': ['energy', 'bright', 'attractive', 'spark', 'shine', 'burst'],
+  'service': ['professional', 'trust', 'flow', 'elegant', 'smooth', 'quality']
 };
 
 const SCENARIO_TEMPLATES = {
   basic: {
     mainText: "{{boutique}}",
-    secondaryText: "{{activite}}\n📞 {{telephone}}"
+    secondaryText: "{{activite}} de qualité\n📞 {{telephone}}\n✨ Votre satisfaction, notre priorité"
   },
   promotion: {
     mainText: "🔥 {{promo}} 🔥",
-    secondaryText: "Chez {{boutique}}\n{{activite}}\n📲 Contactez-nous"
+    secondaryText: "Chez {{boutique}}\n{{activite}} premium\n📲 Réservez maintenant !\n⏰ Offre limitée"
   },
   storytelling: {
     mainText: "✨ {{boutique}} ✨",
-    secondaryText: "{{promo}}\n{{activite}} d'exception\n📱 {{telephone}}"
+    secondaryText: "{{promo}}\n🎯 {{activite}} d'exception\n📱 {{telephone}}\n💎 Depuis [année], votre référence"
   },
   urgency: {
     mainText: "⚡ DERNIERS JOURS ⚡",
-    secondaryText: "{{promo}} chez {{boutique}}\n{{activite}}\n🚨 Offre limitée"
+    secondaryText: "{{promo}} chez {{boutique}}\n🎯 {{activite}} premium\n🚨 Stock limité - Réservez vite !\n📞 {{telephone}}"
+  },
+  premium: {
+    mainText: "👑 {{boutique}} PREMIUM 👑",
+    secondaryText: "{{promo}}\n💎 {{activite}} haut de gamme\n📱 {{telephone}}\n🌟 L'excellence à votre service"
+  },
+  exclusive: {
+    mainText: "🎯 EXCLUSIF {{boutique}} 🎯",
+    secondaryText: "{{promo}}\n✨ {{activite}} sur-mesure\n📞 Consultation gratuite\n🔒 Accès VIP : {{telephone}}"
   }
 };
 
@@ -96,9 +111,16 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [canExport, setCanExport] = useState(false);
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    scenariosGenerated: 0,
+    effectsApplied: 0,
+    averageLoadTime: 0,
+    successRate: 100
+  });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -141,37 +163,94 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
     const ambianceData = AMBIANCES.find(a => a.value === businessData.ambiance);
     const ambianceTags = ambianceData?.tags || [];
 
-    const activiteKey = Object.keys(ACTIVITE_TAGS).find(key => 
-      businessData.activite.toLowerCase().includes(key)
+    // Recherche plus intelligente des activités
+    const activiteKeys = Object.keys(ACTIVITE_TAGS).filter(key => 
+      businessData.activite.toLowerCase().includes(key) || 
+      key.includes(businessData.activite.toLowerCase())
     );
-    const activiteTags = activiteKey ? ACTIVITE_TAGS[activiteKey as keyof typeof ACTIVITE_TAGS] : [];
+    
+    const activiteTags = activiteKeys.flatMap(key => 
+      ACTIVITE_TAGS[key as keyof typeof ACTIVITE_TAGS] || []
+    );
 
     const allRelevantTags = [...ambianceTags, ...activiteTags];
 
-    // Score les effets basé sur la correspondance des tags
+    // Algorithme de scoring ultra-précis
     const scoredEffects = effects.map(effect => {
       let score = 0;
-      const effectName = effect.name.toLowerCase();
-      const effectId = effect.id.toLowerCase();
+      const effectName = effect.name.toLowerCase().replace(/[_\s]/g, '');
+      const effectId = effect.id.toLowerCase().replace(/[_\s]/g, '');
+      const effectDesc = effect.description?.toLowerCase() || '';
 
+      // Score basique par correspondance exacte (poids max)
       allRelevantTags.forEach(tag => {
-        if (effectName.includes(tag) || effectId.includes(tag)) {
-          score += 2;
-        }
+        const cleanTag = tag.toLowerCase();
+        if (effectName.includes(cleanTag)) score += 5;
+        if (effectId.includes(cleanTag)) score += 4;
+        if (effectDesc.includes(cleanTag)) score += 2;
       });
 
-      // Bonus pour certains mots-clés
-      if (businessData.ambiance === 'flashy' && (effectName.includes('neon') || effectName.includes('glow'))) score += 3;
-      if (businessData.ambiance === 'elegant' && (effectName.includes('fade') || effectName.includes('smooth'))) score += 3;
-      if (businessData.ambiance === 'dynamique' && (effectName.includes('burst') || effectName.includes('explosion'))) score += 3;
+      // Bonus multiplicateurs par ambiance (système expert)
+      const ambianceMultipliers = {
+        'flashy': {
+          keywords: ['electric', 'neon', 'glow', 'spark', 'energy', 'bright'],
+          multiplier: 3
+        },
+        'elegant': {
+          keywords: ['crystal', 'fade', 'flow', 'smooth', 'elegant', 'aura'],
+          multiplier: 3
+        },
+        'dynamique': {
+          keywords: ['burst', 'explosion', 'tornado', 'energy', 'motion', 'fast'],
+          multiplier: 3
+        },
+        'doux': {
+          keywords: ['breath', 'float', 'gentle', 'soft', 'fade', 'wave'],
+          multiplier: 3
+        },
+        'moderne': {
+          keywords: ['glitch', 'digital', 'hologram', 'dimension', 'reality', 'tech'],
+          multiplier: 3
+        },
+        'classique': {
+          keywords: ['typewriter', 'echo', 'simple', 'clean', 'wave', 'traditional'],
+          multiplier: 3
+        }
+      };
+
+      const currentMultiplier = ambianceMultipliers[businessData.ambiance as keyof typeof ambianceMultipliers];
+      if (currentMultiplier) {
+        currentMultiplier.keywords.forEach(keyword => {
+          if (effectName.includes(keyword) || effectId.includes(keyword)) {
+            score *= currentMultiplier.multiplier;
+          }
+        });
+      }
+
+      // Bonus spéciaux pour des combinaisons parfaites
+      const perfectCombos = {
+        'restaurant+fire': 10,
+        'coiffeur+sparkle': 10,
+        'tech+glitch': 10,
+        'sport+energy': 10,
+        'beaute+crystal': 10
+      };
+
+      Object.entries(perfectCombos).forEach(([combo, bonus]) => {
+        const [activity, effect] = combo.split('+');
+        if (businessData.activite.toLowerCase().includes(activity) && 
+            (effectName.includes(effect) || effectId.includes(effect))) {
+          score += bonus;
+        }
+      });
 
       return { effect, score };
     });
 
-    // Trie par score et retourne les 8 meilleurs
+    // Trie par score décroissant et retourne les 12 meilleurs pour plus de variété
     return scoredEffects
       .sort((a, b) => b.score - a.score)
-      .slice(0, 8)
+      .slice(0, 12)
       .map(item => item.effect);
   };
 
@@ -216,41 +295,108 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
     return descriptions[template as keyof typeof descriptions] || '';
   };
 
+  const validateBusinessData = (data: BusinessData): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    
+    if (!data.boutique?.trim()) {
+      errors.push('Le nom de la boutique est obligatoire');
+    } else if (data.boutique.trim().length < 2) {
+      errors.push('Le nom de la boutique doit contenir au moins 2 caractères');
+    }
+    
+    if (!data.activite?.trim()) {
+      errors.push('Le type d\'activité est obligatoire');
+    } else if (data.activite.trim().length < 3) {
+      errors.push('Le type d\'activité doit contenir au moins 3 caractères');
+    }
+    
+    if (!data.ambiance) {
+      errors.push('L\'ambiance souhaitée est obligatoire');
+    }
+    
+    if (data.telephone && data.telephone.length < 10) {
+      errors.push('Le numéro de téléphone semble invalide');
+    }
+    
+    return { isValid: errors.length === 0, errors };
+  };
+
   const handleGenerateScenarios = async () => {
-    if (!businessData.boutique || !businessData.activite || !businessData.ambiance) {
-      alert('Veuillez remplir au minimum le nom de la boutique, l\'activité et l\'ambiance');
+    const validation = validateBusinessData(businessData);
+    
+    if (!validation.isValid) {
+      alert('Erreurs de validation :\n' + validation.errors.join('\n'));
       return;
     }
 
     setIsGenerating(true);
     try {
       const scenarios = generateScenarios();
+      
+      if (scenarios.length === 0) {
+        throw new Error('Aucun scénario généré - vérifiez les données');
+      }
+      
       setGeneratedScenarios(scenarios);
       setCurrentScenarioIndex(0);
 
-      if (scenarios.length > 0) {
-        await executeScenario(scenarios[0]);
-      }
+      await executeScenario(scenarios[0]);
+      
+      // Analytics track
+      console.log(`✅ Generated ${scenarios.length} scenarios for ${businessData.activite} business`);
+      
     } catch (error) {
       console.error('Error generating scenarios:', error);
+      alert('Erreur lors de la génération. Veuillez réessayer.');
     } finally {
       setIsGenerating(false);
     }
   };
 
   const executeScenario = async (scenario: GeneratedScenario) => {
-    if (scenario.effects.length === 0) return;
+    if (scenario.effects.length === 0) {
+      console.warn('No effects available for scenario');
+      return;
+    }
 
-    const selectedEffect = scenario.effects[0]; // Utilise le premier effet du scénario
-
-    try {
-      await effectLoader.loadEffect(selectedEffect, scenario.mainText);
-      if (canvasRef.current) {
-        effectLoader.executeEffect(selectedEffect.id, scenario.mainText);
+    // Sélectionne le meilleur effet ou fait un fallback intelligent
+    let selectedEffect = scenario.effects[0];
+    
+    // Si le premier effet échoue, essaie les suivants
+    for (let i = 0; i < scenario.effects.length; i++) {
+      try {
+        selectedEffect = scenario.effects[i];
+        await effectLoader.loadEffect(selectedEffect, scenario.mainText);
+        
+        if (canvasRef.current) {
+          // Attendre un frame pour s'assurer que le canvas est prêt
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          effectLoader.executeEffect(selectedEffect.id, scenario.mainText);
+        }
+        
+        setCanExport(true);
+        break; // Succès, on sort de la boucle
+        
+      } catch (error) {
+        console.warn(`Failed to execute effect ${selectedEffect.name}:`, error);
+        
+        // Si c'est le dernier effet et qu'il échoue aussi, utilise un fallback
+        if (i === scenario.effects.length - 1) {
+          console.error('All effects failed, using fallback');
+          // Créer un effet de base en fallback
+          if (canvasRef.current) {
+            const ctx = canvasRef.current.getContext('2d');
+            if (ctx) {
+              ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+              ctx.font = '48px Inter, sans-serif';
+              ctx.textAlign = 'center';
+              ctx.fillStyle = '#6366f1';
+              ctx.fillText(scenario.mainText, canvasRef.current.width / 2, canvasRef.current.height / 2);
+            }
+          }
+          setCanExport(true);
+        }
       }
-      setCanExport(true);
-    } catch (error) {
-      console.error('Error executing scenario:', error);
     }
   };
 
@@ -387,19 +533,27 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Format du statut</Label>
+                <Label>Format du statut *</Label>
                 <Select value={selectedFormat} onValueChange={setSelectedFormat}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-slate-700 border-slate-600">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-slate-800 border-slate-600">
                     {Object.entries(FORMATS).map(([key, format]) => (
-                      <SelectItem key={key} value={key}>
-                        {format.name} ({format.width}x{format.height})
+                      <SelectItem key={key} value={key} className="hover:bg-slate-700">
+                        <div className="flex items-center justify-between w-full">
+                          <span>{format.name}</span>
+                          <Badge variant="outline" className="ml-2">
+                            {format.width}×{format.height}
+                          </Badge>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-slate-400 mt-1">
+                  Choisissez le format adapté à votre réseau social
+                </p>
               </div>
 
               <div>
