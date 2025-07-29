@@ -160,14 +160,72 @@ const VARIATION_TEMPLATES = {
   ]
 };
 
-// Alternatives d'émojis par ambiance
+// Système d'émojis intelligents par secteur d'activité
+const SECTEUR_EMOJIS = {
+  restaurant: {
+    primary: ['🍕', '🍔', '🥘', '🍝', '🥗', '🍱', '🥙'],
+    accent: ['🔥', '⭐', '🎯', '👨‍🍳', '🍽️', '💯', '✨'],
+    promo: ['🔥', '💥', '⚡', '🎁', '🏃‍♂️', '⏰', '🚨'],
+    contact: ['📞', '📱', '📲', '☎️', '📧', '💬', '📍']
+  },
+  coiffeur: {
+    primary: ['✂️', '💇‍♀️', '💇‍♂️', '💄', '🪞', '👑', '✨'],
+    accent: ['💫', '🌟', '💎', '✨', '🔥', '💯', '⭐'],
+    promo: ['🔥', '💥', '✂️', '🎁', '⚡', '🚨', '⏰'],
+    contact: ['📞', '📅', '📱', '☎️', '💬', '📲', '📍']
+  },
+  beaute: {
+    primary: ['💄', '💅', '🌸', '🌺', '🦋', '💕', '✨'],
+    accent: ['💎', '👑', '🌟', '💫', '🔮', '💯', '⭐'],
+    promo: ['🔥', '💥', '🎁', '⚡', '🌸', '💕', '⏰'],
+    contact: ['📞', '📅', '📱', '☎️', '💬', '📲', '📍']
+  },
+  mode: {
+    primary: ['👗', '👠', '👜', '🕶️', '💍', '👑', '✨'],
+    accent: ['💎', '🌟', '💫', '🔥', '💯', '⭐', '✨'],
+    promo: ['🔥', '💥', '🎁', '⚡', '👗', '💎', '⏰'],
+    contact: ['📞', '🛍️', '📱', '☎️', '💬', '📲', '📍']
+  },
+  sport: {
+    primary: ['💪', '🏃‍♂️', '🏋️‍♀️', '⚽', '🏆', '🥇', '🔥'],
+    accent: ['⚡', '💥', '🌟', '💯', '🎯', '🚀', '💪'],
+    promo: ['🔥', '💥', '⚡', '🏆', '💪', '🎁', '⏰'],
+    contact: ['📞', '📱', '💪', '☎️', '💬', '📲', '📍']
+  },
+  tech: {
+    primary: ['💻', '📱', '⚡', '🔧', '🖥️', '💡', '🚀'],
+    accent: ['⚡', '🔥', '💎', '🌟', '💯', '🎯', '✨'],
+    promo: ['🔥', '💥', '⚡', '🚀', '💻', '🎁', '⏰'],
+    contact: ['📞', '📱', '💻', '☎️', '💬', '📧', '🌐']
+  },
+  sante: {
+    primary: ['🏥', '⚕️', '💊', '🩺', '💉', '🧬', '✨'],
+    accent: ['💎', '🌟', '💯', '⭐', '✨', '🔥', '💫'],
+    promo: ['🔥', '💥', '⚕️', '🎁', '⚡', '💯', '⏰'],
+    contact: ['📞', '📅', '📱', '☎️', '💬', '📲', '🏥']
+  },
+  immobilier: {
+    primary: ['🏠', '🏢', '🔑', '🏡', '🏘️', '🏗️', '✨'],
+    accent: ['💎', '🌟', '🔥', '💯', '⭐', '✨', '🎯'],
+    promo: ['🔥', '💥', '🔑', '🎁', '⚡', '🏠', '⏰'],
+    contact: ['📞', '📱', '🔑', '☎️', '💬', '📲', '📍']
+  },
+  default: {
+    primary: ['✨', '🌟', '💎', '🔥', '💯', '⭐', '🎯'],
+    accent: ['💫', '🔥', '⚡', '🌟', '💎', '✨', '💯'],
+    promo: ['🔥', '💥', '⚡', '🎁', '🌟', '💯', '⏰'],
+    contact: ['📞', '📱', '☎️', '💬', '📲', '📧', '📍']
+  }
+};
+
+// Alternatives d'émojis par ambiance (enrichies)
 const EMOJI_VARIATIONS = {
-  elegant: ['✨', '💎', '🌟', '💫', '🔮', '👑', '🎭'],
-  flashy: ['🔥', '⚡', '💥', '🌈', '🎆', '💫', '🚀'],
-  doux: ['🌸', '💕', '🌙', '☁️', '🕊️', '🦋', '🌺'],
-  dynamique: ['⚡', '🚀', '💥', '🌟', '🎯', '🔥', '💨'],
-  moderne: ['🚀', '💻', '⚡', '🔮', '🎯', '💎', '🌐'],
-  classique: ['🎩', '📜', '🏛️', '⚜️', '🎯', '📞', '✨']
+  elegant: ['✨', '💎', '🌟', '💫', '🔮', '👑', '🎭', '💠', '🌙', '⚜️'],
+  flashy: ['🔥', '⚡', '💥', '🌈', '🎆', '💫', '🚀', '🎯', '💯', '🌟'],
+  doux: ['🌸', '💕', '🌙', '☁️', '🕊️', '🦋', '🌺', '💐', '🌷', '🤍'],
+  dynamique: ['⚡', '🚀', '💥', '🌟', '🎯', '🔥', '💨', '⚽', '🏃‍♂️', '💪'],
+  moderne: ['🚀', '💻', '⚡', '🔮', '🎯', '💎', '🌐', '📱', '💡', '🔬'],
+  classique: ['🎩', '📜', '🏛️', '⚜️', '🎯', '📞', '✨', '👔', '🖋️', '📚']
 };
 
 const FORMATS = {
@@ -354,10 +412,15 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
   const generateScenarios = (): GeneratedScenario[] => {
     const relevantEffects = getRelevantEffects(businessData);
     const scenarios: GeneratedScenario[] = [];
+    const secteur = detectSecteur(businessData.activite);
 
     Object.entries(SCENARIO_TEMPLATES).forEach(([templateKey, template], index) => {
-      const mainText = generateTemplate(template.mainText, businessData);
-      const secondaryText = generateTemplate(template.secondaryText, businessData);
+      let mainText = generateTemplate(template.mainText, businessData);
+      let secondaryText = generateTemplate(template.secondaryText, businessData);
+
+      // 🎯 APPLICATION D'ÉMOJIS INTELLIGENTS PAR SECTEUR
+      mainText = applyContextualEmojis(mainText, templateKey, secteur);
+      secondaryText = applyContactEmojis(secondaryText, secteur);
 
       // Sélectionne 2-3 effets différents pour chaque scénario
       const scenarioEffects = relevantEffects.slice(index * 2, (index * 2) + 3);
@@ -369,21 +432,24 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
         secondaryText,
         effects: scenarioEffects,
         style: businessData.ambiance,
-        description: getScenarioDescription(templateKey, businessData.ambiance)
+        description: getScenarioDescription(templateKey, businessData.ambiance, secteur)
       });
     });
 
     return scenarios;
   };
 
-  const getScenarioDescription = (template: string, ambiance: string): string => {
+  const getScenarioDescription = (template: string, ambiance: string, secteur?: string): string => {
+    const secteurLabel = secteur && secteur !== 'default' ? secteur.charAt(0).toUpperCase() + secteur.slice(1) : '';
     const descriptions = {
-      basic: `Style ${ambiance} - Présentation simple et efficace`,
-      promotion: `Style ${ambiance} - Mise en avant de votre offre`,
-      storytelling: `Style ${ambiance} - Approche narrative et émotionnelle`,
-      urgency: `Style ${ambiance} - Création d'urgence et d'action`
+      basic: `${secteurLabel} ${ambiance} - Présentation professionnelle`,
+      promotion: `${secteurLabel} ${ambiance} - Promotion avec émojis sectoriels`,
+      storytelling: `${secteurLabel} ${ambiance} - Storytelling contextuel`,
+      urgency: `${secteurLabel} ${ambiance} - Urgence avec codes visuels métier`,
+      premium: `${secteurLabel} ${ambiance} - Version premium avec émojis luxe`,
+      exclusive: `${secteurLabel} ${ambiance} - Exclusivité avec codes VIP`
     };
-    return descriptions[template as keyof typeof descriptions] || '';
+    return descriptions[template as keyof typeof descriptions] || `${secteurLabel} ${ambiance}`;
   };
 
   const validateBusinessData = (data: BusinessData): { isValid: boolean; errors: string[] } => {
@@ -539,6 +605,9 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
   };
 
   const createUniqueVariation = async (baseScenario: GeneratedScenario, effects: Effect[], index: number): Promise<GeneratedScenario> => {
+    // Détection intelligente du secteur
+    const secteur = detectSecteur(businessData.activite);
+    
     // Algorithme de variation intelligent
     const templateVariations = VARIATION_TEMPLATES[baseScenario.template as keyof typeof VARIATION_TEMPLATES] || [];
     const selectedTemplate = templateVariations[index % templateVariations.length] || {
@@ -546,16 +615,24 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
       secondaryText: baseScenario.secondaryText
     };
 
-    // Variation des émojis selon l'ambiance
-    const ambianceEmojis = EMOJI_VARIATIONS[businessData.ambiance as keyof typeof EMOJI_VARIATIONS] || ['✨'];
-    const randomEmoji = ambianceEmojis[Math.floor(Math.random() * ambianceEmojis.length)];
-
     // Applique des variations de texte intelligentes
     let mainText = generateTemplate(selectedTemplate.mainText, businessData);
     let secondaryText = generateTemplate(selectedTemplate.secondaryText, businessData);
 
-    // Variation d'émojis contextuelle
-    if (Math.random() > 0.5) {
+    // 🎯 APPLICATION D'ÉMOJIS INTELLIGENTS PAR SECTEUR
+    mainText = applyContextualEmojis(mainText, baseScenario.template, secteur);
+    secondaryText = applyContactEmojis(secondaryText, secteur);
+
+    // Variation d'émojis selon l'ambiance + secteur
+    const ambianceEmojis = EMOJI_VARIATIONS[businessData.ambiance as keyof typeof EMOJI_VARIATIONS] || ['✨'];
+    const secteurEmojis = getSmartEmojis(secteur, 'accent', 2);
+    
+    // Mélange intelligent des émojis d'ambiance et de secteur
+    const combinedEmojis = [...ambianceEmojis, ...secteurEmojis];
+    const randomEmoji = combinedEmojis[Math.floor(Math.random() * combinedEmojis.length)];
+
+    // Variation d'émojis contextuelle améliorée
+    if (Math.random() > 0.3) { // Plus de chances d'avoir des variations
       mainText = replaceRandomEmoji(mainText, randomEmoji);
       secondaryText = replaceRandomEmoji(secondaryText, randomEmoji);
     }
@@ -571,8 +648,115 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
       secondaryText,
       effects: selectedEffects,
       style: businessData.ambiance,
-      description: `${baseScenario.description} - Variation ${index + 1}`
+      description: `${baseScenario.description} - Variation ${index + 1} (${secteur})`
     };
+  };
+
+  // Fonction pour détecter le secteur d'activité automatiquement
+  const detectSecteur = (activite: string): string => {
+    const activiteLower = activite.toLowerCase();
+    
+    const secteurMapping = {
+      'restaurant': ['restaurant', 'resto', 'cuisine', 'chef', 'cuisinier', 'gastronomie', 'food', 'pizz', 'burger'],
+      'coiffeur': ['coiffeur', 'coiffure', 'salon', 'cheveux', 'hair', 'barbier', 'barber'],
+      'beaute': ['beauté', 'beauty', 'esthétique', 'spa', 'manucure', 'massage', 'soins', 'nails'],
+      'mode': ['mode', 'fashion', 'boutique', 'vêtement', 'textile', 'couture', 'prêt-à-porter'],
+      'sport': ['sport', 'fitness', 'gym', 'musculation', 'coach', 'trainer', 'yoga', 'pilates'],
+      'tech': ['tech', 'informatique', 'digital', 'web', 'dev', 'computer', 'réparation'],
+      'sante': ['santé', 'médical', 'docteur', 'pharmacie', 'clinique', 'hôpital', 'kiné'],
+      'immobilier': ['immobilier', 'agence', 'real estate', 'maison', 'appartement', 'location']
+    };
+
+    for (const [secteur, keywords] of Object.entries(secteurMapping)) {
+      if (keywords.some(keyword => activiteLower.includes(keyword))) {
+        return secteur;
+      }
+    }
+    
+    return 'default';
+  };
+
+  // Fonction pour obtenir des émojis intelligents selon le contexte
+  const getSmartEmojis = (secteur: string, type: 'primary' | 'accent' | 'promo' | 'contact', count: number = 1): string[] => {
+    const secteurEmojis = SECTEUR_EMOJIS[secteur as keyof typeof SECTEUR_EMOJIS] || SECTEUR_EMOJIS.default;
+    const availableEmojis = secteurEmojis[type] || secteurEmojis.primary;
+    
+    // Mélange aléatoire et sélection
+    const shuffled = [...availableEmojis].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  // Fonction pour appliquer des émojis contextuels selon le template
+  const applyContextualEmojis = (text: string, template: string, secteur: string): string => {
+    let processedText = text;
+    
+    // Logique d'application d'émojis selon le template
+    switch (template) {
+      case 'promotion':
+      case 'urgency':
+        // Pour les promos, utilise des émojis promo dynamiques
+        const promoEmojis = getSmartEmojis(secteur, 'promo', 2);
+        processedText = enhanceWithEmojis(processedText, promoEmojis, 'promo');
+        break;
+        
+      case 'premium':
+      case 'exclusive':
+        // Pour le premium, utilise des émojis accent luxueux
+        const luxuryEmojis = getSmartEmojis(secteur, 'accent', 2);
+        processedText = enhanceWithEmojis(processedText, luxuryEmojis, 'luxury');
+        break;
+        
+      case 'basic':
+      case 'storytelling':
+      default:
+        // Pour le basique, utilise des émojis primaires du secteur
+        const primaryEmojis = getSmartEmojis(secteur, 'primary', 1);
+        processedText = enhanceWithEmojis(processedText, primaryEmojis, 'basic');
+        break;
+    }
+    
+    return processedText;
+  };
+
+  // Fonction pour enrichir le texte avec des émojis intelligents
+  const enhanceWithEmojis = (text: string, emojis: string[], style: 'promo' | 'luxury' | 'basic'): string => {
+    if (emojis.length === 0) return text;
+    
+    const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu;
+    
+    // Si le texte contient déjà des émojis, les remplace intelligemment
+    if (emojiRegex.test(text)) {
+      const existingEmojis = text.match(emojiRegex) || [];
+      let processedText = text;
+      
+      // Remplace certains émojis selon le style
+      existingEmojis.forEach((existingEmoji, index) => {
+        if (Math.random() > 0.6 && emojis[index % emojis.length]) {
+          processedText = processedText.replace(existingEmoji, emojis[index % emojis.length]);
+        }
+      });
+      
+      return processedText;
+    }
+    
+    // Si pas d'émojis, en ajoute selon le style
+    switch (style) {
+      case 'promo':
+        return `${emojis[0]} ${text} ${emojis[1] || emojis[0]}`;
+      case 'luxury':
+        return `${emojis[0]} ${text} ${emojis[1] || emojis[0]}`;
+      case 'basic':
+      default:
+        return `${emojis[0]} ${text}`;
+    }
+  };
+
+  // Fonction pour appliquer des émojis de contact intelligents
+  const applyContactEmojis = (text: string, secteur: string): string => {
+    const contactEmojis = getSmartEmojis(secteur, 'contact', 1);
+    
+    // Remplace les émojis de contact existants
+    return text.replace(/📞|📱|☎️|📲/g, contactEmojis[0] || '📞');
   };
 
   const replaceRandomEmoji = (text: string, newEmoji: string): string => {
