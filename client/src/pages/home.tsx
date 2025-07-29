@@ -54,7 +54,7 @@ export default function Home() {
   const handleGenerate = async () => {
     if (!text.trim()) return;
 
-    setIsLoading(true);
+    setIsPlaying(false);
     setActiveScenario(null);
     setCanExport(false);
 
@@ -67,12 +67,13 @@ export default function Home() {
         setSelectedEffect(effectToUse);
       }
 
-      await effectLoader.loadEffect(effectToUse, text);
-      setCanExport(true);
+      if (effectToUse) {
+        setIsPlaying(true);
+        setCanExport(true);
+        setStats(prev => ({ ...prev, animationsPlayed: prev.animationsPlayed + 1 }));
+      }
     } catch (error) {
       console.error('Error generating effect:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

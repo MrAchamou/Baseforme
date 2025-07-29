@@ -1,13 +1,13 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Sparkles, Eye, Download, Phone, RefreshCw, Wand2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Wand2, Sparkles, Upload, Play, Pause, RotateCcw, Download } from 'lucide-react';
 import type { Effect } from '@/types/effects';
 import { effectLoader } from '@/lib/effect-loader';
 
@@ -88,7 +88,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
     telephone: '',
     ambiance: ''
   });
-  
+
   const [selectedFormat, setSelectedFormat] = useState<string>('9:16');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
@@ -140,34 +140,34 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
   const getRelevantEffects = (businessData: BusinessData): Effect[] => {
     const ambianceData = AMBIANCES.find(a => a.value === businessData.ambiance);
     const ambianceTags = ambianceData?.tags || [];
-    
+
     const activiteKey = Object.keys(ACTIVITE_TAGS).find(key => 
       businessData.activite.toLowerCase().includes(key)
     );
     const activiteTags = activiteKey ? ACTIVITE_TAGS[activiteKey as keyof typeof ACTIVITE_TAGS] : [];
-    
+
     const allRelevantTags = [...ambianceTags, ...activiteTags];
-    
+
     // Score les effets basé sur la correspondance des tags
     const scoredEffects = effects.map(effect => {
       let score = 0;
       const effectName = effect.name.toLowerCase();
       const effectId = effect.id.toLowerCase();
-      
+
       allRelevantTags.forEach(tag => {
         if (effectName.includes(tag) || effectId.includes(tag)) {
           score += 2;
         }
       });
-      
+
       // Bonus pour certains mots-clés
       if (businessData.ambiance === 'flashy' && (effectName.includes('neon') || effectName.includes('glow'))) score += 3;
       if (businessData.ambiance === 'elegant' && (effectName.includes('fade') || effectName.includes('smooth'))) score += 3;
       if (businessData.ambiance === 'dynamique' && (effectName.includes('burst') || effectName.includes('explosion'))) score += 3;
-      
+
       return { effect, score };
     });
-    
+
     // Trie par score et retourne les 8 meilleurs
     return scoredEffects
       .sort((a, b) => b.score - a.score)
@@ -184,14 +184,14 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
   const generateScenarios = (): GeneratedScenario[] => {
     const relevantEffects = getRelevantEffects(businessData);
     const scenarios: GeneratedScenario[] = [];
-    
+
     Object.entries(SCENARIO_TEMPLATES).forEach(([templateKey, template], index) => {
       const mainText = generateTemplate(template.mainText, businessData);
       const secondaryText = generateTemplate(template.secondaryText, businessData);
-      
+
       // Sélectionne 2-3 effets différents pour chaque scénario
       const scenarioEffects = relevantEffects.slice(index * 2, (index * 2) + 3);
-      
+
       scenarios.push({
         id: `${templateKey}-${index}`,
         template: templateKey,
@@ -202,7 +202,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
         description: getScenarioDescription(templateKey, businessData.ambiance)
       });
     });
-    
+
     return scenarios;
   };
 
@@ -227,7 +227,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
       const scenarios = generateScenarios();
       setGeneratedScenarios(scenarios);
       setCurrentScenarioIndex(0);
-      
+
       if (scenarios.length > 0) {
         await executeScenario(scenarios[0]);
       }
@@ -240,9 +240,9 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
 
   const executeScenario = async (scenario: GeneratedScenario) => {
     if (scenario.effects.length === 0) return;
-    
+
     const selectedEffect = scenario.effects[0]; // Utilise le premier effet du scénario
-    
+
     try {
       await effectLoader.loadEffect(selectedEffect, scenario.mainText);
       if (canvasRef.current) {
@@ -256,7 +256,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
 
   const handleNextScenario = async () => {
     if (generatedScenarios.length === 0) return;
-    
+
     const nextIndex = (currentScenarioIndex + 1) % generatedScenarios.length;
     setCurrentScenarioIndex(nextIndex);
     await executeScenario(generatedScenarios[nextIndex]);
@@ -264,22 +264,22 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
 
   const handleGenerateVariant = async () => {
     if (generatedScenarios.length === 0) return;
-    
+
     // Génère une variante du scénario actuel avec un effet différent
     const currentScenario = generatedScenarios[currentScenarioIndex];
     const availableEffects = getRelevantEffects(businessData);
-    
+
     const newEffect = availableEffects[Math.floor(Math.random() * availableEffects.length)];
-    
+
     const variant: GeneratedScenario = {
       ...currentScenario,
       id: `variant-${Date.now()}`,
       effects: [newEffect],
       description: `${currentScenario.description} - Variante`
     };
-    
+
     await executeScenario(variant);
-    
+
     // Remplace le scénario actuel par la variante
     const newScenarios = [...generatedScenarios];
     newScenarios[currentScenarioIndex] = variant;
@@ -329,7 +329,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                   onChange={(e) => setBusinessData(prev => ({ ...prev, boutique: e.target.value }))}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="activite">Type d'activité *</Label>
                 <Input
@@ -339,7 +339,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                   onChange={(e) => setBusinessData(prev => ({ ...prev, activite: e.target.value }))}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="promo">Promotion ou message spécial</Label>
                 <Textarea
@@ -350,7 +350,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                   rows={3}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="telephone">Numéro de contact</Label>
                 <Input
@@ -361,7 +361,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                   onChange={(e) => setBusinessData(prev => ({ ...prev, telephone: e.target.value }))}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="ambiance">Ambiance souhaitée *</Label>
                 <Select value={businessData.ambiance} onValueChange={(value) => setBusinessData(prev => ({ ...prev, ambiance: value }))}>
@@ -401,7 +401,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <Label>Logo (optionnel)</Label>
                 <Button
@@ -470,7 +470,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                     {currentScenario?.template}
                   </Badge>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Button
                     onClick={handleNextScenario}
@@ -481,7 +481,7 @@ export function SmartStatusGenerator({ effects }: SmartStatusGeneratorProps) {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Scénario Suivant
                   </Button>
-                  
+
                   <Button
                     onClick={handleGenerateVariant}
                     variant="outline"
