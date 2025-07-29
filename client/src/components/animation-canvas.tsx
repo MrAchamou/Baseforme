@@ -33,8 +33,15 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
   useEffect(() => {
     if (canvasRef.current) {
       effectLoader.setCanvas(canvasRef.current);
+      
+      // Set initial canvas size
+      const canvas = canvasRef.current;
+      canvas.width = containerDimensions.width;
+      canvas.height = containerDimensions.height;
+      
+      console.log(`🎯 Canvas initialized: ${canvas.width}x${canvas.height}`);
     }
-  }, []);
+  }, [containerDimensions]);
 
   useEffect(() => {
     if (effect && text && canvasRef.current && isPlaying) {
@@ -54,6 +61,10 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
+      // Set canvas size to current container dimensions
+      canvas.width = containerDimensions.width;
+      canvas.height = containerDimensions.height;
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
@@ -61,8 +72,11 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Load and execute the effect
-      await effectLoader.loadEffect(effect);
+      // Ensure the effect is loaded first
+      if (!effectLoader.isEffectLoaded(effect.id)) {
+        console.log(`📥 Loading effect ${effect.name} first...`);
+        await effectLoader.loadEffect(effect);
+      }
       
       // Start the animation with the current text
       const result = effectLoader.executeEffect(effect.id, text);
