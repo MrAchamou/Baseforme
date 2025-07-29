@@ -10,8 +10,9 @@ import { EffectControls } from '@/components/effect-controls';
 import { EffectStatus } from '@/components/effect-status';
 import { ScenarioControls } from '@/components/scenario-controls';
 import { ScenarioPlayer } from '@/components/scenario-player';
+import { TemplateCreator } from '@/components/template-creator';
 import { loadEffectsFromGitHub } from '@/lib/github-api';
-import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphone } from 'lucide-react';
 import type { Effect, EffectStats } from '@/types/effects';
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
     avgLoadTime: '0s'
   });
   const [canExport, setCanExport] = useState(false);
+  const [currentTab, setCurrentTab] = useState<string>('simple');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -268,8 +270,8 @@ export default function Home() {
                   onRefresh={handleRefreshEffects}
                 />
 
-                <Tabs defaultValue="simple" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-dark-surface border-dark-border">
+                <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 bg-dark-surface border-dark-border">
                     <TabsTrigger value="simple" className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4" />
                       Simple
@@ -277,6 +279,10 @@ export default function Home() {
                     <TabsTrigger value="scenario" className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
                       Scénario
+                    </TabsTrigger>
+                    <TabsTrigger value="templates" className="flex items-center gap-2">
+                      <Smartphone className="w-4 h-4" />
+                      Templates Pro
                     </TabsTrigger>
                   </TabsList>
 
@@ -312,14 +318,33 @@ export default function Home() {
                       </div>
                     )}
                   </TabsContent>
+
+                  <TabsContent value="templates" className="space-y-4">
+                    <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                      <div className="flex items-center gap-2 text-blue-400 mb-2">
+                        <Sparkles className="w-4 h-4" />
+                        <span className="font-medium">Mode Templates Pro Activé</span>
+                      </div>
+                      <p className="text-sm text-slate-400">
+                        Interface avancée pour créer des statuts animés professionnels avec templates scénarisés
+                      </p>
+                    </div>
+                  </TabsContent>
                 </Tabs>
               </div>
             )}
           </div>
 
-          {/* Right Panel - Animation Preview */}
+          {/* Right Panel - Animation Preview or Template Creator */}
           <div className="lg:col-span-2">
-            <Card className="bg-dark-surface border-dark-border overflow-hidden">
+            {currentTab === 'templates' ? (
+              /* Template Creator Mode */
+              <div className="template-creator-panel">
+                <TemplateCreator effects={effects} />
+              </div>
+            ) : (
+              /* Original Animation Preview */
+              <Card className="bg-dark-surface border-dark-border overflow-hidden">
               {/* Preview Header */}
               <CardHeader className="border-b border-dark-border">
                 <div className="flex items-center justify-between">
@@ -416,6 +441,7 @@ export default function Home() {
                 </CardContent>
               </Card>
             </div>
+          )}
           </div>
         </div>
       </div>
