@@ -169,7 +169,10 @@ export function EffectControls({
                     className="text-slate-50 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer transition-colors duration-150"
                   >
                     <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                      <span className="text-lg">🎨</span>
+                      <span className="text-xs px-1 py-0.5 rounded bg-indigo-600 text-white">
+                        {effect.type === 'text' ? 'TXT' : effect.type === 'image' ? 'IMG' : 'UNI'}
+                      </span>
                       <span>{effect.name}</span>
                     </div>
                   </SelectItem>

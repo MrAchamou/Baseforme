@@ -256,6 +256,9 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
           } else if (specialKeywords.some(keyword => fileName.includes(keyword))) {
             type = 'special';
           }
+          
+          // Detect effect type based on description
+          const effectType = detectEffectType(description, effectName);
 
           effects.push({
             id: file.name.replace('.js', ''),
@@ -409,4 +412,25 @@ function getMockEffects(): Effect[] {
       script: 'demo://rainbow-wave'
     }
   ];
+}
+
+function detectEffectType(description: string, effectName: string): 'text' | 'image' | 'both' {
+  const textKeywords = ['text', 'letter', 'word', 'font', 'écriture', 'texte', 'mot', 'police'];
+  const imageKeywords = ['image', 'photo', 'picture', 'visual', 'graphic', 'image', 'photo', 'visuel', 'graphique'];
+
+  const descriptionLower = description.toLowerCase();
+
+  const hasTextKeywords = textKeywords.some(keyword => descriptionLower.includes(keyword));
+  const hasImageKeywords = imageKeywords.some(keyword => descriptionLower.includes(keyword));
+
+  if (hasTextKeywords && hasImageKeywords) {
+    return 'both';
+  } else if (hasTextKeywords) {
+    return 'text';
+  } else if (hasImageKeywords) {
+    return 'image';
+  } else {
+    // Default to 'both' if no keywords are found
+    return 'both';
+  }
 }

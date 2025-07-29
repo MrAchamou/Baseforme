@@ -13,14 +13,14 @@ interface ScenarioData {
   logoText: string;
   logoImage: File | null;
   logoEffect: string;
-  
+
   storyText: string;
   storyEffect: string;
-  
+
   mainText: string;
   mainImage: File | null;
   mainEffect: string;
-  
+
   sloganText: string;
   sloganEffect: string;
 }
@@ -87,6 +87,9 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
     e.name.includes('PLASMA')
   );
 
+    const imageEffects = effects.filter(e => e.type === 'image');
+
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -146,12 +149,17 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                 <SelectValue placeholder="Choisir un effet..." />
               </SelectTrigger>
               <SelectContent>
-                {logoEffects.length > 0 ? logoEffects.map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>{effect.name}</SelectItem>
-                )) : effects.slice(0, 10).map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>{effect.name}</SelectItem>
-                ))}
-              </SelectContent>
+                      {logoEffects.map(effect => (
+                        <SelectItem key={effect.id} value={effect.id}>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs px-1 py-0.5 rounded bg-blue-600 text-white">
+                              {effect.type === 'image' ? 'IMG' : effect.type === 'text' ? 'TXT' : 'UNI'}
+                            </span>
+                            <span>{effect.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
             </Select>
           </div>
         </CardContent>
@@ -184,12 +192,17 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                 <SelectValue placeholder="Choisir un effet..." />
               </SelectTrigger>
               <SelectContent>
-                {textEffects.length > 0 ? textEffects.map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>{effect.name}</SelectItem>
-                )) : effects.slice(10, 20).map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>{effect.name}</SelectItem>
-                ))}
-              </SelectContent>
+                    {textEffects.map(effect => (
+                      <SelectItem key={effect.id} value={effect.id}>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs px-1 py-0.5 rounded bg-purple-600 text-white">
+                            {effect.type === 'text' ? 'TXT' : 'UNI'}
+                          </span>
+                          <span>{effect.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
             </Select>
           </div>
         </CardContent>
@@ -245,12 +258,17 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                 <SelectValue placeholder="Choisir un effet..." />
               </SelectTrigger>
               <SelectContent>
-                {visualEffects.length > 0 ? visualEffects.map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>{effect.name}</SelectItem>
-                )) : effects.slice(20, 30).map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>{effect.name}</SelectItem>
-                ))}
-              </SelectContent>
+                      {imageEffects.map(effect => (
+                        <SelectItem key={effect.id} value={effect.id}>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs px-1 py-0.5 rounded bg-green-600 text-white">
+                              {effect.type === 'image' ? 'IMG' : 'UNI'}
+                            </span>
+                            <span>{effect.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
             </Select>
           </div>
         </CardContent>

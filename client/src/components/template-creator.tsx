@@ -365,7 +365,12 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                   <SelectContent>
                     {effects.map((effect) => (
                       <SelectItem key={effect.id} value={effect.id}>
-                        {effect.name}
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs px-1 py-0.5 rounded bg-blue-600 text-white">
+                            {effect.type === 'text' ? 'TXT' : effect.type === 'image' ? 'IMG' : 'UNI'}
+                          </span>
+                          <span>{effect.name}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
