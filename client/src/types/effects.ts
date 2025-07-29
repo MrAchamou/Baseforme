@@ -4,7 +4,7 @@ export interface Effect {
   description: string;
   script?: string;
   path: string;
-  type?: 'text' | 'image' | 'universal';
+  type?: 'animation' | 'transition' | 'special';
   scriptUrl?: string;
   category: 'text' | 'image' | 'both';
 }

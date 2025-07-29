@@ -229,46 +229,56 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
         console.warn(`Failed to load description for ${effectName}:`, error);
       }
     }
-    const effectName = file.name.replace('.js', '').replace(/-/g, ' ').toUpperCase();
+    // Generate proper effect name from the effect path/directory name
+    const effectName = effectPath.replace(/[-_]/g, ' ').toUpperCase();
 
-          // Categorize effects based on keywords
-          let category: 'text' | 'image' | 'both' = 'both';
-          let type: 'animation' | 'transition' | 'special' = 'animation';
+    // Categorize effects based on keywords from description and name
+    let category: 'text' | 'image' | 'both' = 'both';
+    let type: 'animation' | 'transition' | 'special' = 'animation';
 
-          const fileName = file.name.toLowerCase();
+    const fileName = jsFile.name.toLowerCase();
+    const lowerName = effectName.toLowerCase();
+    const lowerDesc = description.toLowerCase();
 
-          // Text effects keywords
-          const textKeywords = ['typewriter', 'write', 'text', 'type', 'letter', 'word', 'font'];
-          // Image effects keywords  
-          const imageKeywords = ['image', 'photo', 'picture', 'visual', 'graphic'];
-          // Animation type keywords
-          const transitionKeywords = ['fade', 'dissolve', 'morph', 'transform', 'transition'];
-          const specialKeywords = ['quantum', 'reality', 'glitch', 'neural', 'plasma'];
+    // Text effects keywords
+    const textKeywords = ['typewriter', 'write', 'text', 'type', 'letter', 'word', 'font'];
+    // Image effects keywords  
+    const imageKeywords = ['image', 'photo', 'picture', 'visual', 'graphic', 'métamorphoses'];
+    // Animation type keywords
+    const transitionKeywords = ['fade', 'dissolve', 'morph', 'transform', 'transition'];
+    const specialKeywords = ['quantum', 'reality', 'glitch', 'neural', 'plasma'];
 
-          if (textKeywords.some(keyword => fileName.includes(keyword))) {
-            category = 'text';
-          } else if (imageKeywords.some(keyword => fileName.includes(keyword))) {
-            category = 'image';
-          }
+    // Check in filename, effect name and description
+    const hasTextKeywords = textKeywords.some(keyword => 
+      fileName.includes(keyword) || lowerName.includes(keyword) || lowerDesc.includes(keyword)
+    );
+    const hasImageKeywords = imageKeywords.some(keyword => 
+      fileName.includes(keyword) || lowerName.includes(keyword) || lowerDesc.includes(keyword)
+    );
 
-          if (transitionKeywords.some(keyword => fileName.includes(keyword))) {
-            type = 'transition';
-          } else if (specialKeywords.some(keyword => fileName.includes(keyword))) {
-            type = 'special';
-          }
-          
-          // Detect effect type based on description
-          const effectType = detectEffectType(description, effectName);
+    if (hasTextKeywords && !hasImageKeywords) {
+      category = 'text';
+    } else if (hasImageKeywords && !hasTextKeywords) {
+      category = 'image';
+    } else {
+      category = 'both'; // Default for ambiguous or universal effects
+    }
 
-          effects.push({
-            id: file.name.replace('.js', ''),
-            name: effectName,
-            description: `${type.charAt(0).toUpperCase() + type.slice(1)} effect: ${file.name.replace('.js', '')}`,
-            scriptUrl: jsFile.download_url!,
-            path: effectPath,
-            category,
-            type
-          });
+    if (transitionKeywords.some(keyword => lowerName.includes(keyword) || lowerDesc.includes(keyword))) {
+      type = 'transition';
+    } else if (specialKeywords.some(keyword => lowerName.includes(keyword) || lowerDesc.includes(keyword))) {
+      type = 'special';
+    }
+
+    effects.push({
+      id: jsFile.name.replace('.js', ''),
+      name: effectName,
+      description: description,
+      scriptUrl: jsFile.download_url!,
+      path: effectPath,
+      category,
+      type
+    });
 
     console.info(`✅ Successfully loaded effect: ${effectName}`);
     return true;
@@ -414,23 +424,3 @@ function getMockEffects(): Effect[] {
   ];
 }
 
-function detectEffectType(description: string, effectName: string): 'text' | 'image' | 'both' {
-  const textKeywords = ['text', 'letter', 'word', 'font', 'écriture', 'texte', 'mot', 'police'];
-  const imageKeywords = ['image', 'photo', 'picture', 'visual', 'graphic', 'image', 'photo', 'visuel', 'graphique'];
-
-  const descriptionLower = description.toLowerCase();
-
-  const hasTextKeywords = textKeywords.some(keyword => descriptionLower.includes(keyword));
-  const hasImageKeywords = imageKeywords.some(keyword => descriptionLower.includes(keyword));
-
-  if (hasTextKeywords && hasImageKeywords) {
-    return 'both';
-  } else if (hasTextKeywords) {
-    return 'text';
-  } else if (hasImageKeywords) {
-    return 'image';
-  } else {
-    // Default to 'both' if no keywords are found
-    return 'both';
-  }
-}
