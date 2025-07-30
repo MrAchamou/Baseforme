@@ -1,0 +1,63 @@
+📜 Contexte du projet
+Nous développons EffectLab, une application web (React/Next.js + Node.js) qui génère des statuts animés avec des effets visuels.
+Actuellement, les effets sont chargés depuis un dépôt GitHub privé via un token (fetch à chaque démarrage).
+❌ Cela rend le chargement lent et dépendant de GitHub.
+
+✅ Objectif :
+
+Copier tout le dossier d’effets (JS, CSS, JSON, Lottie, SVG, etc.) directement dans le projet.
+
+Supprimer tout chargement GitHub et toute utilisation de token.
+
+Créer un index (fichier JSON ou JS) pour référencer les effets.
+
+Faire en sorte que l’application charge les effets localement et non via API.
+
+🔧 Tâches demandées
+1️⃣ 📂 Intégrer le dossier des effets directement dans le projet
+
+Crée un dossier src/effects (ou public/effects si besoin d’accès direct).
+
+Copie tous les fichiers d’effets (JS, CSS, Lottie, SVG, JSON) dedans.
+
+2️⃣ 📜 Créer un index automatique
+
+Génère un fichier effectsIndex.json (ou effectsIndex.js) dans src/effects/.
+
+Ce fichier doit contenir la liste de tous les effets avec leurs infos :
+
+json
+Copier
+Modifier
+[
+  { "name": "flash", "file": "flash.js", "category": "light" },
+  { "name": "pulse", "file": "pulse.js", "category": "dynamic" }
+]
+L’app pourra lire ce fichier pour afficher la liste des effets.
+
+3️⃣ ⚙️ Modifier le code
+
+Supprime toutes les fonctions/fetch qui allaient chercher les effets sur GitHub.
+
+Supprime toute logique d’authentification avec token GitHub.
+
+Assure-toi que le code appelle désormais directement le dossier local.
+
+4️⃣ 🚀 Optimiser le chargement
+
+Si le projet utilise Next.js ou Vite, configure le build pour inclure le dossier effects dans le bundle final.
+
+Vérifie que les effets sont préchargés et accessibles immédiatement.
+
+5️⃣ 📝 Bonus (optionnel mais utile)
+
+Ajoute un petit script Node (updateEffects.js) pour mettre à jour le dossier d’effets manuellement si on en ajoute plus tard (sans GitHub auto-sync).
+
+✅ Résultat attendu
+🚀 Tous les effets sont directement intégrés dans le projet (aucun fetch GitHub).
+
+🚀 Plus besoin de token (suppression totale de la dépendance API).
+
+🚀 L’app charge les effets instantanément au lancement.
+
+🚀 Le fichier effectsIndex.json permet à l’app de connaître tous les effets disponibles.
