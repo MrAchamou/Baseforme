@@ -85,77 +85,52 @@ export class EffectLoader {
     }
   }
 
-  executeEffect(effectId: string, text: string, image?: HTMLImageElement): boolean {
-    if (!this.canvas) {
-      console.error('❌ No canvas set');
-      return false;
+  executeEffect(effectId: string, text: string, image?: HTMLImageElement, options: any = {}) {
+    if (!this.canvas || !this.loadedEffects.has(effectId)) {
+      console.error('Canvas not set or effect not loaded');
+      return;
     }
 
-    const ctx = this.canvas.getContext('2d');
-    if (!ctx) {
-      console.error('❌ Failed to get canvas context');
-      return false;
-    }
-
-    const effectFunction = this.loadedEffects.get(effectId);
-    if (!effectFunction) {
-      console.error(`❌ Effect ${effectId} not loaded - using fallback`);
-      this.createFallbackAnimation(text);
-      return false;
-    }
-
-    // Stop any existing animation
-    this.stopAnimation();
+    const effect = this.loadedEffects.get(effectId);
+    if (!effect) return;
 
     try {
-      console.log(`🎯 Executing effect ${effectId} with text: "${text}"`);
+      console.log(`🎬 Executing effect: ${effectId} with text: "${text}"`);
 
-      // Create animation context
-      this.currentContext = {
-        ctx,
-        canvas: this.canvas,
-        text,
-        animationFrame: 0,
-        startTime: Date.now(),
-        image
-      };
+      // Prepare canvas context
+      const ctx = this.canvas.getContext('2d');
+      if (!ctx) return;
 
-      // Clear canvas first
-      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      // Set default background with gradient
-      const gradient = ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
-      gradient.addColorStop(0, '#0f0f23');
-      gradient.addColorStop(1, '#1a1a2e');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-      // Execute the effect with timeout protection
-      const timeout = setTimeout(() => {
-        console.warn(`⚠️ Effect ${effectId} timeout - switching to fallback`);
-        this.stopAnimation();
-        this.createFallbackAnimation(text);
-      }, 15000);
-
-      const animateFunction = effectFunction(this.currentContext);
-
-      if (typeof animateFunction === 'function') {
-        console.log(`🎬 Starting animation for effect ${effectId}`);
-        clearTimeout(timeout);
-        animateFunction();
-      } else {
-        console.log(`🎨 Direct execution for effect ${effectId}`);
-        clearTimeout(timeout);
+      // Set canvas size if not already set
+      if (this.canvas.width === 0 || this.canvas.height === 0) {
+        this.canvas.width = 800;
+        this.canvas.height = 400;
       }
 
-      return true;
+      // Don't clear canvas if bounds are specified (multiple effects scenario)
+      if (!options.bounds) {
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
 
+      // Prepare options with image if provided
+      const effectOptions = {
+        ...options,
+        image: image,
+        canvas: this.canvas,
+        ctx: ctx
+      };
+
+      // Execute the effect function with proper context
+      if (typeof effect.execute === 'function') {
+        effect.execute(this.canvas, text, effectOptions);
+      } else if (typeof effect === 'function') {
+        // Some effects might be direct functions
+        effect(this.canvas, text, effectOptions);
+      } else {
+        console.warn(`Effect ${effectId} does not have an execute function`);
+      }
     } catch (error) {
-      console.error(`❌ Error executing effect ${effectId}:`, error);
-
-      // Enhanced fallback with error details
-      this.createFallbackAnimation(text, `Erreur: ${effectId}`);
-      return false;
+      console.error(`Error executing effect ${effectId}:`, error);
     }
   }
 

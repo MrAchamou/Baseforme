@@ -9,6 +9,7 @@ export interface ScenarioElement {
   emoji?: string;
   required?: boolean;
   type?: 'text' | 'image' | 'both'; // Type d'élément pour le filtrage
+  zone?: 'logo' | 'title' | 'subtitle' | 'cta'; // Zone de contrainte sur le canvas
 }
 
 export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
@@ -26,7 +27,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         duration: 2000,
         emoji: '👋',
         required: true,
-        type: 'text'
+        type: 'text',
+        zone: 'title'
       },
       {
         id: 'boutique',
@@ -36,7 +38,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         duration: 3000,
         emoji: '🏪',
         required: true,
-        type: 'both'
+        type: 'both',
+        zone: 'logo'
       },
       {
         id: 'activite',
@@ -46,7 +49,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         duration: 2500,
         emoji: '💼',
         required: true,
-        type: 'text'
+        type: 'text',
+        zone: 'subtitle'
       },
       {
         id: 'slogan',
@@ -56,7 +60,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         duration: 3000,
         emoji: '✨',
         required: false,
-        type: 'text'
+        type: 'text',
+        zone: 'subtitle'
       },
       {
         id: 'contact',
@@ -66,7 +71,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         duration: 2000,
         emoji: '📞',
         required: true,
-        type: 'text'
+        type: 'text',
+        zone: 'cta'
       }
     ]
   },

@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Play, Pause, SkipForward, RotateCcw, Download, Share2 } from "lucide-react";
 import { EffectLoader } from "@/lib/effect-loader";
 import { Effect } from "@/types/effects";
+import { ConstrainedEffect, createConstrainedEffect, DEFAULT_TEMPLATE_LAYOUT, TemplateLayout } from "@/lib/effect-constraints";
 
 interface ScenarioStep {
   id: string;
@@ -106,7 +107,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
 
     const step = steps[stepIndex];
     const effect = effects.find(e => e.id === step.effectId);
-    
+
     if (!effect) {
       console.warn(`Effect not found: ${step.effectId}`);
       return;
@@ -130,18 +131,18 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
 
       // Load and execute the effect
       await effectLoader.loadEffect(effect);
-      
+
       // Prepare the canvas context
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
           // Clear canvas
           ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-          
+
           // Set canvas size
           canvasRef.current.width = 800;
           canvasRef.current.height = 400;
-          
+
           // Execute the effect with text and optional image
           effectLoader.executeEffect(effect.id, step.text, imageElement);
         }
@@ -181,22 +182,22 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
 
     console.log('🎬 Démarrage du scénario complet avec', steps.length, 'étapes');
     setIsPlaying(true);
-    
+
     try {
       for (let i = 0; i < steps.length; i++) {
         console.log(`🎯 Lecture de l'étape ${i + 1}/${steps.length}: ${steps[i].title}`);
         await playStep(i);
-        
+
         // Pause between steps with progress reset
         if (i < steps.length - 1) {
           setProgress(0);
           await new Promise(resolve => setTimeout(resolve, 800));
         }
       }
-      
+
       console.log('✅ Scénario terminé avec succès');
       onComplete?.();
-      
+
     } catch (error) {
       console.error('❌ Erreur pendant la lecture du scénario:', error);
       alert('Une erreur est survenue pendant la lecture du scénario.');
@@ -248,13 +249,13 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
 
       const step = steps[currentStep];
       const effect = effects.find(e => e.id === step.effectId);
-      
+
       if (!effect) return;
 
       // Record animation frames
       let frameCount = 0;
       const maxFrames = 60; // 3 seconds at 20fps
-      
+
       const recordFrame = () => {
         if (frameCount < maxFrames) {
           gif.addFrame(canvasRef.current!, { delay: 50 });
@@ -275,7 +276,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
       // Start recording
       await playStep(currentStep);
       recordFrame();
-      
+
     } catch (error) {
       console.error('❌ Erreur lors de l\'export GIF:', error);
       alert('Erreur lors de l\'export GIF');
@@ -295,7 +296,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
       });
 
       const chunks: Blob[] = [];
-      
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunks.push(event.data);
@@ -313,15 +314,15 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
 
       // Start recording
       mediaRecorder.start();
-      
+
       // Play the effect and record for duration
       await playStep(currentStep);
-      
+
       // Stop recording after step duration
       setTimeout(() => {
         mediaRecorder.stop();
       }, steps[currentStep].duration + 500);
-      
+
     } catch (error) {
       console.error('❌ Erreur lors de l\'export MP4:', error);
       alert('Erreur lors de l\'export MP4');
@@ -339,7 +340,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
         if (!blob) return;
 
         const file = new File([blob], `scenario-step-${currentStep + 1}.png`, { type: 'image/png' });
-        
+
         if (navigator.share && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
