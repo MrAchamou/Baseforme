@@ -56,6 +56,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Servir les fichiers JSfile en développement et production
+  app.use('/JSfile', express.static(path.join(process.cwd(), 'JSfile')));
+  console.log('📁 JSfile directory served at /JSfile');
+
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.

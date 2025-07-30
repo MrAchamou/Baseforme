@@ -97,9 +97,44 @@ export class EffectLoader {
 
       // Execute the effect script in a safe environment
       try {
-        // Create a function from the script and execute it
-        const effectFunction = new Function('canvas', 'ctx', 'text', 'options', loadedEffect.script);
-        effectFunction(this.canvas, ctx, text, { ...options, image });
+        // Les effets JSfile utilisent un format différent - ils exportent des fonctions ou des objets
+        // On va créer un environnement d'exécution adapté
+        const scriptEnvironment = {
+          canvas: this.canvas,
+          ctx,
+          text,
+          options: { ...options, image },
+          requestAnimationFrame: window.requestAnimationFrame.bind(window),
+          cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
+          Math,
+          Date,
+          console
+        };
+
+        // Exécuter le script dans l'environnement sécurisé
+        const effectFunction = new Function(
+          'canvas', 'ctx', 'text', 'options', 'requestAnimationFrame', 'cancelAnimationFrame', 'Math', 'Date', 'console',
+          `
+          try {
+            ${loadedEffect.script}
+          } catch (e) {
+            console.error('Effect execution error:', e);
+            throw e;
+          }
+          `
+        );
+        
+        effectFunction(
+          scriptEnvironment.canvas,
+          scriptEnvironment.ctx,
+          scriptEnvironment.text,
+          scriptEnvironment.options,
+          scriptEnvironment.requestAnimationFrame,
+          scriptEnvironment.cancelAnimationFrame,
+          scriptEnvironment.Math,
+          scriptEnvironment.Date,
+          scriptEnvironment.console
+        );
       } catch (scriptError) {
         console.error('Error executing effect script:', scriptError);
         throw new Error(`Script execution failed: ${scriptError.message}`);
