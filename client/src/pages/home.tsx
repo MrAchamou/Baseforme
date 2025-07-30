@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,10 @@ import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphon
 import type { Effect, EffectStats } from '@/types/effects';
 
 export default function Home() {
-  const [text, setText] = useState('');
+  const [effects, setEffects] = useState<Effect[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<string>('16:9');
+  const [activeScenario, setActiveScenario] = useState<any>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stats, setStats] = useState<EffectStats>({
     effectsLoaded: 0,
@@ -87,7 +88,6 @@ export default function Home() {
 
   const handleScenarioComplete = () => {
     setIsPlaying(false);
-    setActiveScenario(null);
   };
 
   const handleFormatChange = (format: string) => {

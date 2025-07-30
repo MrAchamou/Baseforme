@@ -356,11 +356,9 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                             ))}
 
                             {availableEffects.length === 0 && (
-                              <SelectItem value="no-effects-available" disabled>
-                                <span className="text-muted-foreground">
-                                  Aucun effet compatible disponible
-                                </span>
-                              </SelectItem>
+                              <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                                Aucun effet compatible disponible
+                              </div>
                             )}
                           </>
                         );
