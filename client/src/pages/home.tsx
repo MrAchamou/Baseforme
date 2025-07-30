@@ -6,20 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimationCanvas } from '@/components/animation-canvas';
-import { EffectControls } from '@/components/effect-controls';
 import { EffectStatus } from '@/components/effect-status';
 import { ScenarioControls } from '@/components/scenario-controls';
 import { ScenarioPlayer } from '@/components/scenario-player';
 import { TemplateCreator } from '@/components/template-creator';
-import { SmartStatusGenerator } from '@/components/smart-status-generator';
 import { loadEffectsFromGitHub } from '@/lib/github-api';
 import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphone, Wand2 } from 'lucide-react';
 import type { Effect, EffectStats } from '@/types/effects';
 
 export default function Home() {
   const [text, setText] = useState('');
-  const [selectedEffect, setSelectedEffect] = useState<Effect | null>(null);
-  const [currentEffectIndex, setCurrentEffectIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeScenario, setActiveScenario] = useState<any>(null);
   const [selectedFormat, setSelectedFormat] = useState<string>('16:9');
@@ -29,7 +25,7 @@ export default function Home() {
     avgLoadTime: '0s'
   });
   const [canExport, setCanExport] = useState(false);
-  const [currentTab, setCurrentTab] = useState<string>('smart');
+  const [currentTab, setCurrentTab] = useState<string>('scenario');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -59,96 +55,19 @@ export default function Home() {
     setCanExport(false);
 
     try {
-      let effectToUse = selectedEffect;
+      // TODO: Implement smart effect selection logic here
+      // For now, just select a random effect
+      const randomIndex = Math.floor(Math.random() * effects.length);
+      //const effectToUse = effects[randomIndex];
 
-      if (!effectToUse && effects.length > 0) {
-        const randomIndex = Math.floor(Math.random() * effects.length);
-        effectToUse = effects[randomIndex];
-        setSelectedEffect(effectToUse);
-      }
+      //setSelectedEffect(effectToUse);
+      setIsPlaying(true);
+      setCanExport(true);
+      setStats(prev => ({ ...prev, animationsPlayed: prev.animationsPlayed + 1 }));
 
-      if (effectToUse) {
-        setIsPlaying(true);
-        setCanExport(true);
-        setStats(prev => ({ ...prev, animationsPlayed: prev.animationsPlayed + 1 }));
-      }
     } catch (error) {
       console.error('Error generating effect:', error);
     }
-  };
-
-  const handleRandomEffect = () => {
-    if (effects.length === 0) return;
-
-    // TODO: Filter effects based on text or image type here
-    // Example:
-    // const textEffects = effects.filter(effect => effect.type === 'text');
-    // const imageEffects = effects.filter(effect => effect.type === 'image');
-    // Then select a random effect from the appropriate array based on the input
-
-    const randomEffect = getRandomEffect();
-    setSelectedEffect(randomEffect);
-    setCurrentEffectIndex(effects.indexOf(randomEffect));
-
-    if (text) {
-      setIsPlaying(true);
-      setStats(prev => ({ ...prev, animationsPlayed: prev.animationsPlayed + 1 }));
-    }
-  };
-
-  const detectEffectFromText = (inputText: string): Effect | null => {
-    const keywords = {
-      'coiffeur': 'neon-glow',
-      'salon': 'neon-glow',
-      'restaurant': 'fire-write',
-      'tech': 'particle-burst',
-      'digital': 'liquid-morph'
-    };
-
-    const words = inputText.toLowerCase().split(/\s+/);
-    for (const word of words) {
-      if (keywords[word as keyof typeof keywords]) {
-        const effectId = keywords[word as keyof typeof keywords];
-        return effects.find(e => e.id === effectId) || null;
-      }
-    }
-    return null;
-  };
-
-  const getRandomEffect = (): Effect => {
-    const randomIndex = Math.floor(Math.random() * effects.length);
-    return effects[randomIndex];
-  };
-
-  const handleNextEffect = () => {
-    if (effects.length === 0) return;
-    const nextIndex = (currentEffectIndex + 1) % effects.length;
-    setCurrentEffectIndex(nextIndex);
-    setSelectedEffect(effects[nextIndex]);
-
-    if (text) {
-      setIsPlaying(true);
-    }
-  };
-
-  const handlePreviousEffect = () => {
-    if (effects.length === 0) return;
-    const prevIndex = currentEffectIndex === 0 ? effects.length - 1 : currentEffectIndex - 1;
-    setCurrentEffectIndex(prevIndex);
-    setSelectedEffect(effects[prevIndex]);
-
-    if (text) {
-      setIsPlaying(true);
-    }
-  };
-
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleRestart = () => {
-    setIsPlaying(false);
-    setTimeout(() => setIsPlaying(true), 100);
   };
 
   const handleScenarioPlay = (scenario: any) => {
@@ -187,7 +106,7 @@ export default function Home() {
   };
 
   const handleExportGif = async () => {
-    if (!canvasRef.current || !selectedEffect) {
+    if (!canvasRef.current) {
       alert('❌ Veuillez d\'abord générer une animation.');
       return;
     }
@@ -206,7 +125,7 @@ export default function Home() {
       // Record animation frames
       let frameCount = 0;
       const maxFrames = 60; // 3 seconds at 20fps
-      
+
       const recordFrame = () => {
         if (frameCount < maxFrames) {
           gif.addFrame(canvasRef.current!, { delay: 50 });
@@ -215,7 +134,7 @@ export default function Home() {
         } else {
           gif.on('finished', (blob: Blob) => {
             const link = document.createElement('a');
-            link.download = `animation-${selectedEffect.name.toLowerCase().replace(/\s+/g, '-')}.gif`;
+            link.download = `animation.gif`;
             link.href = URL.createObjectURL(blob);
             link.click();
             console.log('✅ Export GIF réussi');
@@ -227,7 +146,7 @@ export default function Home() {
       // Start animation and recording
       handleGenerate();
       setTimeout(recordFrame, 500);
-      
+
     } catch (error) {
       console.error('❌ Erreur lors de l\'export GIF:', error);
       alert('Erreur lors de l\'export GIF');
@@ -235,7 +154,7 @@ export default function Home() {
   };
 
   const handleExportMp4 = async () => {
-    if (!canvasRef.current || !selectedEffect) {
+    if (!canvasRef.current) {
       alert('❌ Veuillez d\'abord générer une animation.');
       return;
     }
@@ -247,7 +166,7 @@ export default function Home() {
       });
 
       const chunks: Blob[] = [];
-      
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunks.push(event.data);
@@ -257,7 +176,7 @@ export default function Home() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' });
         const link = document.createElement('a');
-        link.download = `animation-${selectedEffect.name.toLowerCase().replace(/\s+/g, '-')}.webm`;
+        link.download = `animation.webm`;
         link.href = URL.createObjectURL(blob);
         link.click();
         console.log('✅ Export MP4 réussi');
@@ -266,12 +185,12 @@ export default function Home() {
       // Start recording and animation
       mediaRecorder.start();
       handleGenerate();
-      
+
       // Stop recording after 5 seconds
       setTimeout(() => {
         mediaRecorder.stop();
       }, 5000);
-      
+
     } catch (error) {
       console.error('❌ Erreur lors de l\'export MP4:', error);
       alert('Erreur lors de l\'export MP4');
@@ -359,15 +278,7 @@ export default function Home() {
                 />
 
                 <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-4 bg-dark-surface border-dark-border">
-                    <TabsTrigger value="smart" className="flex items-center gap-2">
-                      <Wand2 className="w-4 h-4" />
-                      IA Smart
-                    </TabsTrigger>
-                    <TabsTrigger value="simple" className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      Simple
-                    </TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 bg-dark-surface border-dark-border">
                     <TabsTrigger value="scenario" className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
                       Scénario
@@ -377,35 +288,6 @@ export default function Home() {
                       Templates Pro
                     </TabsTrigger>
                   </TabsList>
-
-                  <TabsContent value="smart" className="space-y-4">
-                    <div className="p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
-                      <div className="flex items-center gap-2 text-purple-400 mb-2">
-                        <Wand2 className="w-4 h-4" />
-                        <span className="font-medium">Générateur IA Activé</span>
-                      </div>
-                      <p className="text-sm text-slate-400">
-                        Système intelligent qui sélectionne automatiquement les meilleurs effets selon votre activité et ambiance
-                      </p>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="simple" className="space-y-4">
-                    <EffectControls
-                      effects={effects}
-                      selectedEffect={selectedEffect}
-                      text={text}
-                      onTextChange={setText}
-                      onEffectChange={setSelectedEffect}
-                      onGenerate={handleGenerate}
-                      onRandomEffect={handleRandomEffect}
-                      onFormatChange={handleFormatChange}
-                      onExportGif={handleExportGif}
-                      onExportMp4={handleExportMp4}
-                      isLoading={isLoading}
-                      canExport={canExport}
-                    />
-                  </TabsContent>
 
                   <TabsContent value="scenario" className="space-y-4">
                     <ScenarioControls
@@ -441,87 +323,31 @@ export default function Home() {
 
           {/* Right Panel - Animation Preview, Template Creator or Smart Generator */}
           <div className="lg:col-span-2">
-            {currentTab === 'smart' ? (
-              /* Smart Generator Mode */
-              <div className="smart-generator-panel">
-                <SmartStatusGenerator effects={effects} />
-              </div>
-            ) : currentTab === 'templates' ? (
+            {currentTab === 'scenario' ? (
+              /* Scenario Player Mode */
+              <Card className="bg-dark-surface border-dark-border overflow-hidden">
+                <CardHeader className="border-b border-dark-border">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center text-lg">
+                      <Eye className="w-5 h-5 text-purple-500 mr-2" />
+                      Aperçu du Scénario
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ScenarioPlayer
+                    activeScenario={activeScenario}
+                    isPlaying={isPlaying}
+                    onComplete={handleScenarioComplete}
+                    selectedFormat={selectedFormat}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
               /* Template Creator Mode */
               <div className="template-creator-panel">
                 <TemplateCreator effects={effects} />
               </div>
-            ) : (
-              /* Original Animation Preview */
-              <Card className="bg-dark-surface border-dark-border overflow-hidden">
-              {/* Preview Header */}
-              <CardHeader className="border-b border-dark-border">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center text-lg">
-                    <Eye className="w-5 h-5 text-purple-500 mr-2" />
-                    Aperçu de l'animation
-                  </CardTitle>
-                  <div className="flex items-center space-x-3">
-                    {isLoading && (
-                      <div className="flex items-center space-x-2 text-sm text-slate-400">
-                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <span>Chargement...</span>
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-2 text-sm text-emerald-400">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                      <span data-testid="text-animation-status">
-                        {isLoading ? 'Chargement...' : 'Prêt'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-
-              {/* Animation Canvas Area */}
-              <CardContent className="p-0">
-                <AnimationCanvas
-                  effect={selectedEffect}
-                  text={text}
-                  isPlaying={isPlaying}
-                  onPlayPause={handlePlayPause}
-                  onRestart={handleRestart}
-                  selectedFormat={selectedFormat}
-                />
-              </CardContent>
-
-              {/* Navigation Controls */}
-              <div className="p-6 border-t border-dark-border">
-                <div className="flex items-center justify-between">
-                  <Button
-                    onClick={handlePreviousEffect}
-                    disabled={effects.length <= 1}
-                    variant="secondary"
-                    className="bg-slate-700 hover:bg-slate-600"
-                    data-testid="button-previous-effect"
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Précédent
-                  </Button>
-
-                  <div className="flex items-center space-x-4 text-sm text-slate-400">
-                    <span data-testid="text-current-index">{currentEffectIndex + 1}</span>
-                    <span>/</span>
-                    <span data-testid="text-total-effects">{effects.length}</span>
-                  </div>
-
-                  <Button
-                    onClick={handleNextEffect}
-                    disabled={effects.length <= 1}
-                    className="bg-blue-600 hover:bg-blue-700"
-                    data-testid="button-next-effect"
-                  >
-                    Suivant
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
             )
             }
 
