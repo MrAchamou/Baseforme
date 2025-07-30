@@ -12,6 +12,7 @@ import { Upload, Smartphone, Sparkles, Eye, Download, Phone } from "lucide-react
 import type { Effect } from '@/types/effects';
 import { effectLoader } from '@/lib/effect-loader';
 import { PhoneMockupPreview } from './phone-mockup-preview';
+import { previewEngine } from '@/lib/preview-engine';
 
 interface TemplateCreatorProps {
   effects: Effect[];
@@ -117,11 +118,14 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
   useEffect(() => {
     if (canvasRef.current) {
       effectLoader.setCanvas(canvasRef.current);
+      previewEngine.setCanvas(canvasRef.current);
     }
   }, []);
 
   useEffect(() => {
     updateContainerSize();
+    // Synchroniser le format avec le preview engine
+    previewEngine.updateFormat(selectedFormat, 'whatsapp');
   }, [selectedFormat]);
 
   const updateContainerSize = () => {
@@ -169,17 +173,21 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
       const mainText = generateTemplate(selectedTemplate.mainTextTemplate, templateData);
       const secondaryText = generateTemplate(selectedTemplate.secondaryTextTemplate, templateData);
       
-      // Load and execute the effect
+      // Load and execute the effect in both systems
       await effectLoader.loadEffect(selectedEffect, mainText);
+      await previewEngine.loadEffect(selectedEffect, mainText);
       
       // Apply the effect to the canvas
       if (canvasRef.current) {
         effectLoader.executeEffect(selectedEffect.id, mainText);
       }
       
-      console.info('Template generated successfully:', { mainText, secondaryText });
+      // Démarrer le preview temps réel
+      previewEngine.setRealtimeMode(true);
+      
+      console.info('✅ Template généré avec preview temps réel:', { mainText, secondaryText });
     } catch (error) {
-      console.error('Error generating template:', error);
+      console.error('❌ Erreur lors de la génération:', error);
     } finally {
       setIsGenerating(false);
     }
@@ -221,21 +229,40 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
           {/* Format Selection */}
           <Card className="bg-dark-surface border-dark-border">
             <CardHeader>
-              <CardTitle className="text-lg">Format du Statut</CardTitle>
+              <CardTitle className="text-lg flex items-center">
+                📐 Format du Statut
+                <Badge variant="outline" className="ml-2 text-xs">
+                  {FORMATS[selectedFormat as keyof typeof FORMATS]?.name}
+                </Badge>
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Select value={selectedFormat} onValueChange={setSelectedFormat}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(FORMATS).map(([key, format]) => (
-                    <SelectItem key={key} value={key}>
-                      {format.name} ({format.width}x{format.height})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {Object.entries(FORMATS).map(([key, format]) => (
+                  <Button
+                    key={key}
+                    variant={selectedFormat === key ? "default" : "outline"}
+                    onClick={() => setSelectedFormat(key)}
+                    className="h-auto p-3 flex flex-col items-center gap-1"
+                  >
+                    <div className="text-sm font-medium">{format.name.split(' ')[0]}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {format.width}×{format.height}
+                    </div>
+                    <div className="text-xs opacity-70">{key}</div>
+                  </Button>
+                ))}
+              </div>
+              
+              {/* Indicateur d'usage */}
+              <div className="text-xs text-slate-400 bg-slate-800/50 p-2 rounded">
+                💡 <strong>{selectedFormat}</strong> : 
+                {selectedFormat === '9:16' && ' Parfait pour les Stories (Instagram, WhatsApp, TikTok)'}
+                {selectedFormat === '1:1' && ' Idéal pour les posts Instagram et Facebook'}
+                {selectedFormat === '4:5' && ' Optimisé pour les posts Instagram portrait'}
+                {selectedFormat === '16:9' && ' Parfait pour YouTube et bannières Twitter'}
+                {selectedFormat === '3:4' && ' Format portrait classique'}
+              </div>
             </CardContent>
           </Card>
 

@@ -20,16 +20,32 @@ const PHONE_FORMATS = {
   'iphone': {
     width: 375,
     height: 812,
-    name: 'iPhone 14',
-    borderRadius: '45px',
-    notch: true
+    name: 'iPhone 15 Pro',
+    borderRadius: '55px',
+    notch: true,
+    statusBarHeight: 44,
+    homeIndicator: true,
+    bezels: { top: 8, bottom: 8, left: 8, right: 8 }
   },
   'android': {
-    width: 360,
-    height: 780,
-    name: 'Samsung Galaxy',
-    borderRadius: '25px',
-    notch: false
+    width: 393,
+    height: 851,
+    name: 'Samsung Galaxy S24',
+    borderRadius: '32px',
+    notch: false,
+    statusBarHeight: 32,
+    homeIndicator: false,
+    bezels: { top: 6, bottom: 6, left: 6, right: 6 }
+  },
+  'pixel': {
+    width: 412,
+    height: 892,
+    name: 'Google Pixel 8',
+    borderRadius: '28px',
+    notch: false,
+    statusBarHeight: 36,
+    homeIndicator: false,
+    bezels: { top: 4, bottom: 4, left: 4, right: 4 }
   }
 };
 
@@ -39,30 +55,78 @@ const NETWORK_SIMULATIONS = {
     backgroundColor: '#128C7E',
     statusBar: '#075E54',
     icon: MessageCircle,
+    brandColor: '#25D366',
     header: {
       title: 'Mon statut',
-      time: 'Maintenant'
-    }
+      time: 'Maintenant',
+      avatar: true
+    },
+    overlay: 'whatsapp-ui'
   },
   instagram: {
     name: 'Instagram Story',
     backgroundColor: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
-    statusBar: '#000000',
+    statusBar: 'transparent',
     icon: Instagram,
+    brandColor: '#E4405F',
     header: {
       title: 'Votre story',
-      time: 'Il y a 2 min'
-    }
+      time: 'Il y a 2 min',
+      avatar: true
+    },
+    overlay: 'instagram-ui'
   },
   tiktok: {
     name: 'TikTok Video',
     backgroundColor: '#000000',
-    statusBar: '#000000',
+    statusBar: 'transparent',
     icon: Smartphone,
+    brandColor: '#FF0050',
     header: {
       title: 'Pour vous',
-      time: 'En direct'
-    }
+      time: 'En direct',
+      avatar: false
+    },
+    overlay: 'tiktok-ui'
+  },
+  facebook: {
+    name: 'Facebook Story',
+    backgroundColor: '#1877F2',
+    statusBar: '#1565C0',
+    icon: MessageCircle,
+    brandColor: '#1877F2',
+    header: {
+      title: 'Votre story',
+      time: 'Il y a 1 min',
+      avatar: true
+    },
+    overlay: 'facebook-ui'
+  },
+  youtube: {
+    name: 'YouTube Shorts',
+    backgroundColor: '#000000',
+    statusBar: 'transparent',
+    icon: Smartphone,
+    brandColor: '#FF0000',
+    header: {
+      title: 'Shorts',
+      time: 'En cours',
+      avatar: false
+    },
+    overlay: 'youtube-ui'
+  },
+  linkedin: {
+    name: 'LinkedIn Story',
+    backgroundColor: '#0077B5',
+    statusBar: '#005885',
+    icon: MessageCircle,
+    brandColor: '#0077B5',
+    header: {
+      title: 'Votre story',
+      time: 'Il y a 3 min',
+      avatar: true
+    },
+    overlay: 'linkedin-ui'
   }
 };
 
@@ -102,31 +166,49 @@ export function PhoneMockupPreview({
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex flex-wrap gap-2 justify-between items-center">
-        <div className="flex gap-2">
-          <Tabs value={selectedPhone} onValueChange={(value) => setSelectedPhone(value as keyof typeof PHONE_FORMATS)}>
-            <TabsList className="bg-slate-800">
-              <TabsTrigger value="iphone" className="text-xs">iPhone</TabsTrigger>
-              <TabsTrigger value="android" className="text-xs">Android</TabsTrigger>
-            </TabsList>
-          </Tabs>
+      <div className="flex flex-wrap gap-3 justify-between items-center">
+        <div className="flex flex-wrap gap-3">
+          {/* Sélecteur de téléphone */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">📱 Appareil:</span>
+            <Tabs value={selectedPhone} onValueChange={(value) => setSelectedPhone(value as keyof typeof PHONE_FORMATS)}>
+              <TabsList className="bg-slate-800 h-8">
+                <TabsTrigger value="iphone" className="text-xs px-3">🍎 iPhone</TabsTrigger>
+                <TabsTrigger value="android" className="text-xs px-3">🤖 Samsung</TabsTrigger>
+                <TabsTrigger value="pixel" className="text-xs px-3">📱 Pixel</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-          <Tabs value={selectedNetwork} onValueChange={(value) => setSelectedNetwork(value as keyof typeof NETWORK_SIMULATIONS)}>
-            <TabsList className="bg-slate-800">
-              <TabsTrigger value="whatsapp" className="text-xs">
-                <MessageCircle className="w-3 h-3 mr-1" />
-                WhatsApp
-              </TabsTrigger>
-              <TabsTrigger value="instagram" className="text-xs">
-                <Instagram className="w-3 h-3 mr-1" />
-                Instagram
-              </TabsTrigger>
-              <TabsTrigger value="tiktok" className="text-xs">
-                <Smartphone className="w-3 h-3 mr-1" />
-                TikTok
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Sélecteur de plateforme */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-medium">🌐 Plateforme:</span>
+            <Tabs value={selectedNetwork} onValueChange={(value) => setSelectedNetwork(value as keyof typeof NETWORK_SIMULATIONS)}>
+              <TabsList className="bg-slate-800 h-8">
+                <TabsTrigger value="whatsapp" className="text-xs px-2">
+                  <MessageCircle className="w-3 h-3 mr-1" />
+                  WhatsApp
+                </TabsTrigger>
+                <TabsTrigger value="instagram" className="text-xs px-2">
+                  <Instagram className="w-3 h-3 mr-1" />
+                  Instagram
+                </TabsTrigger>
+                <TabsTrigger value="tiktok" className="text-xs px-2">
+                  <Smartphone className="w-3 h-3 mr-1" />
+                  TikTok
+                </TabsTrigger>
+                <TabsTrigger value="facebook" className="text-xs px-2">
+                  📘 Facebook
+                </TabsTrigger>
+                <TabsTrigger value="youtube" className="text-xs px-2">
+                  📺 YouTube
+                </TabsTrigger>
+                <TabsTrigger value="linkedin" className="text-xs px-2">
+                  💼 LinkedIn
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
 
         <div className="flex gap-2">
@@ -144,23 +226,42 @@ export function PhoneMockupPreview({
       </div>
 
       {/* Phone Mockup */}
-      <div className={`mx-auto transition-all duration-300 ${isFullscreen ? 'scale-110' : 'scale-100'}`}>
+      <div className={`mx-auto transition-all duration-500 ${isFullscreen ? 'scale-110' : 'scale-100'}`}>
         <div 
-          className="relative mx-auto bg-black shadow-2xl"
+          className="relative mx-auto shadow-2xl"
           style={{
-            width: `${phoneConfig.width}px`,
-            height: `${phoneConfig.height}px`,
+            width: `${phoneConfig.width + phoneConfig.bezels.left + phoneConfig.bezels.right}px`,
+            height: `${phoneConfig.height + phoneConfig.bezels.top + phoneConfig.bezels.bottom}px`,
             borderRadius: phoneConfig.borderRadius,
-            padding: '8px',
-            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+            background: selectedPhone === 'iphone' 
+              ? 'linear-gradient(135deg, #2C2C2E 0%, #1C1C1E 100%)' 
+              : selectedPhone === 'pixel'
+              ? 'linear-gradient(135deg, #202124 0%, #131314 100%)'
+              : 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)'
           }}
         >
+          {/* Volume & Power buttons (iPhone) */}
+          {selectedPhone === 'iphone' && (
+            <>
+              <div className="absolute left-0 top-16 w-1 h-8 bg-gradient-to-b from-gray-600 to-gray-800 rounded-r" />
+              <div className="absolute left-0 top-28 w-1 h-6 bg-gradient-to-b from-gray-600 to-gray-800 rounded-r" />
+              <div className="absolute left-0 top-36 w-1 h-6 bg-gradient-to-b from-gray-600 to-gray-800 rounded-r" />
+              <div className="absolute right-0 top-20 w-1 h-12 bg-gradient-to-b from-gray-600 to-gray-800 rounded-l" />
+            </>
+          )}
+
+          {/* Camera bump (Android) */}
+          {selectedPhone !== 'iphone' && (
+            <div className="absolute top-2 right-4 w-8 h-8 bg-black/20 rounded-xl" />
+          )}
           {/* Phone Screen */}
           <div 
-            className="relative w-full h-full overflow-hidden"
+            className="relative overflow-hidden m-2"
             style={{
-              borderRadius: `calc(${phoneConfig.borderRadius} - 8px)`,
+              width: `${phoneConfig.width}px`,
+              height: `${phoneConfig.height}px`,
+              borderRadius: `calc(${phoneConfig.borderRadius} - 12px)`,
               background: typeof networkConfig.backgroundColor === 'string' && networkConfig.backgroundColor.startsWith('linear-gradient') 
                 ? networkConfig.backgroundColor 
                 : networkConfig.backgroundColor
@@ -330,6 +431,14 @@ export function PhoneMockupPreview({
                 </div>
               )}
             </div>
+
+            {/* Home Indicator (iPhone) */}
+            {phoneConfig.homeIndicator && (
+              <div 
+                className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-white/30 rounded-full"
+                style={{ width: '134px', height: '5px' }}
+              />
+            )}
           </div>
         </div>
       </div>
