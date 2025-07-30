@@ -2,11 +2,12 @@ export interface Effect {
   id: string;
   name: string;
   description: string;
+  scriptUrl?: string;
   script?: string;
   path: string;
-  type?: 'animation' | 'transition' | 'special';
-  scriptUrl?: string;
-  category?: 'text' | 'image' | 'both';
+  category: 'text' | 'image' | 'both';
+  type: 'animation' | 'transition' | 'special';
+  tags?: string[];
 }
 
 export interface EffectConfig {

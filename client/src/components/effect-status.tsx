@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { loadEffectsFromGitHub, testGitHubConnection } from '@/lib/github-api';
+import { getLocalEffectsStats } from '@/lib/local-effects-loader';
 import type { Effect } from '@/types/effects';
 
 interface EffectStatusProps {
@@ -33,14 +33,14 @@ export function EffectStatus({ effects, isLoading, onRefresh }: EffectStatusProp
     setStatus(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const isConnected = await testGitHubConnection();
+      const { isConnected, effectsCount, lastCheck, error } = await getLocalEffectsStats();
 
       setStatus({
         isConnected,
         effectsCount: effects.length,
-        lastCheck: new Date(),
+        lastCheck: lastCheck,
         isLoading: false,
-        error: null
+        error: error
       });
     } catch (error) {
       setStatus(prev => ({
@@ -88,7 +88,7 @@ export function EffectStatus({ effects, isLoading, onRefresh }: EffectStatusProp
       <CardContent>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-400">Connexion GitHub</span>
+            <span className="text-sm text-slate-400">Système Local</span>
             <Badge
               variant={status.isConnected ? "default" : "destructive"}
               className={`text-xs ${
@@ -130,13 +130,13 @@ export function EffectStatus({ effects, isLoading, onRefresh }: EffectStatusProp
 
           {isLoading && (
             <div className="p-2 bg-blue-500/10 border border-blue-500/20 rounded text-xs text-blue-400">
-              Chargement des effets depuis GitHub...
+              Chargement des effets depuis le système local...
             </div>
           )}
 
           {!isLoading && status.effectsCount === 0 && (
             <div className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-xs text-yellow-400">
-              Aucun effet trouvé. Vérifiez la connexion GitHub.
+              Aucun effet trouvé. Vérifiez le système local.
             </div>
           )}
         </div>

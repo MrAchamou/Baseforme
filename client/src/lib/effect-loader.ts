@@ -1,5 +1,6 @@
 import type { Effect } from '@/types/effects';
 import { localEffectsLoader } from './local-effects-loader';
+import { loadEffectsFromLocal, loadEffectScript } from './local-effects-loader';
 
 interface AnimationContext {
   ctx: CanvasRenderingContext2D;
@@ -21,68 +22,40 @@ export class EffectLoader {
     this.canvas = canvas;
   }
 
-  async loadEffect(effect: Effect): Promise<void> {
+  async loadEffect(effect: Effect): Promise<boolean> {
     if (this.loadedEffects.has(effect.id)) {
-      console.log(`✅ Effect ${effect.name} already loaded`);
-      return;
+      console.log(`Effect ${effect.id} already loaded`);
+      return true;
     }
 
     try {
-      console.log(`🎬 Loading effect: ${effect.name} from ${effect.scriptUrl}`);
+      console.log(`Loading local effect: ${effect.name}`);
 
-      if (this.onProgress) this.onProgress(20);
+      // Charge le script depuis le système local
+      let scriptContent: string;
 
-      // Fetch the effect script
-      const response = await fetch(effect.scriptUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch effect script: ${response.statusText}`);
+      if (effect.scriptUrl) {
+        scriptContent = await loadEffectScript(effect.scriptUrl);
+      } else if (effect.script) {
+        // Utilise le script intégré pour les effets de démonstration
+        scriptContent = effect.script;
+      } else {
+        throw new Error('No script available for this effect');
       }
 
-      if (this.onProgress) this.onProgress(50);
+      // Enregistre l'effet comme chargé
+      this.loadedEffects.set(effect.id, {
+        effect,
+        script: scriptContent,
+        loadedAt: new Date()
+      });
 
-      const scriptCode = await response.text();
-      console.log(`📜 Script loaded for ${effect.name}, length: ${scriptCode.length} chars`);
-
-      if (this.onProgress) this.onProgress(80);
-
-      // Create a function from the script
-      const effectFunction = new Function('context', `
-        ${scriptCode}
-
-        // If there's an animate function defined, return it
-        if (typeof animate === 'function') {
-          return animate;
-        }
-
-        // Otherwise create a basic animation wrapper
-        return function() {
-          if (typeof init === 'function') {
-            init(context);
-          }
-
-          let frame = 0;
-          function animLoop() {
-            if (typeof update === 'function') {
-              update(context, frame);
-            } else if (typeof render === 'function') {
-              render(context, frame);
-            }
-            frame++;
-            context.animationFrame = requestAnimationFrame(animLoop);
-          }
-          animLoop();
-        };
-      `);
-
-      this.loadedEffects.set(effect.id, effectFunction);
-
-      if (this.onProgress) this.onProgress(100);
-
-      console.log(`✅ Successfully loaded and compiled effect: ${effect.name}`);
+      console.log(`✅ Local effect ${effect.name} loaded successfully`);
+      return true;
 
     } catch (error) {
-      console.error(`❌ Failed to load effect ${effect.name}:`, error);
-      throw error;
+      console.error(`❌ Failed to load local effect ${effect.name}:`, error);
+      return false;
     }
   }
 
