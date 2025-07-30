@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, SkipForward, RotateCcw, Download, Share2, Eye, Phone } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Download, Share2, Eye, Phone, MessageCircle } from "lucide-react";
 import { EffectLoader } from "@/lib/effect-loader";
 import { Effect } from "@/types/effects";
 import { ConstrainedEffect, createConstrainedEffect, DEFAULT_TEMPLATE_LAYOUT, TemplateLayout } from "@/lib/effect-constraints";
@@ -166,7 +165,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete, selec
       const loader = new EffectLoader();
       loader.setCanvas(canvasRef.current);
       setEffectLoader(loader);
-      
+
       // Initialiser le preview engine
       previewEngine.setCanvas(canvasRef.current);
       previewEngine.updateFormat(currentFormat, 'whatsapp');
@@ -222,7 +221,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete, selec
 
     const step = steps[stepIndex];
     const effect = effects.find(e => e.id === step.effectId);
-    
+
     if (!effect) {
       console.warn(`❌ Effet non trouvé: ${step.effectId}`);
       return;
@@ -272,11 +271,11 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete, selec
       // Mise à jour du progrès
       let progressValue = 0;
       const progressIncrement = 100 / (currentStepDuration / 100);
-      
+
       const progressTimer = setInterval(() => {
         progressValue += progressIncrement;
         setProgress((currentIndex / steps.length) * 100 + (progressValue / steps.length));
-        
+
         if (progressValue >= 100) {
           clearInterval(progressTimer);
         }
@@ -381,7 +380,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete, selec
                   </Button>
                 ))}
               </div>
-              
+
               {/* Indicateur d'usage */}
               <div className="text-xs text-slate-400 bg-slate-800/50 p-2 rounded">
                 💡 <strong>{currentFormat}</strong> : 
@@ -441,11 +440,11 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete, selec
                     </>
                   )}
                 </Button>
-                
+
                 <Button onClick={skipToNext} variant="outline" disabled={!isPlaying}>
                   <SkipForward className="w-4 h-4" />
                 </Button>
-                
+
                 <Button onClick={resetScenario} variant="outline">
                   <RotateCcw className="w-4 h-4" />
                 </Button>
@@ -499,16 +498,62 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete, selec
               </p>
             </CardHeader>
             <CardContent>
-              <PhoneMockupPreview
-                canvasRef={canvasRef}
-                mainText={mainText}
-                secondaryText={secondaryText}
-                logoPreview={logoPreview}
-                telephone={businessData.telephone}
-                boutique={businessData.boutique}
-                selectedFormat={currentFormat}
-                onWhatsAppContact={handleWhatsAppContact}
+              {/* Canvas Container - Ajusté au format */}
+            <div 
+              id="effect-container" 
+              className="relative w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800"
+            >
+              <canvas
+                ref={canvasRef}
+                className="w-full h-full object-contain"
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  filter: selectedNetwork === 'instagram' ? 'saturate(1.2) contrast(1.1)' :
+                          selectedNetwork === 'tiktok' ? 'contrast(1.3) brightness(0.9)' :
+                          'none'
+                }}
               />
+
+              {/* Status overlay */}
+              {currentStep && (
+                <div className="absolute top-4 left-4 right-4 z-10">
+                  <div className="bg-black/60 backdrop-blur-md p-3 rounded-lg border border-white/20">
+                    <div className="flex items-center justify-between">
+                      <div className="text-white text-sm font-medium">
+                        {currentStep.title}
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {currentStepIndex + 1}/{steps.length}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Business Info Overlay */}
+              {businessData.boutique && (
+                <div className="absolute bottom-4 left-4 right-4 z-10">
+                  <div className="bg-black/70 backdrop-blur-md p-4 rounded-xl border border-white/20">
+                    <div className="text-center text-white space-y-2">
+                      <h3 className="font-bold text-lg">{businessData.boutique}</h3>
+                      {businessData.activite && (
+                        <p className="text-sm opacity-90">{businessData.activite}</p>
+                      )}
+                      {businessData.telephone && (
+                        <Button
+                          onClick={handleWhatsAppContact}
+                          className="bg-green-500 hover:bg-green-600 text-white rounded-full px-4 py-2 text-sm"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          {businessData.telephone}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             </CardContent>
           </Card>
 
