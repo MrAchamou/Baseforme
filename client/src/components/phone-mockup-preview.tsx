@@ -172,9 +172,9 @@ export function PhoneMockupPreview({
             <span className="text-xs text-slate-400 font-medium">📱 Appareil:</span>
             <Tabs value={selectedPhone} onValueChange={(value) => setSelectedPhone(value as keyof typeof PHONE_FORMATS)}>
               <TabsList className="bg-slate-800 h-8">
-                <TabsTrigger value="iphone" className="text-xs px-3">🍎 iPhone</TabsTrigger>
-                <TabsTrigger value="android" className="text-xs px-3">🤖 Samsung</TabsTrigger>
-                <TabsTrigger value="pixel" className="text-xs px-3">📱 Pixel</TabsTrigger>
+                <TabsTrigger value="iphone" className="text-xs px-3" title="iPhone">🍎</TabsTrigger>
+                <TabsTrigger value="android" className="text-xs px-3" title="Samsung">🤖</TabsTrigger>
+                <TabsTrigger value="pixel" className="text-xs px-3" title="Pixel">🔍</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -184,26 +184,23 @@ export function PhoneMockupPreview({
             <span className="text-xs text-slate-400 font-medium">🌐 Plateforme:</span>
             <Tabs value={selectedNetwork} onValueChange={(value) => setSelectedNetwork(value as keyof typeof NETWORK_SIMULATIONS)}>
               <TabsList className="bg-slate-800 h-8">
-                <TabsTrigger value="whatsapp" className="text-xs px-2">
-                  <MessageCircle className="w-3 h-3 mr-1" />
-                  WhatsApp
+                <TabsTrigger value="whatsapp" className="text-xs px-2" title="WhatsApp">
+                  <MessageCircle className="w-4 h-4 text-green-500" />
                 </TabsTrigger>
-                <TabsTrigger value="instagram" className="text-xs px-2">
-                  <Instagram className="w-3 h-3 mr-1" />
-                  Instagram
+                <TabsTrigger value="instagram" className="text-xs px-2" title="Instagram">
+                  <Instagram className="w-4 h-4 text-pink-500" />
                 </TabsTrigger>
-                <TabsTrigger value="tiktok" className="text-xs px-2">
-                  <Smartphone className="w-3 h-3 mr-1" />
-                  TikTok
+                <TabsTrigger value="tiktok" className="text-xs px-2" title="TikTok">
+                  🎵
                 </TabsTrigger>
-                <TabsTrigger value="facebook" className="text-xs px-2">
-                  📘 Facebook
+                <TabsTrigger value="facebook" className="text-xs px-2" title="Facebook">
+                  📘
                 </TabsTrigger>
-                <TabsTrigger value="youtube" className="text-xs px-2">
-                  📺 YouTube
+                <TabsTrigger value="youtube" className="text-xs px-2" title="YouTube">
+                  📺
                 </TabsTrigger>
-                <TabsTrigger value="linkedin" className="text-xs px-2">
-                  💼 LinkedIn
+                <TabsTrigger value="linkedin" className="text-xs px-2" title="LinkedIn">
+                  💼
                 </TabsTrigger>
               </TabsList>
             </Tabs>
