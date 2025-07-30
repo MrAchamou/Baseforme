@@ -270,44 +270,119 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                       <SelectValue placeholder="Choisir un effet..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* Effets recommandés en premier */}
-                      {(selectedType === 'PREMIUM' ? imageEffects : textEffects).slice(0, 5).map(effect => (
-                        <SelectItem key={effect.id} value={effect.id}>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg">
-                              {effect.name.includes('FIRE') ? '🔥' : 
-                               effect.name.includes('ELECTRIC') ? '⚡' : 
-                               effect.name.includes('CRYSTAL') ? '💎' : 
-                               effect.name.includes('PLASMA') ? '🌀' : 
-                               effect.name.includes('TYPE') ? '⌨️' : 
-                               effect.name.includes('GLOW') ? '✨' : '🎭'}
-                            </span>
-                            <span>{effect.name}</span>
-                            <span className="text-xs text-muted-foreground">⭐</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {(() => {
+                        // Détermine le type d'élément pour filtrer les effets
+                        const isImageElement = ['boutique', 'offre', 'signature', 'logo'].includes(element.id);
+                        const isTextElement = !isImageElement;
+                        
+                        // Filtre les effets selon le type d'élément
+                        let availableEffects: Effect[] = [];
+                        
+                        if (isImageElement) {
+                          // Pour les éléments image/logo : effets image ou both
+                          availableEffects = effects.filter(e => 
+                            e.category === 'image' || e.category === 'both'
+                          );
+                        } else if (isTextElement) {
+                          // Pour les éléments texte : effets text ou both  
+                          availableEffects = effects.filter(e => 
+                            e.category === 'text' || e.category === 'both'
+                          );
+                        }
 
-                      <Separator className="my-2" />
+                        // Tri par recommandation (effets spéciaux d'abord)
+                        const recommendedEffects = availableEffects.filter(e => 
+                          e.name.includes('FIRE') || e.name.includes('ELECTRIC') || 
+                          e.name.includes('CRYSTAL') || e.name.includes('PLASMA') ||
+                          e.name.includes('GLOW') || e.name.includes('SPARKLE') ||
+                          e.name.includes('TYPEWRITER') || e.name.includes('WAVE')
+                        ).slice(0, 5);
 
-                      {/* Tous les autres effets */}
-                      {effects.filter(e => !((selectedType === 'PREMIUM' ? imageEffects : textEffects).slice(0, 5).some(re => re.id === e.id))).map(effect => (
-                        <SelectItem key={effect.id} value={effect.id}>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg">
-                              {effect.name.includes('FIRE') ? '🔥' : 
-                               effect.name.includes('ELECTRIC') ? '⚡' : 
-                               effect.name.includes('CRYSTAL') ? '💎' : 
-                               effect.name.includes('PLASMA') ? '🌀' : 
-                               effect.name.includes('TYPE') ? '⌨️' : 
-                               effect.name.includes('GLOW') ? '✨' : '🎭'}
-                            </span>
-                            <span>{effect.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                        const otherEffects = availableEffects.filter(e => 
+                          !recommendedEffects.some(re => re.id === e.id)
+                        );
+
+                        return (
+                          <>
+                            {/* Effets recommandés */}
+                            {recommendedEffects.length > 0 && (
+                              <>
+                                {recommendedEffects.map(effect => (
+                                  <SelectItem key={effect.id} value={effect.id}>
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-lg">
+                                        {effect.name.includes('FIRE') ? '🔥' : 
+                                         effect.name.includes('ELECTRIC') ? '⚡' : 
+                                         effect.name.includes('CRYSTAL') ? '💎' : 
+                                         effect.name.includes('PLASMA') ? '🌀' : 
+                                         effect.name.includes('TYPE') ? '⌨️' : 
+                                         effect.name.includes('GLOW') ? '✨' : 
+                                         effect.name.includes('SPARKLE') ? '✨' : 
+                                         effect.name.includes('WAVE') ? '🌊' : '🎭'}
+                                      </span>
+                                      <span>{effect.name}</span>
+                                      <span className="text-xs text-muted-foreground">⭐</span>
+                                      <span className="text-xs px-1 py-0.5 rounded bg-blue-100 text-blue-800">
+                                        {effect.category === 'text' ? 'T' : 
+                                         effect.category === 'image' ? 'I' : 'T+I'}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                                
+                                {otherEffects.length > 0 && <Separator className="my-2" />}
+                              </>
+                            )}
+
+                            {/* Tous les autres effets */}
+                            {otherEffects.map(effect => (
+                              <SelectItem key={effect.id} value={effect.id}>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-lg">
+                                    {effect.name.includes('FIRE') ? '🔥' : 
+                                     effect.name.includes('ELECTRIC') ? '⚡' : 
+                                     effect.name.includes('CRYSTAL') ? '💎' : 
+                                     effect.name.includes('PLASMA') ? '🌀' : 
+                                     effect.name.includes('TYPE') ? '⌨️' : 
+                                     effect.name.includes('GLOW') ? '✨' : 
+                                     effect.name.includes('WAVE') ? '🌊' : '🎭'}
+                                  </span>
+                                  <span>{effect.name}</span>
+                                  <span className="text-xs px-1 py-0.5 rounded bg-gray-100 text-gray-800">
+                                    {effect.category === 'text' ? 'T' : 
+                                     effect.category === 'image' ? 'I' : 'T+I'}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+
+                            {availableEffects.length === 0 && (
+                              <SelectItem value="" disabled>
+                                <span className="text-muted-foreground">
+                                  Aucun effet compatible disponible
+                                </span>
+                              </SelectItem>
+                            )}
+                          </>
+                        );
+                      })()}
                     </SelectContent>
                   </Select>
+                  
+                  {/* Indicateur du type d'élément */}
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {['boutique', 'offre', 'signature', 'logo'].includes(element.id) ? (
+                      <span className="flex items-center gap-1">
+                        <span>📷</span>
+                        <span>Élément image - Effets image et universels disponibles</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <span>📝</span>
+                        <span>Élément texte - Effets texte et universels disponibles</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

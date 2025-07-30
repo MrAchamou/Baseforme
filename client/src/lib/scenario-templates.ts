@@ -1,5 +1,15 @@
-
 import { ScenarioTemplate, ScenarioType } from '@/types/effects';
+
+export interface ScenarioElement {
+  id: string;
+  label: string;
+  text: string;
+  effectId: string;
+  duration: number;
+  emoji?: string;
+  required?: boolean;
+  type?: 'text' | 'image' | 'both'; // Type d'élément pour le filtrage
+}
 
 export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
   BASIC: {
@@ -15,7 +25,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '👋',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'boutique',
@@ -24,7 +35,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3000,
         emoji: '🏪',
-        required: true
+        required: true,
+        type: 'both'
       },
       {
         id: 'activite',
@@ -33,7 +45,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2500,
         emoji: '💼',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'slogan',
@@ -42,7 +55,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3000,
         emoji: '✨',
-        required: false
+        required: false,
+        type: 'text'
       },
       {
         id: 'contact',
@@ -51,7 +65,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '📞',
-        required: true
+        required: true,
+        type: 'text'
       }
     ]
   },
@@ -69,7 +84,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2500,
         emoji: '🔥',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'offre',
@@ -78,7 +94,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 4000,
         emoji: '🎉',
-        required: true
+        required: true,
+        type: 'both'
       },
       {
         id: 'boutique',
@@ -87,7 +104,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '🏪',
-        required: true
+        required: true,
+        type: 'both'
       },
       {
         id: 'duree',
@@ -96,7 +114,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2500,
         emoji: '⏳',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'action',
@@ -105,7 +124,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3000,
         emoji: '📲',
-        required: true
+        required: true,
+        type: 'text'
       }
     ]
   },
@@ -123,7 +143,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3500,
         emoji: '✨',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'boutique',
@@ -132,7 +153,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3000,
         emoji: '💎',
-        required: true
+        required: true,
+        type: 'both'
       },
       {
         id: 'mission',
@@ -141,7 +163,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 4000,
         emoji: '🌟',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'signature',
@@ -150,7 +173,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2500,
         emoji: '👑',
-        required: false
+        required: false,
+        type: 'text'
       },
       {
         id: 'contact',
@@ -159,7 +183,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '📧',
-        required: true
+        required: true,
+        type: 'text'
       }
     ]
   },
@@ -177,7 +202,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '⚡',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'offre',
@@ -186,7 +212,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3000,
         emoji: '🔥',
-        required: true
+        required: true,
+        type: 'both'
       },
       {
         id: 'timer',
@@ -195,7 +222,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2500,
         emoji: '⏳',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'action',
@@ -204,7 +232,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '🎯',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'contact',
@@ -213,7 +242,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 1500,
         emoji: '📲',
-        required: true
+        required: true,
+        type: 'text'
       }
     ]
   },
@@ -231,7 +261,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3500,
         emoji: '📖',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'valeurs',
@@ -240,7 +271,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 4000,
         emoji: '❤️',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'evolution',
@@ -249,7 +281,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3500,
         emoji: '🌟',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'inspiration',
@@ -258,7 +291,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 4000,
         emoji: '🚀',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'contact',
@@ -267,7 +301,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '🔗',
-        required: true
+        required: true,
+        type: 'text'
       }
     ]
   },
@@ -285,7 +320,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3000,
         emoji: '👑',
-        required: true
+        required: true,
+        type: 'text'
       },
       {
         id: 'avantage',
@@ -294,7 +330,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 4000,
         emoji: '🎁',
-        required: true
+        required: true,
+        type: 'both'
       },
       {
         id: 'boutique',
@@ -303,7 +340,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2500,
         emoji: '💎',
-        required: true
+        required: true,
+        type: 'both'
       },
       {
         id: 'prive',
@@ -312,7 +350,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 3000,
         emoji: '🔐',
-        required: false
+        required: false,
+        type: 'text'
       },
       {
         id: 'contact',
@@ -321,7 +360,8 @@ export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
         effectId: '',
         duration: 2000,
         emoji: '📧',
-        required: true
+        required: true,
+        type: 'text'
       }
     ]
   }
