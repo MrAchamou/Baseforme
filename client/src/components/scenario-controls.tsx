@@ -26,6 +26,8 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
 
   const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
+  // Vérification de sécurité pour SCENARIO_TEMPLATES
+  const safeTemplates = Array.isArray(SCENARIO_TEMPLATES) ? SCENARIO_TEMPLATES : [];
   const currentTemplate = getScenarioTemplate(selectedType);
 
   const handleTypeChange = (type: ScenarioType) => {
@@ -142,7 +144,7 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
         <CardContent>
           
 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {SCENARIO_TEMPLATES.map((scenario) => (
+        {safeTemplates.map((scenario) => (
           <Button
             key={scenario.id}
            

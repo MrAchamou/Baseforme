@@ -37,15 +37,6 @@ export interface EffectStats {
   avgLoadTime: string;
 }
 
-export interface ScenarioElement {
-  id: string;
-  type: 'text' | 'effect' | 'transition';
-  content?: string;
-  effectId?: string;
-  duration?: number;
-  delay?: number;
-}
-
 export interface Scenario {
   id: string;
   title: string;
@@ -66,6 +57,9 @@ export interface ScenarioElement {
   duration: number;
   emoji?: string;
   required?: boolean;
+  type?: 'text' | 'effect' | 'transition';
+  content?: string;
+  delay?: number;
 }
 
 export interface ScenarioTemplate {
