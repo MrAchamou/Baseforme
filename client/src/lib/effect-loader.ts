@@ -1,5 +1,5 @@
 import type { Effect } from '@/types/effects';
-import { loadEffectsFromLocal, loadEffectScript } from './local-effects-loader';
+import { loadEffectsFromLocal, loadEffectScript, getLocalEffectsStats } from './local-effects-loader';
 import { validateJSfileEffect, logEffectSources } from './effect-validator';
 
 interface AnimationContext {
@@ -11,15 +11,43 @@ interface AnimationContext {
   image?: HTMLImageElement;
 }
 
+interface LoadedEffect {
+  effect: Effect;
+  script: string;
+  loadedAt: Date;
+  source: string;
+}
+
 export class EffectLoader {
   private canvas: HTMLCanvasElement | null = null;
-  private loadedEffects: Map<string, Function> = new Map();
-  private animationFrame: number | null = null;
+  private loadedEffects: Map<string, LoadedEffect> = new Map();
+  private animationFrame: number | null = null;  
   private currentContext: AnimationContext | null = null;
   public onProgress: ((progress: number) => void) | null = null;
 
   setCanvas(canvas: HTMLCanvasElement): void {
     this.canvas = canvas;
+  }
+
+  async loadAllEffects(): Promise<Effect[]> {
+    try {
+      console.log('📂 Loading all JSfile effects...');
+      const effects = await loadEffectsFromLocal();
+      
+      // Log des sources pour vérification
+      logEffectSources(effects);
+      
+      console.log(`✅ Loaded ${effects.length} JSfile effects`);
+      return effects;
+      
+    } catch (error) {
+      console.error('❌ Failed to load JSfile effects:', error);
+      return [];
+    }
+  }
+
+  getStats() {
+    return getLocalEffectsStats();
   }
 
   async loadEffect(effect: Effect): Promise<boolean> {
