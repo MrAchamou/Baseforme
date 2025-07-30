@@ -17,19 +17,23 @@ interface LoadedEffect {
 interface AnimationContext {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
-  element?: HTMLElement;
+  element: HTMLElement;
   startTime: number;
   duration: number;
   parameters: any;
 }
 
 function logEffectSources(effects: Effect[]) {
-  const sources = effects.reduce((acc, effect) => {
-    acc[effect.source] = (acc[effect.source] || 0) + 1;
+  console.log('📊 Effect sources:');
+  const sourceGroups = effects.reduce((acc, effect) => {
+    const source = effect.isLocal ? 'Local Effect Directory' : 'External';
+    acc[source] = (acc[source] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  console.log('📊 Effect sources:', sources);
+  Object.entries(sourceGroups).forEach(([source, count]) => {
+    console.log(`   ${source}: ${count} effects`);
+  });
 }
 
 class EffectLoader {
@@ -70,35 +74,19 @@ class EffectLoader {
     }
 
     try {
-      console.log(`🔄 Loading local effect: ${effect.name} from ${effect.scriptUrl}`);
+      console.log(`🔄 Loading local effect: ${effect.name}`);
 
       if (!validateLocalEffect(effect)) {
         throw new Error(`Effect validation failed: ${effect.name} does not meet local requirements`);
       }
 
-      if (!effect.scriptUrl || !effect.scriptUrl.startsWith('/src/effects/')) {
-        throw new Error(`Security validation failed: Effect must come from local effects directory. Effect: ${effect.name}, URL: ${effect.scriptUrl}`);
-      }
-
-      const script = await loadEffectScript(effect.scriptUrl);
-
-      // Essayer de charger le module
-      let module = null;
-      try {
-        const blob = new Blob([script], { type: 'application/javascript' });
-        const url = URL.createObjectURL(blob);
-        module = await import(url);
-        URL.revokeObjectURL(url);
-      } catch (moduleError) {
-        console.warn(`⚠️ Could not load as module: ${effect.name}`, moduleError);
-      }
-
+      // Pour les effets locaux, on utilise directement la fonction execute
       const loadedEffect: LoadedEffect = {
         effect,
-        script,
+        script: effect.scriptContent || '',
         loadedAt: new Date(),
         source: 'local',
-        module
+        module: null
       };
 
       this.loadedEffects.set(effect.id, loadedEffect);
@@ -128,63 +116,17 @@ class EffectLoader {
         return false;
       }
 
-      const context = this.canvas.getContext('2d');
-      if (!context) {
-        console.error('Could not get canvas context');
+      // Utiliser directement la fonction execute de l'effet
+      if (loadedEffect.effect.execute) {
+        await loadedEffect.effect.execute(this.canvas, parameters.text || '', parameters);
+        return true;
+      } else {
+        console.error('Effect has no execute function');
         return false;
       }
 
-      // Créer le contexte d'animation
-      const animationContext: AnimationContext = {
-        canvas: this.canvas,
-        context,
-        element,
-        startTime: Date.now(),
-        duration: parameters.duration || 3000,
-        parameters
-      };
-
-      this.currentContext = animationContext;
-
-      // Si on a un module, essayer d'utiliser la fonction d'effet
-      if (loadedEffect.module) {
-        const effectConfig = loadedEffect.module.default || loadedEffect.module[Object.keys(loadedEffect.module)[0]];
-
-        if (effectConfig && typeof effectConfig.engine === 'function') {
-          console.log(`🚀 Running effect engine for: ${loadedEffect.effect.name}`);
-          return await this.runEffectEngine(effectConfig.engine, animationContext);
-        }
-      }
-
-      // Fallback: essayer d'exécuter le script directement
-      console.log(`⚡ Running script directly for: ${loadedEffect.effect.name}`);
-      return await this.runEffectScript(loadedEffect.script, animationContext);
-
     } catch (error) {
       console.error(`❌ Effect execution failed for ${effectId}:`, error);
-      return false;
-    }
-  }
-
-  private async runEffectEngine(engineFunction: Function, context: AnimationContext): Promise<boolean> {
-    try {
-      // Appeler la fonction d'effet avec le contexte
-      await engineFunction(context);
-      return true;
-    } catch (error) {
-      console.error('Effect engine execution failed:', error);
-      return false;
-    }
-  }
-
-  private async runEffectScript(script: string, context: AnimationContext): Promise<boolean> {
-    try {
-      // Créer un environnement sécurisé pour l'exécution du script
-      const scriptFunction = new Function('context', 'canvas', 'ctx', script);
-      await scriptFunction(context, context.canvas, context.context);
-      return true;
-    } catch (error) {
-      console.error('Script execution failed:', error);
       return false;
     }
   }
@@ -214,4 +156,4 @@ class EffectLoader {
 }
 
 export const effectLoader = new EffectLoader();
-export { EffectLoader, LoadedEffect, AnimationContext };
+export { EffectLoader, type LoadedEffect, type AnimationContext };

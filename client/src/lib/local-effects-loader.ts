@@ -302,6 +302,19 @@ function runFallbackAnimation(ctx: CanvasRenderingContext2D, text: string, optio
   animate();
 }
 
+export async function loadEffectScript(scriptUrl: string): Promise<string> {
+  try {
+    const response = await fetch(scriptUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return await response.text();
+  } catch (error) {
+    console.error(`Erreur lors du chargement du script ${scriptUrl}:`, error);
+    throw error;
+  }
+}
+
 export function validateLocalEffect(effect: Effect): boolean {
   return !!(effect && effect.id && effect.name && effect.execute);
 }
