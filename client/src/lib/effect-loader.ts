@@ -429,3 +429,6 @@ class EffectLoader {
 }
 
 export default EffectLoader;
+
+// Export singleton instance for convenience
+export const effectLoader = new EffectLoader();
