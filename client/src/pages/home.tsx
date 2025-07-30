@@ -16,16 +16,23 @@ import type { Effect, EffectStats } from '@/types/effects';
 import { testEffectLoading, logEffectStructure } from '../lib/effect-diagnostics';
 
 export default function Home() {
+  const [text, setText] = useState('');
+  const [selectedEffect, setSelectedEffect] = useState<Effect | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState<string>('16:9');
+  const [canExport, setCanExport] = useState(false);
   const [activeScenario, setActiveScenario] = useState<any>(null);
+  const [businessData, setBusinessData] = useState({
+    boutique: '',
+    telephone: '',
+    secondaryText: ''
+  });
+  const [selectedFormat, setSelectedFormat] = useState<string>('16:9');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stats, setStats] = useState<EffectStats>({
     effectsLoaded: 0,
     animationsPlayed: 0,
     avgLoadTime: '0s'
   });
-  const [canExport, setCanExport] = useState(false);
   const [currentTab, setCurrentTab] = useState<string>('scenario');
   const [githubStatus, setGithubStatus] = useState<'checking' | 'connected' | 'error'>('checking');
 
@@ -378,6 +385,10 @@ export default function Home() {
                           effects={effects}
                           onScenarioPlay={handleScenarioPlay}
                           isPlaying={isPlaying}
+                          onTextChange={(newText) => {
+                            setText(newText);
+                            setBusinessData(prev => ({ ...prev, boutique: newText }));
+                          }}
                         />
 
                         {activeScenario && (

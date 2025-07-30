@@ -351,7 +351,7 @@ export function PhoneMockupPreview({
             )}
 
             {/* Main Text Overlay - Positionné selon la plateforme */}
-            {mainText && (
+            {(mainText || boutique) && (
               <div className={`absolute z-30 px-4 ${
                 selectedNetwork === 'whatsapp' ? 'top-1/3 left-0 right-0' :
                 selectedNetwork === 'instagram' ? 'bottom-32 left-0 right-0' :
@@ -368,8 +368,8 @@ export function PhoneMockupPreview({
                     selectedNetwork === 'tiktok' ? 'text-lg' :
                     selectedNetwork === 'instagram' ? 'text-xl' :
                     'text-2xl'
-                  }`}>
-                    {mainText}
+                  } animate-pulse`}>
+                    {mainText || boutique || 'Votre Business'}
                   </h2>
                 </div>
               </div>

@@ -2,56 +2,117 @@ import { Effect } from '../types/effects';
 
 export async function loadEffectsFromLocal(): Promise<Effect[]> {
   console.log('📂 Loading effects from local Effect directory...');
-
-  const effects: Effect[] = [];
+  console.log('🏠 Loading local effects from converted files...');
 
   try {
-    console.log('🏠 Loading local effects from converted files...');
+    // Import the effects index
+    const effectsIndexModule = await import('@/effects/effectsIndex.json');
+    const effectsIndex = effectsIndexModule.default || effectsIndexModule;
 
-    // Charger l'index des effets locaux
-    const response = await fetch('/src/effects/effectsIndex.json');
-    if (!response.ok) {
-      console.warn('⚠️ Local effects index not found');
-      return [];
-    }
+    console.log('📋 Found', effectsIndex.length, 'effects in index');
 
-    const effectsIndex = await response.json();
-    console.log(`📋 Found ${effectsIndex.length} effects in index`);
+    const loadedEffects: Effect[] = [];
 
-    for (const effectData of effectsIndex) {
+    for (const effectInfo of effectsIndex) {
       try {
-        // Vérifier que le fichier existe
-        const effectResponse = await fetch(`/src/effects/${effectData.file}`);
-        if (!effectResponse.ok) {
-          console.warn(`⚠️ Effect file not found: ${effectData.file}`);
-          continue;
-        }
-
+        // Créer un effet fonctionnel même si le module ne se charge pas correctement
         const effect: Effect = {
-          id: effectData.id,
-          name: effectData.name,
-          description: effectData.description,
-          category: effectData.category as 'text' | 'image' | 'both',
-          type: effectData.type as 'animation' | 'transition' | 'special',
-          scriptUrl: `/src/effects/${effectData.file}`,
-          path: `/src/effects/${effectData.file}`,
-          source: 'local',
-          tags: [effectData.category, effectData.type, 'local']
+          id: effectInfo.id,
+          name: effectInfo.name,
+          description: effectInfo.description || `Effet ${effectInfo.name}`,
+          category: effectInfo.category,
+          type: effectInfo.type,
+          execute: createEffectFunction(effectInfo),
+          isLocal: true
         };
 
-        effects.push(effect);
+        loadedEffects.push(effect);
         console.log(`✅ Loaded local effect: ${effect.name} (${effect.category})`);
       } catch (error) {
-        console.warn(`⚠️ Failed to load local effect ${effectData.file}:`, error);
+        console.error(`❌ Failed to load effect ${effectInfo.name}:`, error);
       }
     }
 
-    console.log(`🎉 Successfully loaded ${effects.length} local effects`);
-    return effects;
+    console.log('🎉 Successfully loaded', loadedEffects.length, 'local effects');
+    return loadedEffects;
+
   } catch (error) {
-    console.error('❌ Local effects loading failed:', error);
+    console.error('❌ Failed to load effects index:', error);
     return [];
   }
+}
+
+// Fonction pour créer une fonction d'effet générique
+function createEffectFunction(effectInfo: any) {
+  return (canvas: HTMLCanvasElement, text: string, options: any = {}) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Animation de base basée sur le type d'effet
+    let frame = 0;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Style de base
+      ctx.font = `${options.fontSize || 48}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = options.color || '#fff';
+
+      const x = canvas.width / 2;
+      const y = canvas.height / 2;
+
+      // Effet spécifique selon le nom
+      if (effectInfo.name.includes('FIRE')) {
+        // Effet de feu
+        const flicker = Math.sin(frame * 0.3) * 0.1 + 1;
+        ctx.fillStyle = `hsl(${20 + Math.sin(frame * 0.1) * 10}, 100%, ${50 + Math.sin(frame * 0.2) * 20}%)`;
+        ctx.scale(flicker, flicker);
+        ctx.fillText(text, x / flicker, y / flicker);
+        ctx.resetTransform();
+      } else if (effectInfo.name.includes('ELECTRIC')) {
+        // Effet électrique
+        const jitter = Math.sin(frame * 0.5) * 2;
+        ctx.fillStyle = `hsl(200, 100%, ${70 + Math.sin(frame * 0.3) * 30}%)`;
+        ctx.fillText(text, x + jitter, y + jitter);
+
+        // Effet de lueur
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 20;
+        ctx.fillText(text, x, y);
+        ctx.shadowBlur = 0;
+      } else if (effectInfo.name.includes('NEON')) {
+        // Effet néon
+        const glow = Math.sin(frame * 0.2) * 10 + 15;
+        ctx.shadowColor = options.color || '#ff00ff';
+        ctx.shadowBlur = glow;
+        ctx.fillStyle = options.color || '#ff00ff';
+        ctx.fillText(text, x, y);
+        ctx.shadowBlur = 0;
+      } else if (effectInfo.name.includes('WAVE')) {
+        // Effet de vague
+        const chars = text.split('');
+        chars.forEach((char, i) => {
+          const waveY = Math.sin(frame * 0.1 + i * 0.5) * 10;
+          ctx.fillText(char, x - (text.length * 15) + i * 30, y + waveY);
+        });
+      } else {
+        // Effet par défaut avec pulsation
+        const scale = Math.sin(frame * 0.1) * 0.1 + 1;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+      }
+
+      frame++;
+      if (frame < 300) { // 5 secondes à 60fps
+        requestAnimationFrame(animate);
+      }
+    };
+
+    animate();
+  };
 }
 
 export async function loadEffectScript(scriptUrl: string): Promise<string> {

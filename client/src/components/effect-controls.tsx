@@ -51,10 +51,18 @@ export function EffectControls({
     if (autoMode && text) {
       const detected = detectEffectFromKeywords(text);
       setDetectedEffect(detected);
+      
+      // Appliquer automatiquement l'effet détecté
+      if (detected) {
+        const effect = effects.find(e => e.id === detected);
+        if (effect) {
+          onEffectChange(effect);
+        }
+      }
     } else {
       setDetectedEffect(null);
     }
-  }, [text, autoMode]);
+  }, [text, autoMode, effects, onEffectChange]);
 
     useEffect(() => {
         if (selectedCategory === "all") {
@@ -87,7 +95,13 @@ export function EffectControls({
   const handleEffectSelectionChange = (value: string) => {
     if (value === 'auto') {
       setAutoMode(true);
-      onEffectChange(null);
+      // En mode auto, sélectionner un effet basé sur le texte
+      if (detectedEffect) {
+        const effect = effects.find(e => e.id === detectedEffect);
+        onEffectChange(effect || null);
+      } else {
+        onEffectChange(null);
+      }
     } else {
       setAutoMode(false);
       const effect = effects.find(e => e.id === value);
