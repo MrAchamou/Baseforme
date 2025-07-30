@@ -401,17 +401,24 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                             <SelectItem value="loading" disabled className="text-xs text-slate-500">
                               Chargement des effets...
                             </SelectItem>
-                          ) : effects.filter(e => e.category === 'image' || e.category === 'both').length === 0 ? (
-                            <SelectItem value="no-effects" disabled className="text-xs text-slate-500">
-                              Aucun effet image disponible
-                            </SelectItem>
-                          ) : (
-                            effects.filter(e => e.category === 'image' || e.category === 'both').map((effect) => (
+                          ) : (() => {
+                            const imageEffects = effects.filter(e => e.category === 'image' || e.category === 'both');
+                            console.log(`🖼️ Effets image disponibles: ${imageEffects.length}`, imageEffects.map(e => e.name));
+                            
+                            if (imageEffects.length === 0) {
+                              return (
+                                <SelectItem value="no-effects" disabled className="text-xs text-slate-500">
+                                  Aucun effet image disponible
+                                </SelectItem>
+                              );
+                            }
+                            
+                            return imageEffects.map((effect) => (
                               <SelectItem key={effect.id} value={effect.id} className="text-xs">
-                                {effect.name}
+                                {effect.name} ({effect.category})
                               </SelectItem>
-                            ))
-                          )}
+                            ));
+                          })()}
                         </SelectContent>
                       </Select>
                       <Button
@@ -460,17 +467,24 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                             <SelectItem value="loading" disabled className="text-xs text-slate-500">
                               Chargement des effets...
                             </SelectItem>
-                          ) : effects.filter(e => e.category === 'text' || e.category === 'both').length === 0 ? (
-                            <SelectItem value="no-effects" disabled className="text-xs text-slate-500">
-                              Aucun effet texte disponible
-                            </SelectItem>
-                          ) : (
-                            effects.filter(e => e.category === 'text' || e.category === 'both').map((effect) => (
+                          ) : (() => {
+                            const textEffects = effects.filter(e => e.category === 'text' || e.category === 'both');
+                            console.log(`📝 Effets texte disponibles: ${textEffects.length}`, textEffects.map(e => e.name));
+                            
+                            if (textEffects.length === 0) {
+                              return (
+                                <SelectItem value="no-effects" disabled className="text-xs text-slate-500">
+                                  Aucun effet texte disponible
+                                </SelectItem>
+                              );
+                            }
+                            
+                            return textEffects.map((effect) => (
                               <SelectItem key={effect.id} value={effect.id} className="text-xs">
-                                {effect.name}
+                                {effect.name} ({effect.category})
                               </SelectItem>
-                            ))
-                          )}
+                            ));
+                          })()}
                         </SelectContent>
                       </Select>
                     </div>

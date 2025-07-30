@@ -4,10 +4,13 @@ export interface Effect {
   description: string;
   scriptUrl?: string;
   script?: string;
-  path: string;
+  scriptContent?: string;
+  path?: string;
   category: 'text' | 'image' | 'both';
-  type: 'animation' | 'transition' | 'special';
+  type: string;
   tags?: string[];
+  isLocal?: boolean;
+  execute?: (canvas: HTMLCanvasElement, text: string, options?: any) => void;
 }
 
 export interface EffectConfig {

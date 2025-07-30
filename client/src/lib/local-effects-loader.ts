@@ -91,7 +91,7 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
           id: effectName.replace(/-/g, '_'),
           name: effectName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
           description: `Effet ${effectType === 'text' ? 'de texte' : 'd\'image'} ${effectName}`,
-          category: getEffectCategory(effectName),
+          category: getEffectCategory(fileName),
           type: effectType,
           execute: createEffectExecutor(scriptContent, effectName),
           isLocal: true,
@@ -115,15 +115,11 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
   }
 }
 
-function getEffectCategory(effectName: string): string {
-  if (effectName.includes('fire') || effectName.includes('burn')) return 'fire';
-  if (effectName.includes('electric') || effectName.includes('energy')) return 'electric';
-  if (effectName.includes('water') || effectName.includes('liquid')) return 'water';
-  if (effectName.includes('neon') || effectName.includes('glow')) return 'neon';
-  if (effectName.includes('particle') || effectName.includes('sparkle')) return 'particle';
-  if (effectName.includes('3d') || effectName.includes('morph')) return '3d';
-  if (effectName.includes('quantum') || effectName.includes('glitch')) return 'quantum';
-  return 'special';
+function getEffectCategory(fileName: string): 'text' | 'image' | 'both' {
+  // Déterminer la catégorie basée sur le nom du fichier
+  if (fileName.includes('-texte.js')) return 'text';
+  if (fileName.includes('-img.js')) return 'image';
+  return 'both'; // Par défaut, compatible avec les deux
 }
 
 function createEffectExecutor(scriptContent: string, effectName: string) {
