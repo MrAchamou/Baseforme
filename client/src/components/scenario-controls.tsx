@@ -141,32 +141,108 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
             🎬 Scénarios Officiels
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          
-<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {safeTemplates.map((scenario) => (
-          <Button
-            key={scenario.id}
-           
-            className={`transition-all duration-200 hover:shadow-lg min-h-[120px] flex flex-col items-start gap-2 h-auto p-4 `}
-            onClick={() => handleTypeChange(scenario.id)}
-          >
-            <div className="flex items-start space-x-4 flex-1 w-full">
-                <div className="text-3xl flex-shrink-0 mt-1">
-                  {scenario.emoji}
-                </div>
-                <div className="flex-1 min-w-0 space-y-2">
-                  <h3 className="font-semibold text-base text-left text-slate-700 leading-tight break-words">
-                    {scenario.name}
-                  </h3>
-                  <p className="text-sm text-left text-gray-500 leading-relaxed break-words line-clamp-3">
-                    {scenario.description}
-                  </p>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {/* Scénarios populaires */}
+            <div>
+              <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                <span>🔥</span>
+                Populaires & Recommandés
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {safeTemplates.slice(0, 4).map((scenario) => (
+                  <div
+                    key={scenario.id}
+                    onClick={() => handleTypeChange(scenario.id)}
+                    className={`group relative overflow-hidden rounded-xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl ${
+                      selectedType === scenario.id 
+                        ? 'border-purple-400 bg-gradient-to-br from-purple-500/10 to-blue-500/10 shadow-lg' 
+                        : 'border-slate-700/50 bg-slate-800/30 hover:border-slate-600 hover:bg-slate-800/50'
+                    }`}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all duration-300 ${
+                            selectedType === scenario.id 
+                              ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
+                              : 'bg-slate-700/50 group-hover:bg-slate-600/50'
+                          }`}>
+                            {scenario.emoji}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`font-semibold text-sm mb-1 transition-colors ${
+                            selectedType === scenario.id ? 'text-purple-300' : 'text-slate-200'
+                          }`}>
+                            {scenario.name}
+                          </h4>
+                          <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                            {scenario.description}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {selectedType === scenario.id && (
+                        <div className="absolute top-2 right-2">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Autres scénarios si plus de 4 */}
+            {safeTemplates.length > 4 && (
+              <div>
+                <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                  <span>📋</span>
+                  Autres Templates
+                </h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {safeTemplates.slice(4).map((scenario) => (
+                    <div
+                      key={scenario.id}
+                      onClick={() => handleTypeChange(scenario.id)}
+                      className={`group flex items-center p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
+                        selectedType === scenario.id 
+                          ? 'border-purple-400 bg-purple-500/10' 
+                          : 'border-slate-700/50 bg-slate-800/20 hover:border-slate-600 hover:bg-slate-800/40'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3 flex-1">
+                        <span className="text-lg">{scenario.emoji}</span>
+                        <div className="flex-1">
+                          <h4 className={`font-medium text-sm ${
+                            selectedType === scenario.id ? 'text-purple-300' : 'text-slate-200'
+                          }`}>
+                            {scenario.name}
+                          </h4>
+                        </div>
+                        {selectedType === scenario.id && (
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-          </Button>
-        ))}
-      </div>
+            )}
+
+            {/* Indicateur de sélection */}
+            {selectedType && (
+              <div className="mt-4 p-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                <div className="flex items-center space-x-2 text-sm">
+                  <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
+                  <span className="text-purple-300">
+                    Template sélectionné : <strong>{currentTemplate.name}</strong>
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
