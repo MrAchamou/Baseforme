@@ -1,5 +1,4 @@
 import type { Effect } from '@/types/effects';
-import { localEffectsLoader } from './local-effects-loader';
 import { loadEffectsFromLocal, loadEffectScript } from './local-effects-loader';
 
 interface AnimationContext {
@@ -75,11 +74,36 @@ export class EffectLoader {
       // Stop any existing animation
       this.stopAnimation();
 
-      // Use the local effects loader to execute the effect
-      await localEffectsLoader.executeEffect(effectId, this.canvas, text, {
-        ...options,
-        image: image
-      });
+      // Load and execute the effect
+      const loadedEffect = this.loadedEffects.get(effectId);
+      if (!loadedEffect) {
+        throw new Error(`Effect ${effectId} not loaded`);
+      }
+
+      const ctx = this.canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+
+      // Create animation context
+      this.currentContext = {
+        ctx,
+        canvas: this.canvas,
+        text,
+        animationFrame: 0,
+        startTime: Date.now(),
+        image
+      };
+
+      // Execute the effect script in a safe environment
+      try {
+        // Create a function from the script and execute it
+        const effectFunction = new Function('canvas', 'ctx', 'text', 'options', loadedEffect.script);
+        effectFunction(this.canvas, ctx, text, { ...options, image });
+      } catch (scriptError) {
+        console.error('Error executing effect script:', scriptError);
+        throw new Error(`Script execution failed: ${scriptError.message}`);
+      }
 
     } catch (error) {
       console.error(`Error executing effect ${effectId}:`, error);
