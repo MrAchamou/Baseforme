@@ -86,11 +86,21 @@ interface JSfileEffectModule {
 }
 
 export async function loadEffectsFromLocal(): Promise<Effect[]> {
-  console.log('📂 Loading effects from JSfile directory...');
+  console.log('📂 Loading effects from local and JSfile directories...');
 
   const effects: Effect[] = [];
   let successCount = 0;
   let errorCount = 0;
+
+  // D'abord charger les effets locaux (priorité)
+  try {
+    console.log('🏠 Loading local effects first...');
+    const localEffects = await loadLocalEffects();
+    effects.push(...localEffects);
+    console.log(`✅ Loaded ${localEffects.length} local effects`);
+  } catch (error) {
+    console.warn('⚠️ Failed to load local effects:', error);
+  }
 
   for (const filename of KNOWN_JSFILE_EFFECTS) {
     try {
@@ -130,6 +140,49 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
 
   console.log('🔒 All effects are verified to come from JSfile source');
   return effects;
+}
+
+async function loadLocalEffects(): Promise<Effect[]> {
+  try {
+    // Charger l'index des effets locaux
+    const response = await fetch('/src/effects/effectsIndex.json');
+    if (!response.ok) {
+      throw new Error('Local effects index not found');
+    }
+
+    const effectsIndex = await response.json();
+    const localEffects: Effect[] = [];
+
+    for (const effectData of effectsIndex) {
+      try {
+        // Charger le module d'effet local
+        const effectModule = await import(`../effects/${effectData.file}`);
+        
+        if (effectModule.default || effectModule[Object.keys(effectModule)[0]]) {
+          const effect: Effect = {
+            id: effectData.id,
+            name: effectData.name,
+            description: effectData.description,
+            category: effectData.category as 'text' | 'image' | 'both',
+            type: effectData.type as 'animation' | 'transition' | 'special',
+            scriptUrl: `/src/effects/${effectData.file}`,
+            path: `/src/effects/${effectData.file}`,
+            source: 'local',
+            tags: []
+          };
+          
+          localEffects.push(effect);
+        }
+      } catch (error) {
+        console.warn(`⚠️ Failed to load local effect ${effectData.file}:`, error);
+      }
+    }
+
+    return localEffects;
+  } catch (error) {
+    console.warn('⚠️ Local effects loading failed:', error);
+    return [];
+  }
 }
 
 async function loadJSfileModule(filename: string): Promise<any> {
