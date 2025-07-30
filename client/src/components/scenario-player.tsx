@@ -42,9 +42,11 @@ interface ScenarioPlayerProps {
   effects: Effect[];
   canvasRef: React.RefObject<HTMLCanvasElement>;
   onComplete?: () => void;
+  selectedFormat: string;
+  activeScenario?: any;
 }
 
-export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: ScenarioPlayerProps) {
+export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete, selectedFormat, activeScenario }: ScenarioPlayerProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);

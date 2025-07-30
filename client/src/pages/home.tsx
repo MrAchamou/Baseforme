@@ -26,6 +26,8 @@ export default function Home() {
   });
   const [canExport, setCanExport] = useState(false);
   const [currentTab, setCurrentTab] = useState<string>('scenario');
+  const [githubStatus, setGithubStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+
 
   const queryClient = useQueryClient();
   const { data: effects = [], isLoading, error, refetch } = useQuery({
@@ -44,6 +46,21 @@ export default function Home() {
       error: error?.message || 'none' 
     });
   }, [isLoading, effects.length, error]);
+
+  useEffect(() => {
+    const checkGitHubStatus = async () => {
+      try {
+        // Tentative de chargement des effets pour vérifier la connexion GitHub
+        await loadEffectsFromGitHub();
+        setGithubStatus('connected');
+      } catch (err) {
+        console.error('Erreur lors de la vérification du statut GitHub:', err);
+        setGithubStatus('error');
+      }
+    };
+
+    checkGitHubStatus();
+  }, []);
 
   const handleRefreshEffects = async () => {
     // Utiliser directement la fonction refetch du hook
@@ -341,6 +358,8 @@ export default function Home() {
                       effects={effects}
                       canvasRef={canvasRef}
                       onComplete={handleScenarioComplete}
+                      selectedFormat={selectedFormat}
+                      activeScenario={activeScenario}
                     />
                   ) : (
                     <div className="h-96 flex items-center justify-center">

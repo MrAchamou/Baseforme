@@ -37,13 +37,31 @@ export async function fetchFileContent(url: string): Promise<string> {
 
 export async function testGitHubConnection(): Promise<boolean> {
   try {
+    console.log('🔍 Testing GitHub connection...');
+    console.log('🔑 Token présent:', !!GITHUB_API_TOKEN);
+    console.log('📂 Repository:', `${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`);
+    
     const response = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`,
-      { headers }
+      { 
+        headers,
+        signal: AbortSignal.timeout(10000)
+      }
     );
+    
+    console.log('📡 Response status:', response.status);
+    
+    if (response.status === 403) {
+      console.warn('⚠️ GitHub API rate limit exceeded or token invalid');
+    } else if (response.status === 404) {
+      console.error('❌ Repository not found or no access');
+    } else if (response.ok) {
+      console.log('✅ GitHub connection successful');
+    }
+    
     return response.ok;
   } catch (error) {
-    console.error('GitHub connectivity test failed:', error);
+    console.error('❌ GitHub connectivity test failed:', error);
     return false;
   }
 }
