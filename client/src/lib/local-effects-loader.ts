@@ -58,5 +58,28 @@ export async function loadLocalEffects(): Promise<Effect[]> {
   }
 }
 
+// Fonction pour obtenir les statistiques des effets locaux
+export async function getLocalEffectsStats() {
+  try {
+    const effects = await loadLocalEffects();
+    return {
+      isConnected: true,
+      effectsCount: effects.length,
+      lastCheck: new Date(),
+      error: null
+    };
+  } catch (error) {
+    return {
+      isConnected: false,
+      effectsCount: 0,
+      lastCheck: new Date(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+// Fonction pour charger les effets depuis le système local (alias pour compatibilité)
+export const loadEffectsFromLocal = loadLocalEffects;
+
 // Export par défaut et nommé pour compatibilité
 export default loadLocalEffects;

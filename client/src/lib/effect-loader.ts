@@ -225,6 +225,7 @@ const DEMO_EFFECTS: Effect[] = [
     id: 'demo-fire-text',
     name: 'FIRE_TEXT',
     category: 'text',
+    type: 'animation',
     path: '/demo/fire-text.js',
     description: 'Effet de feu sur texte'
   },
@@ -232,6 +233,7 @@ const DEMO_EFFECTS: Effect[] = [
     id: 'demo-electric-text',
     name: 'ELECTRIC_TEXT',
     category: 'text',
+    type: 'animation',
     path: '/demo/electric-text.js',
     description: 'Effet électrique sur texte'
   },
@@ -239,6 +241,7 @@ const DEMO_EFFECTS: Effect[] = [
     id: 'demo-crystal-image',
     name: 'CRYSTAL_IMAGE',
     category: 'image',
+    type: 'animation',
     path: '/demo/crystal-image.js',
     description: 'Effet cristal sur image'
   },
@@ -246,6 +249,7 @@ const DEMO_EFFECTS: Effect[] = [
     id: 'demo-sparkle-both',
     name: 'SPARKLE_UNIVERSAL',
     category: 'both',
+    type: 'special',
     path: '/demo/sparkle-universal.js',
     description: 'Effet paillettes universel'
   },
@@ -253,6 +257,7 @@ const DEMO_EFFECTS: Effect[] = [
     id: 'demo-glow-text',
     name: 'GLOW_TEXT',
     category: 'text',
+    type: 'animation',
     path: '/demo/glow-text.js',
     description: 'Effet de lueur sur texte'
   },
@@ -260,6 +265,7 @@ const DEMO_EFFECTS: Effect[] = [
     id: 'demo-wave-image',
     name: 'WAVE_IMAGE',
     category: 'image',
+    type: 'animation',
     path: '/demo/wave-image.js',
     description: 'Effet de vague sur image'
   }
