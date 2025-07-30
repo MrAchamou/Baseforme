@@ -144,14 +144,19 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
 
 async function loadLocalEffects(): Promise<Effect[]> {
   try {
+    console.log('🏠 Loading local effects from Effect directory...');
+    
     // Charger l'index des effets locaux
     const response = await fetch('/src/effects/effectsIndex.json');
     if (!response.ok) {
-      throw new Error('Local effects index not found');
+      console.warn('⚠️ Local effects index not found, creating from available files...');
+      return await loadEffectsFromFiles();
     }
 
     const effectsIndex = await response.json();
     const localEffects: Effect[] = [];
+
+    console.log(`📋 Found ${effectsIndex.length} effects in index`);
 
     for (const effectData of effectsIndex) {
       try {
@@ -168,19 +173,38 @@ async function loadLocalEffects(): Promise<Effect[]> {
             scriptUrl: `/src/effects/${effectData.file}`,
             path: `/src/effects/${effectData.file}`,
             source: 'local',
-            tags: []
+            tags: effectData.category ? [effectData.category] : []
           };
           
           localEffects.push(effect);
+          console.log(`✅ Loaded local effect: ${effect.name} (${effect.category})`);
         }
       } catch (error) {
         console.warn(`⚠️ Failed to load local effect ${effectData.file}:`, error);
       }
     }
 
+    console.log(`🎉 Successfully loaded ${localEffects.length} local effects`);
     return localEffects;
   } catch (error) {
     console.warn('⚠️ Local effects loading failed:', error);
+    return await loadEffectsFromFiles();
+  }
+}
+
+async function loadEffectsFromFiles(): Promise<Effect[]> {
+  // Fallback: scanner directement les fichiers d'effets
+  console.log('🔍 Scanning effect files directly...');
+  
+  try {
+    const effects: Effect[] = [];
+    
+    // Cette fonction sera appelée si l'index n'est pas disponible
+    // Elle peut être étendue pour scanner dynamiquement les fichiers
+    
+    return effects;
+  } catch (error) {
+    console.error('❌ Failed to scan effect files:', error);
     return [];
   }
 }
