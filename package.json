@@ -11,7 +11,8 @@
     "db:push": "drizzle-kit push",
     "update-effects": "node scripts/update-effects-index.js",
     "download-effects": "node scripts/download-effects.js && npm run update-effects-index",
-    "sync-effects": "node scripts/sync-effects.js"
+    "sync-effects": "node scripts/sync-effects.js",
+    "diagnose": "node scripts/diagnose-app.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

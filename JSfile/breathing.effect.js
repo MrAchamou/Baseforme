@@ -1,45 +1,82 @@
-// Effet de respiration pour texte - Compatible avec EffectLab
-function createBreathingEffect() {
-  return function breathingEffect(ctx, canvas, text, options = {}) {
-    const { 
-      fontSize = 48, 
-      color = '#ffffff', 
-      minScale = 0.8, 
-      maxScale = 1.2,
-      speed = 0.003 
-    } = options;
 
-    let startTime = Date.now();
+export const breathingEffect = {
+  id: "breathing",
+  name: "Breathing",
+  
+  description: `## 🌬️ EFFET : BREATHING
 
-    function animate() {
-      const elapsed = Date.now() - startTime;
-      const scale = minScale + (maxScale - minScale) * 
-        (Math.sin(elapsed * speed) * 0.5 + 0.5);
+**CATÉGORIE :** IMAGE  
+**EFFET DEMANDÉ :** Breathing  
+**ID UNIQUE :** breathing-animation-001  
+**NOM AFFICHAGE :** Animation Respiration  
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+**DESCRIPTION :** Effet de respiration naturelle appliqué à l'image avec expansion et contraction douce.
 
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.scale(scale, scale);
+**SPÉCIFICATIONS :**
+- Animation cyclique de respiration
+- Effet de dilatation/contraction fluide
+- Rythme naturel et apaisant
+- Transitions douces et organiques`,
 
-      ctx.font = `${fontSize}px Arial`;
-      ctx.fillStyle = color;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+  category: "image",
+  subcategory: "animation",
+  intensity: "low",
+  performance: "light",
 
-      ctx.fillText(text, 0, 0);
-      ctx.restore();
+  compatibility: {
+    text: false,
+    image: true,
+    logo: true,
+    background: true
+  },
 
-      return true; // Continue animation
+  tags: ["image", "breathing", "animation", "organic", "cycle"],
+
+  parameters: {
+    vitesse: {
+      type: "range",
+      min: 0.1,
+      max: 3,
+      default: 1,
+      description: "Vitesse de respiration"
+    },
+    intensite: {
+      type: "range",
+      min: 0,
+      max: 1,
+      default: 0.3,
+      description: "Intensité de l'expansion"
     }
+  },
 
-    return animate;
-  };
-}
+  preview: {
+    gif: "breathing.gif",
+    duration: 4000,
+    loop: true
+  },
 
-// Export pour le système EffectLab
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = createBreathingEffect();
-} else if (typeof window !== 'undefined') {
-  window.breathingEffect = createBreathingEffect();
-}
+  engine: (element, params) => {
+    if (!element) return;
+
+    const startTime = Date.now();
+    const baseScale = 1;
+    
+    function animate() {
+      const elapsed = (Date.now() - startTime) * 0.001;
+      const breathingCycle = Math.sin(elapsed * params.vitesse * Math.PI) * params.intensite;
+      const scale = baseScale + breathingCycle * 0.1;
+      
+      element.style.transform = `scale(${scale})`;
+      element.style.transformOrigin = 'center center';
+      
+      requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    return () => {
+      element.style.transform = '';
+      element.style.transformOrigin = '';
+    };
+  }
+};
