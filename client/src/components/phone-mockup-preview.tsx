@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -251,6 +252,7 @@ export function PhoneMockupPreview({
           {selectedPhone !== 'iphone' && (
             <div className="absolute top-2 right-4 w-8 h-8 bg-black/20 rounded-xl" />
           )}
+
           {/* Phone Screen */}
           <div 
             className="relative overflow-hidden m-2"
@@ -331,71 +333,46 @@ export function PhoneMockupPreview({
             </div>
 
             {/* Content Area */}
-          <div className="relative flex-1 overflow-hidden">
-            {/* Logo Area - Plus réaliste selon la plateforme */}
-            {logoPreview && (
-              <div className={`absolute top-4 z-20 rounded-lg p-2 ${
-                selectedNetwork === 'whatsapp' ? 'left-4 bg-black/20 backdrop-blur-sm' :
-                selectedNetwork === 'instagram' ? 'left-4 bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm' :
-                selectedNetwork === 'tiktok' ? 'right-4 bg-white/10 backdrop-blur-sm' :
-                'left-4 bg-white/10 backdrop-blur-sm'
-              }`}>
-                <img
-                  src={logoPreview}
-                  alt="Logo"
-                  className={`object-contain ${
-                    selectedNetwork === 'tiktok' ? 'max-w-8 max-h-8' : 'max-w-12 max-h-12'
-                  }`}
+            <div className="relative flex-1 overflow-hidden" style={{ height: `${phoneConfig.height - 120}px` }}>
+              {/* Logo Area - Positionné en haut à gauche */}
+              {logoPreview && (
+                <div className="absolute top-6 left-4 z-30 bg-black/20 backdrop-blur-sm rounded-lg p-2">
+                  <img
+                    src={logoPreview}
+                    alt="Logo"
+                    className="max-w-12 max-h-12 object-contain"
+                  />
+                </div>
+              )}
+
+              {/* Main Animation Canvas - Canvas principal centré */}
+              <div className="absolute inset-0 z-10 flex items-center justify-center">
+                <canvas
+                  ref={canvasRef}
+                  width={phoneConfig.width - 40}
+                  height={phoneConfig.height - 200}
+                  className="max-w-full max-h-full object-contain"
+                  style={{
+                    backgroundColor: 'transparent'
+                  }}
                 />
               </div>
-            )}
 
-            {/* Main Text Overlay - Positionné selon la plateforme */}
-            {(mainText || boutique) && (
-              <div className={`absolute z-30 px-4 ${
-                selectedNetwork === 'whatsapp' ? 'top-1/3 left-0 right-0' :
-                selectedNetwork === 'instagram' ? 'bottom-32 left-0 right-0' :
-                selectedNetwork === 'tiktok' ? 'bottom-40 left-0 right-0' :
-                'top-1/2 left-0 right-0 transform -translate-y-1/2'
-              }`}>
-                <div className={`text-center ${
-                  selectedNetwork === 'whatsapp' ? 'bg-black/40 backdrop-blur-md p-4 rounded-xl' :
-                  selectedNetwork === 'instagram' ? 'bg-gradient-to-t from-black/60 to-transparent p-4 rounded-xl' :
-                  selectedNetwork === 'tiktok' ? 'bg-black/30 backdrop-blur-sm p-3 rounded-lg' :
-                  'bg-black/50 backdrop-blur-md p-4 rounded-xl'
-                }`}>
-                  <h2 className={`text-white font-bold leading-tight ${
-                    selectedNetwork === 'tiktok' ? 'text-lg' :
-                    selectedNetwork === 'instagram' ? 'text-xl' :
-                    'text-2xl'
-                  } animate-pulse`}>
-                    {mainText || boutique || 'Votre Business'}
-                  </h2>
+              {/* Main Text Overlay - Texte principal intégré dans le canvas */}
+              {(mainText || boutique) && (
+                <div className="absolute top-16 left-4 right-4 z-25 pointer-events-none">
+                  <div className="text-center bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/20">
+                    <h2 className="text-white font-bold text-lg leading-tight animate-pulse">
+                      {mainText || boutique || 'Votre Business'}
+                    </h2>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Main Animation Canvas - En arrière-plan */}
-            <div className="absolute inset-0 z-10">
-              <canvas
-                ref={canvasRef}
-                width={phoneConfig.width}
-                height={phoneConfig.height}
-                className="w-full h-full object-cover opacity-80"
-                style={{
-                  transform: 'scale(0.98)',
-                  transformOrigin: 'center',
-                  filter: selectedNetwork === 'instagram' ? 'saturate(1.2) contrast(1.1)' :
-                          selectedNetwork === 'tiktok' ? 'contrast(1.3) brightness(0.9)' :
-                          'none'
-                }}
-              />
-            </div>
-
-              {/* Secondary Text Overlay */}
+              {/* Secondary Text - Informations business en temps réel positionnées au centre */}
               {secondaryText && (
-                <div className="absolute bottom-20 left-4 right-4 z-20">
-                  <div className="bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/20">
+                <div className="absolute top-1/2 left-4 right-4 z-25 transform -translate-y-1/2">
+                  <div className="bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/30">
                     <div className="text-white text-sm font-medium text-center space-y-1">
                       {secondaryText.split('\n').map((line, i) => (
                         <div key={i} className="flex items-center justify-center">
@@ -407,19 +384,36 @@ export function PhoneMockupPreview({
                 </div>
               )}
 
+              {/* Contact Information - Informations de contact en bas */}
+              {telephone && (
+                <div className="absolute bottom-20 left-4 right-4 z-25">
+                  <div className="bg-gradient-to-r from-green-600/80 to-green-500/80 backdrop-blur-md p-3 rounded-xl border border-green-400/30">
+                    <div className="text-white text-center">
+                      <div className="text-sm font-medium flex items-center justify-center">
+                        📞 {telephone}
+                      </div>
+                      <div className="text-xs text-green-100 mt-1">
+                        Appelez maintenant !
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons */}
-              <div className="absolute bottom-6 right-4 left-4 z-20 flex justify-between items-center">
+              <div className="absolute bottom-6 right-4 left-4 z-30 flex justify-between items-center">
                 {/* WhatsApp Contact Button */}
                 {selectedNetwork === 'whatsapp' && telephone && (
                   <Button
                     onClick={onWhatsAppContact}
-                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-full font-medium shadow-lg text-sm"
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow-lg text-sm"
                   >
-                    💬
+                    <MessageCircle className="w-4 h-4 mr-1" />
+                    Contact
                   </Button>
                 )}
 
-                {/* Instagram/TikTok Actions */}
+                {/* Social Media Actions */}
                 {selectedNetwork !== 'whatsapp' && (
                   <div className="flex space-x-3">
                     <Button
@@ -445,12 +439,12 @@ export function PhoneMockupPreview({
               </div>
 
               {/* Network-specific overlays */}
-              {selectedNetwork === 'instagram' && (
-                <div className="absolute top-16 left-4 right-4 z-10">
+              {selectedNetwork === 'instagram' && boutique && (
+                <div className="absolute top-20 left-4 right-4 z-20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 p-0.5">
-                        <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-xs">
+                        <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-xs font-bold">
                           {boutique.charAt(0)}
                         </div>
                       </div>
@@ -473,15 +467,37 @@ export function PhoneMockupPreview({
         </div>
       </div>
 
-      {/* Preview Info */}
-      <div className="text-center space-y-2">
+      {/* Preview Info avec informations temps réel détaillées */}
+      <div className="text-center space-y-3">
         <p className="text-sm text-slate-400">
           Aperçu réaliste sur {networkConfig.name}
         </p>
-        <div className="flex justify-center space-x-4 text-xs text-slate-500">
-          <span>📱 {phoneConfig.name}</span>
-          <span>📊 Format {selectedFormat}</span>
-          <span>🎨 Temps réel</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-slate-500">
+          <div className="bg-slate-800/50 p-2 rounded">
+            <div>📱 {phoneConfig.name}</div>
+          </div>
+          <div className="bg-slate-800/50 p-2 rounded">
+            <div>📊 {selectedFormat}</div>
+          </div>
+          <div className="bg-slate-800/50 p-2 rounded">
+            <div>🎨 Temps réel</div>
+          </div>
+          <div className="bg-slate-800/50 p-2 rounded">
+            <div>🌐 {networkConfig.name}</div>
+          </div>
+        </div>
+
+        {/* Informations détaillées sur les éléments du mockup */}
+        <div className="mt-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
+          <h4 className="text-sm font-medium text-slate-300 mb-2">🎯 Disposition des éléments:</h4>
+          <div className="text-xs text-slate-400 space-y-1">
+            <div>• <strong>Logo:</strong> Haut gauche avec fond semi-transparent</div>
+            <div>• <strong>Texte principal:</strong> Intégré dans le canvas avec overlay</div>
+            <div>• <strong>Canvas d'animation:</strong> Centré avec les effets en temps réel</div>
+            <div>• <strong>Informations business:</strong> Positionnées au centre</div>
+            <div>• <strong>Contact:</strong> Barre verte en bas avec numéro</div>
+            <div>• <strong>Actions:</strong> Boutons d'interaction en bas</div>
+          </div>
         </div>
       </div>
     </div>
