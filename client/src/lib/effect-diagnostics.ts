@@ -45,3 +45,66 @@ export async function diagnoseEffects() {
   
   console.log('🏁 Diagnostics completed');
 }
+export async function testEffectLoading() {
+  console.log('🔍 Testing effect loading...');
+  
+  try {
+    // Tester le chargement d'un effet spécifique
+    const testUrl = '/JSfile/breathing.effect.js';
+    console.log(`Testing URL: ${testUrl}`);
+    
+    const response = await fetch(testUrl);
+    console.log(`Response status: ${response.status}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const content = await response.text();
+    console.log(`Content length: ${content.length}`);
+    console.log(`Content preview:`, content.substring(0, 200) + '...');
+    
+    // Tester l'import dynamique
+    const blob = new Blob([content], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    
+    try {
+      const module = await import(url);
+      console.log('Module loaded successfully');
+      console.log('Module exports:', Object.keys(module));
+      
+      // Analyser le module
+      if (module.default) {
+        console.log('Default export:', {
+          type: typeof module.default,
+          hasId: module.default?.id,
+          hasName: module.default?.name,
+          hasEngine: typeof module.default?.engine === 'function'
+        });
+      }
+      
+      return { success: true, module, content };
+      
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+    
+  } catch (error) {
+    console.error('Effect loading test failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export function logEffectStructure(effect: any, name: string) {
+  console.log(`📋 Effect structure for ${name}:`);
+  console.log({
+    id: effect?.id,
+    name: effect?.name,
+    description: effect?.description,
+    category: effect?.category,
+    type: effect?.type,
+    hasEngine: typeof effect?.engine === 'function',
+    hasParameters: !!effect?.parameters,
+    hasCompatibility: !!effect?.compatibility
+  });
+}

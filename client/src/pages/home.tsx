@@ -13,6 +13,7 @@ import { TemplateCreator } from '@/components/template-creator';
 import { loadEffectsFromLocal } from '@/lib/local-effects-loader';
 import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphone, Wand2 } from 'lucide-react';
 import type { Effect, EffectStats } from '@/types/effects';
+import { testEffectLoading, logEffectStructure } from '../lib/effect-diagnostics';
 
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);

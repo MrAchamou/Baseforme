@@ -151,21 +151,8 @@ async function loadJSfileModule(filename: string): Promise<any> {
 
     // Vérifier que le contenu contient un export valide
     if (!content.includes('export') && !content.includes('module.exports')) {
-      console.warn(`⚠️ No exports found in ${filename}, trying to wrap content`);
-      // Essayer d'envelopper le contenu dans un module
-      const wrappedContent = `
-        const effectContent = ${content};
-        export default effectContent;
-      `;
-      const blob = new Blob([wrappedContent], { type: 'application/javascript' });
-      const url = URL.createObjectURL(blob);
-      
-      try {
-        const module = await import(url);
-        return module;
-      } finally {
-        URL.revokeObjectURL(url);
-      }
+      console.warn(`⚠️ No exports found in ${filename}, content appears to be raw code`);
+      throw new Error(`No valid exports found in ${filename}`);
     }
 
     // Créer un blob et importer le module
@@ -199,7 +186,7 @@ function convertJSfileToEffect(effectModule: any, filename: string): Effect | nu
       console.log(`✅ Found valid default export for ${filename}`);
     } else {
       // Chercher dans les exports nommés
-      const keys = Object.keys(effectModule);
+      const keys = Object.keys(effectModule).filter(key => key !== 'default');
       for (const key of keys) {
         if (isValidJSfileEffect(effectModule[key])) {
           effectObject = effectModule[key];
@@ -210,34 +197,23 @@ function convertJSfileToEffect(effectModule: any, filename: string): Effect | nu
     }
 
     if (!effectObject) {
-      // Essayer de créer un objet d'effet générique si le module contient des fonctions
-      const baseName = filename.replace('.effect.js', '');
-      console.warn(`⚠️ No valid effect object found in ${filename}, creating generic wrapper`);
+      console.error(`❌ No valid effect object found in ${filename}`);
+      console.log('Available exports:', Object.keys(effectModule));
       
-      // Chercher une fonction qui pourrait être l'engine de l'effet
-      const keys = Object.keys(effectModule);
-      let engineFunction = null;
+      // Debug: afficher le contenu des exports
+      Object.keys(effectModule).forEach(key => {
+        const value = effectModule[key];
+        console.log(`Export '${key}':`, {
+          type: typeof value,
+          isObject: typeof value === 'object',
+          hasId: value && typeof value.id === 'string',
+          hasName: value && typeof value.name === 'string', 
+          hasEngine: value && typeof value.engine === 'function',
+          keys: value && typeof value === 'object' ? Object.keys(value) : 'N/A'
+        });
+      });
       
-      for (const key of keys) {
-        if (typeof effectModule[key] === 'function') {
-          engineFunction = effectModule[key];
-          break;
-        }
-      }
-      
-      if (engineFunction) {
-        effectObject = {
-          id: baseName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
-          name: baseName.toUpperCase(),
-          description: `${baseName} effect`,
-          category: 'both',
-          engine: engineFunction,
-          parameters: {}
-        };
-        console.log(`🔧 Created generic effect wrapper for ${filename}`);
-      } else {
-        throw new Error('No valid effect object or function found in module');
-      }
+      return null;
     }
 
     // Convertir au format Effect standard
@@ -317,18 +293,23 @@ function convertJSfileToEffect(effectModule: any, filename: string): Effect | nu
 }
 
 function isValidJSfileEffect(obj: any): boolean {
-  const isValid = obj && 
-         typeof obj === 'object' &&
-         typeof obj.id === 'string' &&
-         typeof obj.name === 'string' &&
-         typeof obj.engine === 'function';
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+  
+  const hasId = typeof obj.id === 'string' && obj.id.length > 0;
+  const hasName = typeof obj.name === 'string' && obj.name.length > 0;
+  const hasEngine = typeof obj.engine === 'function';
+  
+  const isValid = hasId && hasName && hasEngine;
   
   if (!isValid && obj) {
     console.log(`❌ Invalid effect object:`, {
-      hasId: typeof obj.id === 'string',
-      hasName: typeof obj.name === 'string',
-      hasEngine: typeof obj.engine === 'function',
-      actualKeys: Object.keys(obj)
+      hasId,
+      hasName, 
+      hasEngine,
+      actualKeys: Object.keys(obj),
+      obj: obj
     });
   }
   
