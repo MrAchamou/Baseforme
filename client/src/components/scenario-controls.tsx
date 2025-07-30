@@ -70,7 +70,7 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
       return;
     }
 
-    // Validation des effets
+    // Validation des effets pour les sections avec du contenu
     const sections = [];
     if (scenario.logoText.trim() && !scenario.logoEffect) {
       sections.push('Logo');
@@ -90,7 +90,24 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
       return;
     }
 
-    console.log('🎬 Lancement du scénario:', scenario);
+    // Vérifier que les effets sélectionnés existent
+    const selectedEffectIds = [
+      scenario.logoEffect,
+      scenario.storyEffect,
+      scenario.mainEffect,
+      scenario.sloganEffect
+    ].filter(Boolean);
+
+    const missingEffects = selectedEffectIds.filter(effectId => 
+      !effects.find(e => e.id === effectId)
+    );
+
+    if (missingEffects.length > 0) {
+      alert(`⚠️ Certains effets sélectionnés ne sont pas disponibles. Veuillez les resélectionner.`);
+      return;
+    }
+
+    console.log('🎬 Lancement du scénario avec', selectedEffectIds.length, 'effets:', scenario);
     onScenarioPlay(scenario);
   };
 

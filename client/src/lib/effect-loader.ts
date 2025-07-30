@@ -235,7 +235,7 @@ export class EffectLoader {
       for (let i = 0; i < 5; i++) {
         const particleX = x + Math.sin((frame + i * 50) * 0.05) * 100;
         const particleY = y + Math.cos((frame + i * 30) * 0.03) * 60;
-        
+
         ctx.fillStyle = `hsl(${(hue + i * 60) % 360}, 70%, 60%)`;
         ctx.beginPath();
         ctx.arc(particleX, particleY, 2, 0, Math.PI * 2);
@@ -264,6 +264,53 @@ export class EffectLoader {
 
   getLoadedEffectsCount(): number {
     return this.loadedEffects.size;
+  }
+
+  executeEffect(effectId: string, text: string, image?: HTMLImageElement, options: any = {}) {
+    if (!this.canvas || !this.loadedEffects.has(effectId)) {
+      console.error('Canvas not set or effect not loaded');
+      return;
+    }
+
+    const effect = this.loadedEffects.get(effectId);
+    if (!effect) return;
+
+    try {
+      console.log(`🎬 Executing effect: ${effectId} with text: "${text}"`);
+
+      // Prepare canvas context
+      const ctx = this.canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Set canvas size if not already set
+      if (this.canvas.width === 0 || this.canvas.height === 0) {
+        this.canvas.width = 800;
+        this.canvas.height = 400;
+      }
+
+      // Clear canvas
+      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Prepare options with image if provided
+      const effectOptions = {
+        ...options,
+        image: image,
+        canvas: this.canvas,
+        ctx: ctx
+      };
+
+      // Execute the effect function with proper context
+      if (typeof effect.execute === 'function') {
+        effect.execute(this.canvas, text, effectOptions);
+      } else if (typeof effect === 'function') {
+        // Some effects might be direct functions
+        effect(this.canvas, text, effectOptions);
+      } else {
+        console.warn(`Effect ${effectId} does not have an execute function`);
+      }
+    } catch (error) {
+      console.error(`Error executing effect ${effectId}:`, error);
+    }
   }
 }
 

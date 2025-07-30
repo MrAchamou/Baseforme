@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Play, Pause, SkipForward, RotateCcw } from "lucide-react";
+import { Play, Pause, SkipForward, RotateCcw, Download, Share2 } from "lucide-react";
 import { EffectLoader } from "@/lib/effect-loader";
 import { Effect } from "@/types/effects";
 
@@ -107,8 +107,24 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
         });
       }
 
-      // Load the effect
+      // Load and execute the effect
       await effectLoader.loadEffect(effect);
+      
+      // Prepare the canvas context
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          // Clear canvas
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          
+          // Set canvas size
+          canvasRef.current.width = 800;
+          canvasRef.current.height = 400;
+          
+          // Execute the effect with text and optional image
+          effectLoader.executeEffect(effect.id, step.text, imageElement);
+        }
+      }
 
       // Progress simulation
       const progressInterval = setInterval(() => {
@@ -193,6 +209,64 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
     }
   };
 
+  const exportCanvasAsImage = () => {
+    if (!canvasRef.current) {
+      alert('❌ Aucun contenu à exporter. Veuillez d\'abord lancer une étape du scénario.');
+      return;
+    }
+
+    try {
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `scenario-step-${currentStep + 1}.png`;
+      link.href = canvasRef.current.toDataURL('image/png');
+      link.click();
+      
+      console.log('✅ Export réussi:', link.download);
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'export:', error);
+      alert('Erreur lors de l\'export de l\'image');
+    }
+  };
+
+  const shareCanvasImage = async () => {
+    if (!canvasRef.current) {
+      alert('❌ Aucun contenu à partager. Veuillez d\'abord lancer une étape du scénario.');
+      return;
+    }
+
+    try {
+      canvasRef.current.toBlob(async (blob) => {
+        if (!blob) return;
+
+        const file = new File([blob], `scenario-step-${currentStep + 1}.png`, { type: 'image/png' });
+        
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Scénario - Étape ${currentStep + 1}`,
+            text: `${currentStepData?.title}: ${currentStepData?.text}`
+          });
+        } else {
+          // Fallback: copy to clipboard
+          if (navigator.clipboard && navigator.clipboard.write) {
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': blob })
+            ]);
+            alert('✅ Image copiée dans le presse-papiers !');
+          } else {
+            // Ultimate fallback: download
+            exportCanvasAsImage();
+          }
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('❌ Erreur lors du partage:', error);
+      alert('Erreur lors du partage. L\'image a été téléchargée à la place.');
+      exportCanvasAsImage();
+    }
+  };
+
   if (steps.length === 0) {
     return (
       <Card>
@@ -240,11 +314,12 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
         </div>
 
         {/* Controls */}
-        <div className="flex gap-2 justify-center">
+        <div className="flex gap-2 justify-center flex-wrap">
           <Button
             onClick={playScenario}
             disabled={isPlaying}
             data-testid="button-play-full-scenario"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
           >
             <Play className="w-4 h-4 mr-2" />
             {isPlaying ? 'Lecture...' : 'Scénario Complet'}
@@ -275,6 +350,31 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
             data-testid="button-reset-scenario"
           >
             <RotateCcw className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Export Controls */}
+        <div className="flex gap-2 justify-center mt-3 pt-3 border-t">
+          <Button
+            variant="outline"
+            onClick={exportCanvasAsImage}
+            disabled={isPlaying}
+            data-testid="button-export-image"
+            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exporter PNG
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={shareCanvasImage}
+            disabled={isPlaying}
+            data-testid="button-share-image"
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            Partager
           </Button>
         </div>
 
