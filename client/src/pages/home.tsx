@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,7 +92,7 @@ export default function Home() {
 
     try {
       console.log('🎬 Début de la génération d\'animation...');
-      
+
       // Sélectionner un effet aléatoirement si aucun n'est sélectionné
       let effectToUse = selectedEffect;
       if (!effectToUse && effects.length > 0) {
@@ -113,14 +112,14 @@ export default function Home() {
         };
 
         console.log(`✨ Exécution de l'effet: ${effectToUse.name}`);
-        
+
         // Démarrer l'animation
         setIsPlaying(true);
         await effectToUse.execute(canvasRef.current, text, options);
-        
+
         setCanExport(true);
         setStats(prev => ({ ...prev, animationsPlayed: prev.animationsPlayed + 1 }));
-        
+
         console.log('✅ Animation générée avec succès');
       } else {
         console.error('❌ Aucun effet disponible pour l\'exécution');
@@ -135,22 +134,22 @@ export default function Home() {
 
   const runFallbackAnimation = () => {
     if (!canvasRef.current) return;
-    
+
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
 
     let frame = 0;
     const animate = () => {
       ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
-      
+
       // Animation simple par défaut
       ctx.font = '48px Arial';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
-      
+
       const x = canvasRef.current!.width / 2;
       const y = canvasRef.current!.height / 2;
-      
+
       // Effet de pulsation simple
       const scale = Math.sin(frame * 0.1) * 0.2 + 1;
       ctx.save();
@@ -158,7 +157,7 @@ export default function Home() {
       ctx.scale(scale, scale);
       ctx.fillText(text, 0, 0);
       ctx.restore();
-      
+
       frame++;
       if (frame < 180) {
         requestAnimationFrame(animate);
@@ -167,7 +166,7 @@ export default function Home() {
         setCanExport(true);
       }
     };
-    
+
     setIsPlaying(true);
     animate();
   };
@@ -217,7 +216,7 @@ export default function Home() {
         canvasRef.current.style.height = `${scaledHeight}px`;
         canvasRef.current.style.display = 'block';
         canvasRef.current.style.margin = '0 auto';
-        
+
         // Nettoyer le canvas après changement de format
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
@@ -239,12 +238,12 @@ export default function Home() {
       // Relancer l'animation pour l'enregistrement
       if (selectedEffect && selectedEffect.execute) {
         console.log('🎬 Début de l\'export GIF...');
-        
+
         // Créer un nouveau canvas pour l'export
         const exportCanvas = document.createElement('canvas');
         exportCanvas.width = canvasRef.current.width;
         exportCanvas.height = canvasRef.current.height;
-        
+
         // Simuler l'export (implémentation simplifiée)
         alert('🎉 Export GIF en cours de développement - Animation générée avec succès !');
       }
@@ -549,7 +548,7 @@ export default function Home() {
                                 </div>
                               </div>
                             )}
-                            
+
                             {isPlaying && (
                               <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
                                 🔴 REC
@@ -608,7 +607,12 @@ export default function Home() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <TemplateCreator effects={effects} />
+                  <>
+                    <div className="mb-4 p-2 bg-slate-800/30 rounded text-xs text-slate-400">
+                      🔧 Debug: {effects.length} effets transmis au TemplateCreator
+                    </div>
+                    <TemplateCreator effects={effects} />
+                  </>
                 </CardContent>
               </Card>
             )}

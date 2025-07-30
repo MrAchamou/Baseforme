@@ -88,11 +88,30 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
   useEffect(() => {
     console.log('🔍 Debug des effets dans TemplateCreator:');
     console.log(`Total effets: ${effects.length}`);
-    console.log('Effets texte:', effects.filter(e => e.category === 'text' || e.category === 'both').length);
-    console.log('Effets image:', effects.filter(e => e.category === 'image' || e.category === 'both').length);
-    effects.slice(0, 5).forEach(effect => {
-      console.log(`- ${effect.name} (${effect.category})`);
-    });
+    
+    const textEffects = effects.filter(e => e.category === 'text' || e.category === 'both');
+    const imageEffects = effects.filter(e => e.category === 'image' || e.category === 'both');
+    
+    console.log('Effets texte:', textEffects.length);
+    console.log('Effets image:', imageEffects.length);
+    
+    if (textEffects.length > 0) {
+      console.log('📝 Exemples d\'effets texte:');
+      textEffects.slice(0, 3).forEach(effect => {
+        console.log(`  - ${effect.name} (${effect.category})`);
+      });
+    }
+    
+    if (imageEffects.length > 0) {
+      console.log('🖼️ Exemples d\'effets image:');
+      imageEffects.slice(0, 3).forEach(effect => {
+        console.log(`  - ${effect.name} (${effect.category})`);
+      });
+    }
+    
+    if (effects.length === 0) {
+      console.warn('⚠️ Aucun effet disponible - les listes déroulantes seront vides');
+    }
   }, [effects]);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -378,11 +397,21 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                           <SelectValue placeholder="Effet" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-600">
-                          {effects.filter(e => e.category === 'image' || e.category === 'both').map((effect) => (
-                            <SelectItem key={effect.id} value={effect.id} className="text-xs">
-                              {effect.name}
+                          {effects.length === 0 ? (
+                            <SelectItem value="loading" disabled className="text-xs text-slate-500">
+                              Chargement des effets...
                             </SelectItem>
-                          ))}
+                          ) : effects.filter(e => e.category === 'image' || e.category === 'both').length === 0 ? (
+                            <SelectItem value="no-effects" disabled className="text-xs text-slate-500">
+                              Aucun effet image disponible
+                            </SelectItem>
+                          ) : (
+                            effects.filter(e => e.category === 'image' || e.category === 'both').map((effect) => (
+                              <SelectItem key={effect.id} value={effect.id} className="text-xs">
+                                {effect.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <Button
@@ -427,11 +456,21 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                           <SelectValue placeholder="Effet" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-600">
-                          {effects.filter(e => e.category === 'text' || e.category === 'both').map((effect) => (
-                            <SelectItem key={effect.id} value={effect.id} className="text-xs">
-                              {effect.name}
+                          {effects.length === 0 ? (
+                            <SelectItem value="loading" disabled className="text-xs text-slate-500">
+                              Chargement des effets...
                             </SelectItem>
-                          ))}
+                          ) : effects.filter(e => e.category === 'text' || e.category === 'both').length === 0 ? (
+                            <SelectItem value="no-effects" disabled className="text-xs text-slate-500">
+                              Aucun effet texte disponible
+                            </SelectItem>
+                          ) : (
+                            effects.filter(e => e.category === 'text' || e.category === 'both').map((effect) => (
+                              <SelectItem key={effect.id} value={effect.id} className="text-xs">
+                                {effect.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
