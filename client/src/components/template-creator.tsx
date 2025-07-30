@@ -128,13 +128,6 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
     previewEngine.updateFormat(selectedFormat, 'whatsapp');
   }, [selectedFormat]);
 
-  useEffect(() => {
-    if (canvasRef.current) {
-      effectLoader.setCanvas(canvasRef.current);
-      previewEngine.setCanvas(canvasRef.current);
-      previewEngine.updateFormat(selectedFormat, 'whatsapp');
-  }, [selectedFormat]);
-
   const updateContainerSize = () => {
     const container = document.getElementById('effect-container');
     if (container && FORMATS[selectedFormat as keyof typeof FORMATS]) {
@@ -396,8 +389,8 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                     <SelectValue placeholder="Choisir un effet..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {effects.map((effect) => (
-                      <SelectItem key={effect.id} value={effect.id}>
+                    {effects.map((effect, index) => (
+                      <SelectItem key={`${effect.id}-${index}`} value={effect.id}>
                         <div className="flex items-center space-x-2">
                           <span className="text-xs px-1 py-0.5 rounded bg-blue-600 text-white">
                             {effect.type === 'text' ? 'TXT' : effect.type === 'image' ? 'IMG' : 'UNI'}

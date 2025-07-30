@@ -308,7 +308,7 @@ export class PreviewEngine {
     this.stopAnimation();
     this.canvas = null;
     this.ctx = null;
-    this.currentEffect = null;
+    this.zoneContents.clear();
   }
 }
 
