@@ -140,28 +140,31 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {getAllScenarioTypes().map(type => {
-              const template = getScenarioTemplate(type);
-              return (
-                <Button
-                  key={type}
-                  variant={selectedType === type ? "default" : "outline"}
-                  onClick={() => handleTypeChange(type)}
-                  className="h-auto p-4 flex flex-col items-start gap-2"
-                  data-testid={`scenario-type-${type}`}
-                >
-                  <div className="flex items-center gap-2 w-full">
-                    <span className="text-lg">{template.emoji}</span>
-                    <span className="font-semibold text-sm">{template.name}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground text-left">
-                    {template.description}
+          
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {SCENARIO_TEMPLATES.map((scenario) => (
+          <Button
+            key={scenario.id}
+           
+            className={`transition-all duration-200 hover:shadow-lg min-h-[120px] flex flex-col items-start gap-2 h-auto p-4 `}
+            onClick={() => handleTypeChange(scenario.id)}
+          >
+            <div className="flex items-start space-x-4 flex-1 w-full">
+                <div className="text-3xl flex-shrink-0 mt-1">
+                  {scenario.emoji}
+                </div>
+                <div className="flex-1 min-w-0 space-y-2">
+                  <h3 className="font-semibold text-base text-left text-slate-700 leading-tight break-words">
+                    {scenario.name}
+                  </h3>
+                  <p className="text-sm text-left text-gray-500 leading-relaxed break-words line-clamp-3">
+                    {scenario.description}
                   </p>
-                </Button>
-              );
-            })}
-          </div>
+                </div>
+              </div>
+          </Button>
+        ))}
+      </div>
         </CardContent>
       </Card>
 

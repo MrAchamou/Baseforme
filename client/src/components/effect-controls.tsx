@@ -298,24 +298,35 @@ export function EffectControls({
         <CardHeader>
           <CardTitle className="flex items-center text-lg">
             <Download className="w-5 h-5 text-green-500 mr-2" />
-            Export Disponible
+            Options d'Export
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="text-sm text-slate-400 mb-3">
+            Génération d'animation requise pour l'export
+          </div>
           <Button 
-            onClick={onExportMp4}
-            disabled={!canExport}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={() => {
+              // TODO: Implement MP4 export
+              console.log('MP4 export functionality to be implemented');
+            }}
+            disabled={!selectedEffect || !text}
+            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white transition-all duration-200"
             data-testid="button-export-mp4"
           >
+            <Download className="w-4 h-4 mr-2" />
             Exporter en MP4
           </Button>
           <Button 
-            onClick={onExportGif}
-            disabled={!canExport}
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => {
+              // TODO: Implement GIF export
+              console.log('GIF export functionality to be implemented');
+            }}
+            disabled={!selectedEffect || !text}
+            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white transition-all duration-200"
             data-testid="button-export-gif"
           >
+            <Download className="w-4 h-4 mr-2" />
             Exporter en GIF
           </Button>
         </CardContent>
