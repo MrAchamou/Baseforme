@@ -72,20 +72,22 @@ class EffectLoader {
     }
 
     try {
-      console.log(`Loading JSfile effect: ${effect.name}`);
+      console.log(`🔄 Loading JSfile effect: ${effect.name} from ${effect.scriptUrl}`);
 
       if (!validateJSfileEffect(effect)) {
         throw new Error(`Effect validation failed: ${effect.name} does not meet JSfile requirements`);
       }
 
       if (!effect.scriptUrl || !effect.scriptUrl.startsWith('/JSfile/')) {
-        throw new Error(`Security validation failed: Effect must come from JSfile directory. Effect: ${effect.name}`);
+        throw new Error(`Security validation failed: Effect must come from JSfile directory. Effect: ${effect.name}, URL: ${effect.scriptUrl}`);
       }
 
       const scriptContent = await loadEffectScript(effect.scriptUrl);
+      console.log(`📜 Script content loaded for ${effect.name}: ${scriptContent.length} characters`);
 
       // Charger aussi le module JSfile pour l'exécution
       const effectModule = await this.loadJSfileModule(effect.scriptUrl);
+      console.log(`📦 Module loaded for ${effect.name}:`, Object.keys(effectModule));
 
       this.loadedEffects.set(effect.id, {
         effect,
@@ -100,6 +102,7 @@ class EffectLoader {
 
     } catch (error) {
       console.error(`❌ Failed to load JSfile effect ${effect.name}:`, error);
+      console.error(`❌ Effect details:`, { id: effect.id, scriptUrl: effect.scriptUrl, category: effect.category });
       return false;
     }
   }
@@ -181,45 +184,84 @@ class EffectLoader {
         throw new Error('JSfile module not loaded');
       }
 
+      console.log(`🔍 Analyzing JSfile module for ${loadedEffect.effect.name}:`, Object.keys(loadedEffect.module));
+
       // Chercher l'objet d'effet dans le module
       let effectObject = null;
+      let engineFunction = null;
 
       if (loadedEffect.module.default && this.isValidJSfileEffect(loadedEffect.module.default)) {
         effectObject = loadedEffect.module.default;
+        engineFunction = effectObject.engine;
       } else {
         const keys = Object.keys(loadedEffect.module);
         for (const key of keys) {
           if (this.isValidJSfileEffect(loadedEffect.module[key])) {
             effectObject = loadedEffect.module[key];
+            engineFunction = effectObject.engine;
             break;
           }
         }
       }
 
-      if (!effectObject || !effectObject.engine) {
-        throw new Error('No valid effect engine found in JSfile module');
+      // Si pas d'objet d'effet valide, chercher une fonction directement
+      if (!effectObject || !engineFunction) {
+        console.log(`⚠️ No valid effect object found, looking for direct function`);
+        const keys = Object.keys(loadedEffect.module);
+        for (const key of keys) {
+          if (typeof loadedEffect.module[key] === 'function') {
+            engineFunction = loadedEffect.module[key];
+            console.log(`🔧 Using function '${key}' as effect engine`);
+            break;
+          }
+        }
+        
+        if (!engineFunction && loadedEffect.module.default && typeof loadedEffect.module.default === 'function') {
+          engineFunction = loadedEffect.module.default;
+          console.log(`🔧 Using default export as effect engine`);
+        }
       }
 
-      console.log(`🎬 Executing JSfile effect: ${effectObject.name}`);
+      if (!engineFunction) {
+        throw new Error('No valid effect engine function found in JSfile module');
+      }
+
+      console.log(`🎬 Executing JSfile effect: ${loadedEffect.effect.name}`);
 
       // Préparer les paramètres pour l'effet
       const effectParams = {
         vitesse: 1,
         intensite: 0.5,
-        ...effectObject.parameters,
+        ...((effectObject && effectObject.parameters) || {}),
         ...options
       };
 
-      // Créer l'élément pour l'effet (canvas ou div)
-      const effectElement = this.createEffectElement(text, image);
+      // Essayer d'exécuter l'effet directement sur le canvas
+      try {
+        // Si l'effet attend un canvas comme premier paramètre
+        const cleanup = engineFunction(this.canvas, text, effectParams);
+        
+        if (typeof cleanup === 'function') {
+          // Si l'effet retourne une fonction de nettoyage
+          setTimeout(() => {
+            cleanup();
+          }, 10000); // Nettoyer après 10 secondes
+        }
+        
+      } catch (directError) {
+        console.warn(`⚠️ Direct canvas execution failed, trying with element wrapper:`, directError);
+        
+        // Créer l'élément pour l'effet (canvas ou div)
+        const effectElement = this.createEffectElement(text, image);
 
-      // Exécuter l'engine de l'effet JSfile
-      const cleanup = effectObject.engine(effectElement, effectParams);
+        // Exécuter l'engine de l'effet JSfile avec l'élément
+        const cleanup = engineFunction(effectElement, effectParams);
 
-      // Démarrer l'animation de rendu
-      this.startRenderLoop(effectElement, cleanup);
+        // Démarrer l'animation de rendu
+        this.startRenderLoop(effectElement, cleanup);
+      }
 
-      console.log(`✅ JSfile effect ${effectObject.name} started successfully`);
+      console.log(`✅ JSfile effect ${loadedEffect.effect.name} started successfully`);
 
     } catch (error) {
       console.error(`Failed to execute JSfile effect ${loadedEffect.effect.name}:`, error);

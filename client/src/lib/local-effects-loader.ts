@@ -135,6 +135,8 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
 async function loadJSfileModule(filename: string): Promise<any> {
   try {
     const scriptUrl = `/JSfile/${filename}`;
+    console.log(`🔄 Loading JSfile module: ${scriptUrl}`);
+    
     const response = await fetch(scriptUrl);
 
     if (!response.ok) {
@@ -147,12 +149,32 @@ async function loadJSfileModule(filename: string): Promise<any> {
       throw new Error('Empty script content');
     }
 
+    // Vérifier que le contenu contient un export valide
+    if (!content.includes('export') && !content.includes('module.exports')) {
+      console.warn(`⚠️ No exports found in ${filename}, trying to wrap content`);
+      // Essayer d'envelopper le contenu dans un module
+      const wrappedContent = `
+        const effectContent = ${content};
+        export default effectContent;
+      `;
+      const blob = new Blob([wrappedContent], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      
+      try {
+        const module = await import(url);
+        return module;
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
     // Créer un blob et importer le module
     const blob = new Blob([content], { type: 'application/javascript' });
     const url = URL.createObjectURL(blob);
 
     try {
       const module = await import(url);
+      console.log(`✅ Successfully loaded module: ${filename}`);
       return module;
     } finally {
       URL.revokeObjectURL(url);
@@ -166,25 +188,56 @@ async function loadJSfileModule(filename: string): Promise<any> {
 
 function convertJSfileToEffect(effectModule: any, filename: string): Effect | null {
   try {
+    console.log(`🔍 Converting effect module for ${filename}:`, Object.keys(effectModule));
+    
     // Chercher l'effet dans les exports du module
     let effectObject = null;
 
     // Vérifier export par défaut
     if (effectModule.default && isValidJSfileEffect(effectModule.default)) {
       effectObject = effectModule.default;
+      console.log(`✅ Found valid default export for ${filename}`);
     } else {
       // Chercher dans les exports nommés
       const keys = Object.keys(effectModule);
       for (const key of keys) {
         if (isValidJSfileEffect(effectModule[key])) {
           effectObject = effectModule[key];
+          console.log(`✅ Found valid named export '${key}' for ${filename}`);
           break;
         }
       }
     }
 
     if (!effectObject) {
-      throw new Error('No valid effect object found in module');
+      // Essayer de créer un objet d'effet générique si le module contient des fonctions
+      const baseName = filename.replace('.effect.js', '');
+      console.warn(`⚠️ No valid effect object found in ${filename}, creating generic wrapper`);
+      
+      // Chercher une fonction qui pourrait être l'engine de l'effet
+      const keys = Object.keys(effectModule);
+      let engineFunction = null;
+      
+      for (const key of keys) {
+        if (typeof effectModule[key] === 'function') {
+          engineFunction = effectModule[key];
+          break;
+        }
+      }
+      
+      if (engineFunction) {
+        effectObject = {
+          id: baseName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
+          name: baseName.toUpperCase(),
+          description: `${baseName} effect`,
+          category: 'both',
+          engine: engineFunction,
+          parameters: {}
+        };
+        console.log(`🔧 Created generic effect wrapper for ${filename}`);
+      } else {
+        throw new Error('No valid effect object or function found in module');
+      }
     }
 
     // Convertir au format Effect standard
@@ -264,11 +317,22 @@ function convertJSfileToEffect(effectModule: any, filename: string): Effect | nu
 }
 
 function isValidJSfileEffect(obj: any): boolean {
-  return obj && 
+  const isValid = obj && 
          typeof obj === 'object' &&
          typeof obj.id === 'string' &&
          typeof obj.name === 'string' &&
          typeof obj.engine === 'function';
+  
+  if (!isValid && obj) {
+    console.log(`❌ Invalid effect object:`, {
+      hasId: typeof obj.id === 'string',
+      hasName: typeof obj.name === 'string',
+      hasEngine: typeof obj.engine === 'function',
+      actualKeys: Object.keys(obj)
+    });
+  }
+  
+  return isValid;
 }
 
 export async function loadEffectScript(scriptUrl: string): Promise<string> {
