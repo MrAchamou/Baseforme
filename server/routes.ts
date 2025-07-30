@@ -13,3 +13,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+import { Express } from "express";
+import { createServer } from "http";
+
+export function registerRoutes(app: Express) {
+  // Route API de base
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // Route pour les effets (à implémenter selon vos besoins)
+  app.get("/api/effects", (req, res) => {
+    res.json({ effects: [] });
+  });
+
+  // Créer le serveur HTTP
+  const server = createServer(app);
+  
+  return server;
+}
