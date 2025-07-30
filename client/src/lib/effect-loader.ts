@@ -1,4 +1,5 @@
 import type { Effect } from '@/types/effects';
+import { localEffectsLoader } from './local-effects-loader';
 
 interface AnimationContext {
   ctx: CanvasRenderingContext2D;
@@ -85,52 +86,31 @@ export class EffectLoader {
     }
   }
 
-  executeEffect(effectId: string, text: string, image?: HTMLImageElement, options: any = {}) {
-    if (!this.canvas || !this.loadedEffects.has(effectId)) {
-      console.error('Canvas not set or effect not loaded');
+  async executeEffect(effectId: string, text: string, image?: HTMLImageElement, options: any = {}) {
+    if (!this.canvas) {
+      console.error('Canvas not set');
       return;
     }
 
-    const effect = this.loadedEffects.get(effectId);
-    if (!effect) return;
-
     try {
-      console.log(`🎬 Executing effect: ${effectId} with text: "${text}"`);
-
-      // Prepare canvas context
-      const ctx = this.canvas.getContext('2d');
-      if (!ctx) return;
-
       // Set canvas size if not already set
       if (this.canvas.width === 0 || this.canvas.height === 0) {
         this.canvas.width = 800;
         this.canvas.height = 400;
       }
 
-      // Don't clear canvas if bounds are specified (multiple effects scenario)
-      if (!options.bounds) {
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      }
+      // Stop any existing animation
+      this.stopAnimation();
 
-      // Prepare options with image if provided
-      const effectOptions = {
+      // Use the local effects loader to execute the effect
+      await localEffectsLoader.executeEffect(effectId, this.canvas, text, {
         ...options,
-        image: image,
-        canvas: this.canvas,
-        ctx: ctx
-      };
+        image: image
+      });
 
-      // Execute the effect function with proper context
-      if (typeof effect.execute === 'function') {
-        effect.execute(this.canvas, text, effectOptions);
-      } else if (typeof effect === 'function') {
-        // Some effects might be direct functions
-        effect(this.canvas, text, effectOptions);
-      } else {
-        console.warn(`Effect ${effectId} does not have an execute function`);
-      }
     } catch (error) {
       console.error(`Error executing effect ${effectId}:`, error);
+      this.createFallbackAnimation(text, `Error: ${error.message}`);
     }
   }
 

@@ -10,7 +10,7 @@ import { EffectStatus } from '@/components/effect-status';
 import { ScenarioControls } from '@/components/scenario-controls';
 import { ScenarioPlayer } from '@/components/scenario-player';
 import { TemplateCreator } from '@/components/template-creator';
-import { loadEffectsFromGitHub } from '@/lib/github-api';
+import { loadEffectsFromLocal } from '@/lib/local-effects-loader';
 import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphone, Wand2 } from 'lucide-react';
 import type { Effect, EffectStats } from '@/types/effects';
 
@@ -32,10 +32,9 @@ export default function Home() {
   const queryClient = useQueryClient();
   const { data: effects = [], isLoading, error, refetch } = useQuery({
     queryKey: ['effects'],
-    queryFn: loadEffectsFromGitHub,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    queryFn: loadEffectsFromLocal,
+    staleTime: Infinity, // Cache indefinitely since effects are local
+    retry: 1, // Less retries needed for local loading
   });
 
   // Log des informations de débogage
@@ -48,35 +47,9 @@ export default function Home() {
   }, [isLoading, effects.length, error]);
 
   useEffect(() => {
-    const checkGitHubStatus = async () => {
-      try {
-        console.log('🔍 Checking GitHub status on page load...');
-        console.log('🔑 VITE_GITHUB_TOKEN present:', !!import.meta.env.VITE_GITHUB_TOKEN);
-        
-        if (!import.meta.env.VITE_GITHUB_TOKEN) {
-          console.warn('⚠️ No GitHub token found - effects loading will be limited');
-          setGithubStatus('error');
-          return;
-        }
-
-        // Test GitHub connection first
-        const { testGitHubConnection } = await import('@/lib/github-api');
-        const isConnected = await testGitHubConnection();
-        
-        if (isConnected) {
-          console.log('✅ GitHub connection successful');
-          setGithubStatus('connected');
-        } else {
-          console.error('❌ GitHub connection failed');
-          setGithubStatus('error');
-        }
-      } catch (err) {
-        console.error('❌ Error checking GitHub status:', err);
-        setGithubStatus('error');
-      }
-    };
-
-    checkGitHubStatus();
+    // Local effects - no need to check GitHub status
+    console.log('📂 Using local effects system - no external dependencies');
+    setGithubStatus('connected'); // Set to connected since we're using local files
   }, []);
 
   const handleRefreshEffects = async () => {

@@ -1,0 +1,491 @@
+
+[
+  {
+    "id": "breathing-object",
+    "name": "BREATHING OBJECT",
+    "description": "Effet de respiration sur objet avec animation douce",
+    "file": "breathing-object.js",
+    "category": "image",
+    "type": "animation"
+  },
+  {
+    "id": "breathing",
+    "name": "BREATHING",
+    "description": "Animation de respiration pour texte",
+    "file": "breathing.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "crystal-grow",
+    "name": "CRYSTAL GROW",
+    "description": "Croissance cristalline progressive",
+    "file": "crystal-grow.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "crystal-shatter",
+    "name": "CRYSTAL SHATTER",
+    "description": "Bris de cristal avec fragments",
+    "file": "crystal-shatter.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "dimension-shift",
+    "name": "DIMENSION SHIFT",
+    "description": "Changement dimensionnel avec déformation",
+    "file": "dimension-shift.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "dna-build",
+    "name": "DNA BUILD",
+    "description": "Construction ADN hélicoïdale",
+    "file": "dna-build.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "echo-multiple",
+    "name": "ECHO MULTIPLE",
+    "description": "Échos multiples avec répétition",
+    "file": "echo-multiple.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "echo-trail",
+    "name": "ECHO TRAIL",
+    "description": "Traînée d'écho visuel",
+    "file": "echo-trail.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "electric-form",
+    "name": "ELECTRIC FORM",
+    "description": "Formation électrique avec arcs",
+    "file": "electric-form.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "electric-hover",
+    "name": "ELECTRIC HOVER",
+    "description": "Survol électrique animé",
+    "file": "electric-hover.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "energy-flow",
+    "name": "ENERGY FLOW",
+    "description": "Flux d'énergie continu",
+    "file": "energy-flow.js",
+    "category": "both",
+    "type": "animation"
+  },
+  {
+    "id": "energy-ionize",
+    "name": "ENERGY IONIZE",
+    "description": "Ionisation énergétique",
+    "file": "energy-ionize.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "fade-layers",
+    "name": "FADE LAYERS",
+    "description": "Fondu par couches successives",
+    "file": "fade-layers.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "fire-consume",
+    "name": "FIRE CONSUME",
+    "description": "Consommation par le feu",
+    "file": "fire-consume.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "fire-write",
+    "name": "FIRE WRITE",
+    "description": "Écriture enflammée progressive",
+    "file": "fire-write.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "float-dance",
+    "name": "FLOAT DANCE",
+    "description": "Danse flottante gracieuse",
+    "file": "float-dance.js",
+    "category": "both",
+    "type": "animation"
+  },
+  {
+    "id": "float-physics",
+    "name": "FLOAT PHYSICS",
+    "description": "Flottement avec physique réaliste",
+    "file": "float-physics.js",
+    "category": "image",
+    "type": "animation"
+  },
+  {
+    "id": "glitch-spawn",
+    "name": "GLITCH SPAWN",
+    "description": "Apparition glitchée numérique",
+    "file": "glitch-spawn.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "gravity-reverse",
+    "name": "GRAVITY REVERSE",
+    "description": "Inversion gravitationnelle",
+    "file": "gravity-reverse.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "gyroscope-spin",
+    "name": "GYROSCOPE SPIN",
+    "description": "Rotation gyroscopique complexe",
+    "file": "gyroscope-spin.js",
+    "category": "both",
+    "type": "animation"
+  },
+  {
+    "id": "heartbeat",
+    "name": "HEARTBEAT",
+    "description": "Pulsation cardiaque rythmée",
+    "file": "heartbeat.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "hologram",
+    "name": "HOLOGRAM",
+    "description": "Projection holographique",
+    "file": "hologram.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "ice-freeze",
+    "name": "ICE FREEZE",
+    "description": "Cristallisation glacée progressive",
+    "file": "ice-freeze.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "liquid-morph",
+    "name": "LIQUID MORPH",
+    "description": "Morphing liquide fluide",
+    "file": "liquid-morph.js",
+    "category": "both",
+    "type": "transition"
+  },
+  {
+    "id": "liquid-pour",
+    "name": "LIQUID POUR",
+    "description": "Versement liquide réaliste",
+    "file": "liquid-pour.js",
+    "category": "image",
+    "type": "animation"
+  },
+  {
+    "id": "liquid-state",
+    "name": "LIQUID STATE",
+    "description": "État liquide dynamique",
+    "file": "liquid-state.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "magnetic-field",
+    "name": "MAGNETIC FIELD",
+    "description": "Champ magnétique visualisé",
+    "file": "magnetic-field.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "magnetic-pull",
+    "name": "MAGNETIC PULL",
+    "description": "Attraction magnétique forte",
+    "file": "magnetic-pull.js",
+    "category": "image",
+    "type": "animation"
+  },
+  {
+    "id": "mirror-reality",
+    "name": "MIRROR REALITY",
+    "description": "Réalité miroir déformante",
+    "file": "mirror-reality.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "morph-3d",
+    "name": "MORPH 3D",
+    "description": "Morphing tridimensionnel",
+    "file": "morph-3d.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "metamorphoses-images",
+    "name": "MÉTAMORPHOSES D'IMAGES",
+    "description": "Transformation d'images complexe",
+    "file": "metamorphoses-images.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "neon-glow",
+    "name": "NEON GLOW",
+    "description": "Lueur néon électrique",
+    "file": "neon-glow.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "neural-pulse",
+    "name": "NEURAL PULSE",
+    "description": "Impulsion neuronale",
+    "file": "neural-pulse.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "orbit-dance",
+    "name": "ORBIT DANCE",
+    "description": "Danse orbitale gravitationnelle",
+    "file": "orbit-dance.js",
+    "category": "both",
+    "type": "animation"
+  },
+  {
+    "id": "particle-build",
+    "name": "PARTICLE BUILD",
+    "description": "Construction par particules",
+    "file": "particle-build.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "particle-dissolve",
+    "name": "PARTICLE DISSOLVE",
+    "description": "Dissolution particulaire",
+    "file": "particle-dissolve.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "pendulum-swing",
+    "name": "PENDULUM SWING",
+    "description": "Balancement pendulaire",
+    "file": "pendulum-swing.js",
+    "category": "image",
+    "type": "animation"
+  },
+  {
+    "id": "phase-through",
+    "name": "PHASE THROUGH",
+    "description": "Traversée phasique",
+    "file": "phase-through.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "plasma-state",
+    "name": "PLASMA STATE",
+    "description": "État plasma énergétique",
+    "file": "plasma-state.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "prism-split",
+    "name": "PRISM SPLIT",
+    "description": "Division prismatique colorée",
+    "file": "prism-split.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "quantum-phase",
+    "name": "QUANTUM PHASE",
+    "description": "Phase quantique instable",
+    "file": "quantum-phase.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "quantum-split",
+    "name": "QUANTUM SPLIT",
+    "description": "Division quantique multiple",
+    "file": "quantum-split.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "rainbow-shift",
+    "name": "RAINBOW SHIFT",
+    "description": "Changement arc-en-ciel",
+    "file": "rainbow-shift.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "reality-glitch",
+    "name": "REALITY GLITCH",
+    "description": "Glitch de réalité numérique",
+    "file": "reality-glitch.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "rotation-3d",
+    "name": "ROTATION 3D",
+    "description": "Rotation tridimensionnelle",
+    "file": "rotation-3d.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "shadow-clone",
+    "name": "SHADOW CLONE",
+    "description": "Clonage d'ombres multiples",
+    "file": "shadow-clone.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "smoke-disperse",
+    "name": "SMOKE DISPERSE",
+    "description": "Dispersion de fumée",
+    "file": "smoke-disperse.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "soul-aura",
+    "name": "SOUL AURA",
+    "description": "Aura spirituelle lumineuse",
+    "file": "soul-aura.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "sparkle-aura",
+    "name": "SPARKLE AURA",
+    "description": "Aura scintillante magique",
+    "file": "sparkle-aura.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "star-dust-form",
+    "name": "STAR DUST FORM",
+    "description": "Formation de poussière d'étoiles",
+    "file": "star-dust-form.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "star-explosion",
+    "name": "STAR EXPLOSION",
+    "description": "Explosion stellaire spectaculaire",
+    "file": "star-explosion.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "stellar-drift",
+    "name": "STELLAR DRIFT",
+    "description": "Dérive stellaire cosmique",
+    "file": "stellar-drift.js",
+    "category": "image",
+    "type": "animation"
+  },
+  {
+    "id": "time-echo",
+    "name": "TIME ECHO",
+    "description": "Écho temporel répétitif",
+    "file": "time-echo.js",
+    "category": "text",
+    "type": "special"
+  },
+  {
+    "id": "time-rewind",
+    "name": "TIME REWIND",
+    "description": "Retour temporel inversé",
+    "file": "time-rewind.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "tornado-absorb",
+    "name": "TORNADO ABSORB",
+    "description": "Absorption tourbillonnaire",
+    "file": "tornado-absorb.js",
+    "category": "image",
+    "type": "special"
+  },
+  {
+    "id": "tornado-spin",
+    "name": "TORNADO SPIN",
+    "description": "Rotation tourbillonnaire",
+    "file": "tornado-spin.js",
+    "category": "image",
+    "type": "animation"
+  },
+  {
+    "id": "tornado-twist",
+    "name": "TORNADO TWIST",
+    "description": "Torsion tourbillonnaire",
+    "file": "tornado-twist.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "typewriter",
+    "name": "TYPEWRITER",
+    "description": "Écriture machine à écrire",
+    "file": "typewriter.js",
+    "category": "text",
+    "type": "animation"
+  },
+  {
+    "id": "wave-dissolve",
+    "name": "WAVE DISSOLVE",
+    "description": "Dissolution ondulée",
+    "file": "wave-dissolve.js",
+    "category": "image",
+    "type": "transition"
+  },
+  {
+    "id": "wave-distortion",
+    "name": "WAVE DISTORTION",
+    "description": "Distorsion ondulée",
+    "file": "wave-distortion.js",
+    "category": "both",
+    "type": "special"
+  },
+  {
+    "id": "wave-pulse",
+    "name": "WAVE PULSE",
+    "description": "Pulsation ondulée",
+    "file": "wave-pulse.js",
+    "category": "both",
+    "type": "animation"
+  }
+]
