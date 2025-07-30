@@ -334,66 +334,84 @@ export function PhoneMockupPreview({
 
             {/* Content Area */}
             <div className="relative flex-1 overflow-hidden" style={{ height: `${phoneConfig.height - 120}px` }}>
-              {/* Logo Area - Positionné en haut à gauche */}
+              {/* Logo Area - Positionné en haut à gauche, sans fond sombre */}
               {logoPreview && (
-                <div className="absolute top-6 left-4 z-30 bg-black/20 backdrop-blur-sm rounded-lg p-2">
-                  <img
-                    src={logoPreview}
-                    alt="Logo"
-                    className="max-w-12 max-h-12 object-contain"
-                  />
+                <div className="absolute top-6 left-4 z-30">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden shadow-lg ring-2 ring-white/20">
+                    <img
+                      src={logoPreview}
+                      alt="Logo"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 </div>
               )}
 
-              {/* Main Animation Canvas - Canvas principal centré */}
-              <div className="absolute inset-0 z-10 flex items-center justify-center">
+              {/* Main Animation Canvas - Canvas principal avec zones définies */}
+              <div className="absolute inset-0 z-10">
                 <canvas
                   ref={canvasRef}
-                  width={phoneConfig.width - 40}
-                  height={phoneConfig.height - 200}
-                  className="max-w-full max-h-full object-contain"
+                  width={phoneConfig.width}
+                  height={phoneConfig.height}
+                  className="w-full h-full object-contain"
                   style={{
                     backgroundColor: 'transparent'
                   }}
                 />
               </div>
 
-              {/* Main Text Overlay - Texte principal intégré dans le canvas */}
+              {/* Main Text Overlay - Texte principal sans fond sombre */}
               {(mainText || boutique) && (
-                <div className="absolute top-16 left-4 right-4 z-25 pointer-events-none">
-                  <div className="text-center bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/20">
-                    <h2 className="text-white font-bold text-lg leading-tight animate-pulse">
+                <div className="absolute top-20 left-4 right-4 z-25 pointer-events-none">
+                  <div className="text-center">
+                    <h2 
+                      className="text-white font-bold text-xl leading-tight drop-shadow-2xl"
+                      style={{
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5)'
+                      }}
+                    >
                       {mainText || boutique || 'Votre Business'}
                     </h2>
                   </div>
                 </div>
               )}
 
-              {/* Secondary Text - Informations business en temps réel positionnées au centre */}
+              {/* Secondary Text - Informations business bien réparties */}
               {secondaryText && (
                 <div className="absolute top-1/2 left-4 right-4 z-25 transform -translate-y-1/2">
-                  <div className="bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/30">
-                    <div className="text-white text-sm font-medium text-center space-y-1">
-                      {secondaryText.split('\n').map((line, i) => (
-                        <div key={i} className="flex items-center justify-center">
-                          {line}
-                        </div>
-                      ))}
-                    </div>
+                  <div className="text-center space-y-3">
+                    {secondaryText.split('\n').map((line, i) => (
+                      <div 
+                        key={i} 
+                        className="text-white text-sm font-medium px-2 py-1 rounded-lg"
+                        style={{
+                          textShadow: '1px 1px 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.5)',
+                          backgroundColor: 'rgba(0,0,0,0.1)',
+                          backdropFilter: 'blur(4px)'
+                        }}
+                      >
+                        {line}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Contact Information - Informations de contact en bas */}
+              {/* Contact Information - Design plus élégant */}
               {telephone && (
-                <div className="absolute bottom-20 left-4 right-4 z-25">
-                  <div className="bg-gradient-to-r from-green-600/80 to-green-500/80 backdrop-blur-md p-3 rounded-xl border border-green-400/30">
-                    <div className="text-white text-center">
-                      <div className="text-sm font-medium flex items-center justify-center">
+                <div className="absolute bottom-24 left-4 right-4 z-25">
+                  <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm p-3 rounded-2xl border border-green-400/20 shadow-lg">
+                    <div className="text-center">
+                      <div 
+                        className="text-white text-sm font-medium flex items-center justify-center"
+                        style={{
+                          textShadow: '1px 1px 2px rgba(0,0,0,0.7)'
+                        }}
+                      >
                         📞 {telephone}
                       </div>
-                      <div className="text-xs text-green-100 mt-1">
-                        Appelez maintenant !
+                      <div className="text-xs text-green-200 mt-1">
+                        Contactez-nous !
                       </div>
                     </div>
                   </div>

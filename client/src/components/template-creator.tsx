@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Smartphone, Sparkles, Eye, Download, Phone } from "lucide-react";
+import { Upload, Smartphone, Sparkles, Eye, Download, Phone, Wand2, Play, Settings } from "lucide-react";
 import type { Effect } from '@/types/effects';
 import { effectLoader } from '@/lib/effect-loader';
 import { PhoneMockupPreview } from './phone-mockup-preview';
@@ -21,77 +21,42 @@ interface TemplateCreatorProps {
 interface ScenarioTemplate {
   id: string;
   name: string;
-  level: 'basic' | 'standard' | 'premium' | 'masterclass';
-  description: string;
-  fields: {
-    name: string;
-    label: string;
-    type: 'text' | 'textarea' | 'tel';
-    placeholder: string;
-    required: boolean;
-  }[];
+  category: 'basic' | 'standard' | 'premium';
   mainTextTemplate: string;
   secondaryTextTemplate: string;
+  variables: string[];
+}
+
+interface ElementEffect {
+  elementId: string;
+  effect: Effect | null;
+  isActive: boolean;
 }
 
 const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
   {
-    id: 'basic-boutique',
+    id: 'boutique-simple',
     name: 'Boutique Simple',
-    level: 'basic',
-    description: 'Template basique pour présenter votre boutique',
-    fields: [
-      { name: 'boutique', label: 'Nom de la boutique', type: 'text', placeholder: 'Ma Belle Boutique', required: true },
-      { name: 'activite', label: 'Activité', type: 'text', placeholder: 'Mode & Accessoires', required: true },
-      { name: 'telephone', label: 'Téléphone WhatsApp', type: 'tel', placeholder: '+33 6 12 34 56 78', required: true }
-    ],
+    category: 'basic',
     mainTextTemplate: '{{boutique}}',
-    secondaryTextTemplate: '{{activite}}\n📞 {{telephone}}'
+    secondaryTextTemplate: '{{activite}}\n📞 {{telephone}}',
+    variables: ['boutique', 'activite', 'telephone']
   },
   {
-    id: 'standard-promo',
+    id: 'promotion-standard',
     name: 'Promotion Standard',
-    level: 'standard',
-    description: 'Template avec promotion et call-to-action',
-    fields: [
-      { name: 'boutique', label: 'Nom de la boutique', type: 'text', placeholder: 'Style & Co', required: true },
-      { name: 'promo', label: 'Promotion', type: 'text', placeholder: '-30% sur tout', required: true },
-      { name: 'duree', label: 'Durée', type: 'text', placeholder: 'Jusqu\'au 31/12', required: true },
-      { name: 'telephone', label: 'Téléphone WhatsApp', type: 'tel', placeholder: '+33 6 12 34 56 78', required: true }
-    ],
-    mainTextTemplate: '🔥 {{promo}} 🔥',
-    secondaryTextTemplate: 'Chez {{boutique}}\n⏰ {{duree}}\n📲 Contactez-nous'
+    category: 'standard',
+    mainTextTemplate: '🔥 {{promo}}',
+    secondaryTextTemplate: '{{boutique}}\n{{activite}}\n📞 {{telephone}}\n{{horaires}}',
+    variables: ['promo', 'boutique', 'activite', 'telephone', 'horaires']
   },
   {
-    id: 'premium-event',
+    id: 'evenement-premium',
     name: 'Événement Premium',
-    level: 'premium',
-    description: 'Template élaboré pour événements spéciaux',
-    fields: [
-      { name: 'boutique', label: 'Nom de la boutique', type: 'text', placeholder: 'Luxury Store', required: true },
-      { name: 'evenement', label: 'Événement', type: 'text', placeholder: 'Soldes d\'Hiver', required: true },
-      { name: 'reduction', label: 'Réduction', type: 'text', placeholder: 'Jusqu\'à -50%', required: true },
-      { name: 'condition', label: 'Condition', type: 'text', placeholder: 'Sur une sélection', required: false },
-      { name: 'adresse', label: 'Adresse', type: 'text', placeholder: '123 Rue de la Mode, Paris', required: false },
-      { name: 'telephone', label: 'Téléphone WhatsApp', type: 'tel', placeholder: '+33 6 12 34 56 78', required: true }
-    ],
-    mainTextTemplate: '✨ {{evenement}} ✨',
-    secondaryTextTemplate: '{{reduction}} {{condition}}\n📍 {{boutique}}\n{{adresse}}'
-  },
-  {
-    id: 'masterclass-luxury',
-    name: 'Luxe Masterclass',
-    level: 'masterclass',
-    description: 'Template haut de gamme avec storytelling',
-    fields: [
-      { name: 'boutique', label: 'Nom de la boutique', type: 'text', placeholder: 'Élégance Parisienne', required: true },
-      { name: 'histoire', label: 'Histoire/Message', type: 'textarea', placeholder: 'Découvrez notre nouvelle collection exclusive...', required: true },
-      { name: 'signature', label: 'Signature', type: 'text', placeholder: 'L\'art de vivre à la française', required: false },
-      { name: 'horaires', label: 'Horaires', type: 'text', placeholder: 'Lun-Sam 10h-19h', required: false },
-      { name: 'telephone', label: 'Téléphone WhatsApp', type: 'tel', placeholder: '+33 6 12 34 56 78', required: true }
-    ],
-    mainTextTemplate: '{{boutique}}',
-    secondaryTextTemplate: '{{histoire}}\n\n{{signature}}\n🕒 {{horaires}}'
+    category: 'premium',
+    mainTextTemplate: '✨ {{evenement}}',
+    secondaryTextTemplate: '{{boutique}}\n{{description}}\n📅 {{date}}\n🕒 {{horaires}}\n📞 {{telephone}}\n{{signature}}',
+    variables: ['evenement', 'boutique', 'description', 'date', 'horaires', 'telephone', 'signature']
   }
 ];
 
@@ -109,8 +74,15 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
   const [templateData, setTemplateData] = useState<Record<string, string>>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
-  const [selectedEffect, setSelectedEffect] = useState<Effect | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Gestion des effets par élément
+  const [elementEffects, setElementEffects] = useState<ElementEffect[]>([
+    { elementId: 'logo', effect: null, isActive: false },
+    { elementId: 'mainText', effect: null, isActive: false },
+    { elementId: 'secondaryText', effect: null, isActive: false },
+    { elementId: 'contact', effect: null, isActive: false }
+  ]);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -119,28 +91,32 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
     if (canvasRef.current) {
       effectLoader.setCanvas(canvasRef.current);
       previewEngine.setCanvas(canvasRef.current);
+      updateContainerSize();
     }
-  }, []);
-
-  useEffect(() => {
-    updateContainerSize();
-    // Synchroniser le format avec le preview engine
-    previewEngine.updateFormat(selectedFormat, 'whatsapp');
   }, [selectedFormat]);
 
   const updateContainerSize = () => {
-    const container = document.getElementById('effect-container');
-    if (container && FORMATS[selectedFormat as keyof typeof FORMATS]) {
-      const format = FORMATS[selectedFormat as keyof typeof FORMATS];
-      const scale = Math.min(400 / format.width, 600 / format.height, 1);
-      const scaledWidth = format.width * scale;
-      const scaledHeight = format.height * scale;
-
-      container.style.width = `${scaledWidth}px`;
-      container.style.height = `${scaledHeight}px`;
-      container.style.maxWidth = '100%';
-      container.style.maxHeight = '70vh';
+    if (!canvasRef.current) return;
+    
+    const format = FORMATS[selectedFormat as keyof typeof FORMATS];
+    if (format) {
+      const maxWidth = 350;
+      const maxHeight = 600;
+      const scale = Math.min(maxWidth / format.width, maxHeight / format.height, 1);
+      
+      canvasRef.current.width = format.width;
+      canvasRef.current.height = format.height;
+      canvasRef.current.style.width = `${Math.round(format.width * scale)}px`;
+      canvasRef.current.style.height = `${Math.round(format.height * scale)}px`;
     }
+  };
+
+  const generateTemplate = (template: string, data: Record<string, string>): string => {
+    let result = template;
+    Object.entries(data).forEach(([key, value]) => {
+      result = result.replace(new RegExp(`{{${key}}}`, 'g'), value || `[${key}]`);
+    });
+    return result;
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,144 +131,211 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
     }
   };
 
-  const handleTemplateDataChange = (field: string, value: string) => {
-    setTemplateData(prev => ({ ...prev, [field]: value }));
+  const handleWhatsAppContact = () => {
+    const phone = templateData.telephone;
+    if (phone) {
+      const message = encodeURIComponent(`Bonjour ${templateData.boutique || 'votre boutique'} !`);
+      window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`, '_blank');
+    }
   };
 
-  const generateTemplate = (template: string, data: Record<string, string>): string => {
-    return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      return data[key] || match;
-    });
-  };
-
-  const handleGenerate = async () => {
-    if (!selectedTemplate || !selectedEffect) return;
+  const applyEffectToElement = async (elementId: string, effect: Effect) => {
+    if (!canvasRef.current || isGenerating) return;
 
     setIsGenerating(true);
+    
+    // Mettre à jour l'état de l'effet pour cet élément
+    setElementEffects(prev => prev.map(item => 
+      item.elementId === elementId 
+        ? { ...item, effect, isActive: true }
+        : item
+    ));
+
     try {
-      const mainText = generateTemplate(selectedTemplate.mainTextTemplate, templateData);
-      const secondaryText = generateTemplate(selectedTemplate.secondaryTextTemplate, templateData);
-      
-      // Créer les éléments de scénario avec zones définies
-      const scenarioElements = [
-        { elementId: 'main', zoneId: 'title', text: mainText, effect: selectedEffect },
-        { elementId: 'secondary', zoneId: 'subtitle', text: secondaryText, effect: null },
-        { elementId: 'boutique', zoneId: 'logo', text: templateData.boutique || '', effect: null },
-        { elementId: 'contact', zoneId: 'footer', text: templateData.telephone || '', effect: null }
-      ].filter(el => el.text.trim()); // Garder seulement les éléments avec du contenu
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-      // Charger le scénario dans le preview engine
-      await previewEngine.loadScenario(scenarioElements);
+      // Définir les zones pour chaque élément selon le format
+      const zones = getElementZones(selectedFormat);
+      const zone = zones[elementId];
       
-      console.info('✅ Template généré avec zones définies:', scenarioElements);
+      if (!zone) return;
+
+      // Obtenir le contenu pour cet élément
+      let content = '';
+      switch (elementId) {
+        case 'logo':
+          content = logoPreview ? 'LOGO' : 'Logo';
+          break;
+        case 'mainText':
+          content = selectedTemplate ? generateTemplate(selectedTemplate.mainTextTemplate, templateData) : 'Texte Principal';
+          break;
+        case 'secondaryText':
+          content = selectedTemplate ? generateTemplate(selectedTemplate.secondaryTextTemplate, templateData) : 'Texte Secondaire';
+          break;
+        case 'contact':
+          content = templateData.telephone || 'Contact';
+          break;
+      }
+
+      // Créer un canvas temporaire pour cet élément
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = zone.width;
+      tempCanvas.height = zone.height;
+      
+      // Appliquer l'effet sur la zone spécifique
+      const options = {
+        fontSize: elementId === 'mainText' ? 32 : 24,
+        color: '#ffffff',
+        duration: 2000,
+        zone: zone
+      };
+
+      console.log(`✨ Application de l'effet ${effect.name} sur ${elementId}`);
+      await effect.execute(tempCanvas, content, options);
+      
+      // Copier le résultat sur le canvas principal
+      ctx.drawImage(tempCanvas, zone.x, zone.y);
+      
     } catch (error) {
-      console.error('❌ Erreur lors de la génération:', error);
-    } finally {
-      setIsGenerating(false);
+      console.error(`❌ Erreur lors de l'application de l'effet sur ${elementId}:`, error);
     }
+    
+    setIsGenerating(false);
   };
 
-  const handleWhatsAppContact = () => {
-    const phone = templateData.telephone?.replace(/\D/g, '');
-    if (phone) {
-      const message = encodeURIComponent(`Bonjour ! Je vous contacte depuis votre statut ${selectedTemplate?.name}`);
-      window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-    }
+  const getElementZones = (format: string) => {
+    const formatConfig = FORMATS[format as keyof typeof FORMATS];
+    if (!formatConfig) return {};
+
+    const { width, height } = formatConfig;
+    
+    return {
+      logo: {
+        x: 40,
+        y: 80,
+        width: 120,
+        height: 120
+      },
+      mainText: {
+        x: 40,
+        y: width > height ? 80 : 220,
+        width: width - 80,
+        height: 100
+      },
+      secondaryText: {
+        x: 40,
+        y: width > height ? 200 : height * 0.5,
+        width: width - 80,
+        height: 200
+      },
+      contact: {
+        x: 40,
+        y: height - 120,
+        width: width - 80,
+        height: 80
+      }
+    };
   };
 
-  const getRandomEffect = () => {
-    if (effects.length > 0) {
-      const randomEffect = effects[Math.floor(Math.random() * effects.length)];
-      setSelectedEffect(randomEffect);
+  const generateCompleteAnimation = async () => {
+    if (!canvasRef.current || !selectedTemplate) return;
+
+    setIsGenerating(true);
+    
+    try {
+      const ctx = canvasRef.current.getContext('2d');
+      if (!ctx) return;
+
+      // Nettoyer le canvas
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      
+      // Appliquer les effets séquentiellement pour chaque élément actif
+      for (const elementEffect of elementEffects) {
+        if (elementEffect.isActive && elementEffect.effect) {
+          await applyEffectToElement(elementEffect.elementId, elementEffect.effect);
+          // Délai entre les effets
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+      
+      console.log('✅ Animation complète générée avec succès');
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de la génération complète:', error);
     }
+    
+    setIsGenerating(false);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card className="bg-dark-surface border-dark-border">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Sparkles className="w-5 h-5 text-purple-500 mr-2" />
-            Générateur de Statuts Animés
-          </CardTitle>
-          <p className="text-sm text-slate-400">
-            Créez des statuts professionnels animés pour tous vos réseaux sociaux
-          </p>
-        </CardHeader>
-      </Card>
+      {/* Header avec contrôles principaux */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+            🎨 Template Creator Pro
+          </h2>
+          <p className="text-sm text-slate-400">Créez des contenus professionnels avec effets individualisés</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {/* Sélecteur de format */}
+          <Select value={selectedFormat} onValueChange={setSelectedFormat}>
+            <SelectTrigger className="w-32 bg-slate-800 border-slate-600">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-600">
+              {Object.entries(FORMATS).map(([key, format]) => (
+                <SelectItem key={key} value={key}>
+                  {key}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Configuration Panel */}
+          <Button 
+            onClick={generateCompleteAnimation}
+            disabled={isGenerating || !selectedTemplate}
+            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+          >
+            <Play className="w-4 h-4 mr-2" />
+            {isGenerating ? 'Génération...' : 'Générer Tout'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Panel de configuration */}
         <div className="space-y-6">
-          {/* Format Selection */}
-          <Card className="bg-dark-surface border-dark-border">
+          {/* Sélection du template */}
+          <Card className="bg-slate-800/50 border-slate-700/50">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                📐 Format du Statut
-                <Badge variant="outline" className="ml-2 text-xs">
-                  {FORMATS[selectedFormat as keyof typeof FORMATS]?.name}
-                </Badge>
+              <CardTitle className="flex items-center text-lg">
+                <Settings className="w-5 h-5 text-blue-400 mr-2" />
+                Choix du Template
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                {Object.entries(FORMATS).map(([key, format]) => (
-                  <Button
-                    key={key}
-                    variant={selectedFormat === key ? "default" : "outline"}
-                    onClick={() => setSelectedFormat(key)}
-                    className="h-auto p-3 flex flex-col items-center gap-1"
-                  >
-                    <div className="text-sm font-medium">{format.name.split(' ')[0]}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {format.width}×{format.height}
-                    </div>
-                    <div className="text-xs opacity-70">{key}</div>
-                  </Button>
-                ))}
-              </div>
-              
-              {/* Indicateur d'usage */}
-              <div className="text-xs text-slate-400 bg-slate-800/50 p-2 rounded">
-                💡 <strong>{selectedFormat}</strong> : 
-                {selectedFormat === '9:16' && ' Parfait pour les Stories (Instagram, WhatsApp, TikTok)'}
-                {selectedFormat === '1:1' && ' Idéal pour les posts Instagram et Facebook'}
-                {selectedFormat === '4:5' && ' Optimisé pour les posts Instagram portrait'}
-                {selectedFormat === '16:9' && ' Parfait pour YouTube et bannières Twitter'}
-                {selectedFormat === '3:4' && ' Format portrait classique'}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Template Selection */}
-          <Card className="bg-dark-surface border-dark-border">
-            <CardHeader>
-              <CardTitle className="text-lg">Scénario Template</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-3">
+            <CardContent className="space-y-4">
+              <div className="grid gap-3">
                 {SCENARIO_TEMPLATES.map((template) => (
                   <div
                     key={template.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
                       selectedTemplate?.id === template.id
-                        ? 'border-blue-500 bg-blue-500/10'
-                        : 'border-dark-border hover:border-slate-600'
+                        ? 'bg-blue-500/20 border-blue-500/50'
+                        : 'bg-slate-700/30 border-slate-600/50 hover:bg-slate-700/50'
                     }`}
                     onClick={() => setSelectedTemplate(template)}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium">{template.name}</h4>
-                        <p className="text-sm text-slate-400 mt-1">{template.description}</p>
+                        <h3 className="font-semibold text-white mb-1">{template.name}</h3>
+                        <p className="text-xs text-slate-400">Template {template.category}</p>
                       </div>
-                      <Badge variant={
-                        template.level === 'basic' ? 'secondary' :
-                        template.level === 'standard' ? 'default' :
-                        template.level === 'premium' ? 'destructive' : 'outline'
-                      }>
-                        {template.level}
+                      <Badge variant={template.category === 'premium' ? 'default' : 'outline'}>
+                        {template.category}
                       </Badge>
                     </div>
                   </div>
@@ -301,143 +344,128 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
             </CardContent>
           </Card>
 
-          {/* Logo Upload */}
-          <Card className="bg-dark-surface border-dark-border">
-            <CardHeader>
-              <CardTitle className="text-lg">Logo (Optionnel)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Button
-                  onClick={() => logoInputRef.current?.click()}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Uploader un logo PNG
-                </Button>
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept=".png"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                />
-                {logoPreview && (
-                  <div className="p-4 border border-dark-border rounded-lg">
-                    <img
-                      src={logoPreview}
-                      alt="Logo preview"
-                      className="max-w-full max-h-24 mx-auto"
-                    />
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Template Fields */}
+          {/* Configuration des éléments avec effets */}
           {selectedTemplate && (
-            <Card className="bg-dark-surface border-dark-border">
+            <Card className="bg-slate-800/50 border-slate-700/50">
               <CardHeader>
-                <CardTitle className="text-lg">Configuration du Template</CardTitle>
+                <CardTitle className="flex items-center text-lg">
+                  <Wand2 className="w-5 h-5 text-purple-400 mr-2" />
+                  Configuration & Effets
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {selectedTemplate.fields.map((field) => (
-                  <div key={field.name}>
-                    <Label htmlFor={field.name}>
-                      {field.label} {field.required && <span className="text-red-400">*</span>}
-                    </Label>
-                    {field.type === 'textarea' ? (
+              <CardContent className="space-y-6">
+                {/* Logo avec effet */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-slate-300">Logo (Optionnel)</Label>
+                    <div className="flex items-center gap-2">
+                      <Select onValueChange={(effectId) => {
+                        const effect = effects.find(e => e.id === effectId);
+                        if (effect) applyEffectToElement('logo', effect);
+                      }}>
+                        <SelectTrigger className="w-32 h-8 text-xs bg-slate-700 border-slate-600">
+                          <SelectValue placeholder="Effet" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-600">
+                          {effects.filter(e => e.name.includes('img')).map((effect) => (
+                            <SelectItem key={effect.id} value={effect.id} className="text-xs">
+                              {effect.name.replace('-img.js', '')}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        onClick={() => logoInputRef.current?.click()}
+                        variant="outline"
+                        size="sm"
+                        className="border-slate-600 hover:bg-slate-700"
+                      >
+                        <Upload className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  {logoPreview && (
+                    <div className="w-16 h-16 bg-slate-700 rounded-lg overflow-hidden">
+                      <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Variables du template avec effets */}
+                {selectedTemplate.variables.map((variable) => (
+                  <div key={variable} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-slate-300 capitalize">
+                        {variable}
+                      </Label>
+                      <Select onValueChange={(effectId) => {
+                        const effect = effects.find(e => e.id === effectId);
+                        if (effect) {
+                          const elementId = variable === selectedTemplate.variables[0] ? 'mainText' : 'secondaryText';
+                          applyEffectToElement(elementId, effect);
+                        }
+                      }}>
+                        <SelectTrigger className="w-32 h-8 text-xs bg-slate-700 border-slate-600">
+                          <SelectValue placeholder="Effet" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-600">
+                          {effects.filter(e => e.name.includes('texte')).map((effect) => (
+                            <SelectItem key={effect.id} value={effect.id} className="text-xs">
+                              {effect.name.replace('-texte.js', '')}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {variable === 'description' || variable === 'signature' ? (
                       <Textarea
-                        id={field.name}
-                        placeholder={field.placeholder}
-                        value={templateData[field.name] || ''}
-                        onChange={(e) => handleTemplateDataChange(field.name, e.target.value)}
-                        rows={3}
+                        placeholder={`Entrez ${variable}...`}
+                        value={templateData[variable] || ''}
+                        onChange={(e) => setTemplateData(prev => ({ ...prev, [variable]: e.target.value }))}
+                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 resize-none"
+                        rows={2}
                       />
                     ) : (
                       <Input
-                        id={field.name}
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        value={templateData[field.name] || ''}
-                        onChange={(e) => handleTemplateDataChange(field.name, e.target.value)}
+                        placeholder={`Entrez ${variable}...`}
+                        value={templateData[variable] || ''}
+                        onChange={(e) => setTemplateData(prev => ({ ...prev, [variable]: e.target.value }))}
+                        className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400"
                       />
                     )}
                   </div>
                 ))}
+
+                {/* Statut des effets actifs */}
+                <div className="mt-6 p-3 bg-slate-700/20 rounded-lg">
+                  <h4 className="text-sm font-medium text-slate-300 mb-2">🎯 Effets Actifs</h4>
+                  <div className="space-y-1">
+                    {elementEffects.map((item) => (
+                      <div key={item.elementId} className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400 capitalize">{item.elementId}</span>
+                        <Badge variant={item.isActive ? "default" : "outline"} className="h-5">
+                          {item.isActive && item.effect ? item.effect.name.split('-')[0] : 'Aucun'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
-
-          {/* Effect Selection */}
-          <Card className="bg-dark-surface border-dark-border">
-            <CardHeader>
-              <CardTitle className="text-lg">Effet Visuel</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Select 
-                  value={selectedEffect?.id || ''} 
-                  onValueChange={(value) => {
-                    const effect = effects.find(e => e.id === value);
-                    setSelectedEffect(effect || null);
-                  }}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Choisir un effet..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {effects.map((effect, index) => (
-                      <SelectItem key={`${effect.id}-${index}`} value={effect.id}>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs px-1 py-0.5 rounded bg-blue-600 text-white">
-                            {effect.type === 'text' ? 'TXT' : effect.type === 'image' ? 'IMG' : 'UNI'}
-                          </span>
-                          <span>{effect.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button onClick={getRandomEffect} variant="outline">
-                  <Sparkles className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              {selectedEffect && (
-                <div className="p-3 bg-slate-800/50 rounded-lg">
-                  <p className="text-sm text-slate-300">{selectedEffect.description}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Generate Button */}
-          <Button
-            onClick={handleGenerate}
-            disabled={!selectedTemplate || !selectedEffect || isGenerating}
-            className="w-full bg-blue-600 hover:bg-blue-700"
-            size="lg"
-          >
-            {isGenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Génération...
-              </>
-            ) : (
-              <>
-                <Eye className="w-4 h-4 mr-2" />
-                Générer le Statut
-              </>
-            )}
-          </Button>
         </div>
 
         {/* Preview Panel */}
         <div className="space-y-6">
-          <Card className="bg-dark-surface border-dark-border">
+          <Card className="bg-slate-800/30 border-slate-700/50">
             <CardHeader>
               <CardTitle className="text-lg">Aperçu Réaliste du Statut</CardTitle>
               <p className="text-sm text-slate-400">
@@ -458,44 +486,24 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
             </CardContent>
           </Card>
 
-          {/* Preview Info */}
-          {selectedTemplate && (
-            <Card className="bg-dark-surface border-dark-border">
-              <CardHeader>
-                <CardTitle className="text-lg">Textes Générés</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-sm font-medium text-slate-300">Texte Principal:</Label>
-                  <div className="mt-1 p-2 bg-slate-800 rounded text-sm">
-                    {generateTemplate(selectedTemplate.mainTextTemplate, templateData)}
-                  </div>
+          {/* Actions d'export */}
+          <Card className="bg-gradient-to-br from-green-500/10 to-blue-500/10 border-green-500/20">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="flex justify-center gap-3">
+                  <Button variant="outline" className="border-green-500/50 text-green-400 hover:bg-green-500/10">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export GIF
+                  </Button>
+                  <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                    <Smartphone className="w-4 h-4 mr-2" />
+                    Export MP4
+                  </Button>
                 </div>
-                <div>
-                  <Label className="text-sm font-medium text-slate-300">Texte Secondaire:</Label>
-                  <div className="mt-1 p-2 bg-slate-800 rounded text-sm whitespace-pre-line">
-                    {generateTemplate(selectedTemplate.secondaryTextTemplate, templateData)}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Export Options */}
-          <Card className="bg-dark-surface/50 border-dark-border border-dashed opacity-75">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center">
-                <Download className="w-5 h-5 text-slate-500 mr-2" />
-                Export (Bientôt)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button disabled className="w-full bg-slate-700/50 text-slate-500 cursor-not-allowed">
-                Télécharger en MP4
-              </Button>
-              <Button disabled className="w-full bg-slate-700/50 text-slate-500 cursor-not-allowed">
-                Télécharger en GIF
-              </Button>
+                <p className="text-xs text-slate-500">
+                  Exportez votre création avec tous les effets appliqués
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
