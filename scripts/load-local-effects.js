@@ -31,22 +31,49 @@ function categorizeEffect(filename) {
   return { category: 'both', type: 'animation' };
 }
 
+function extractFunctionName(content) {
+  // Chercher différents patterns de fonctions
+  const patterns = [
+    /function\s+(\w+)\s*\(/,
+    /const\s+(\w+)\s*=\s*function/,
+    /let\s+(\w+)\s*=\s*function/,
+    /var\s+(\w+)\s*=\s*function/,
+    /(\w+)\s*:\s*function/,
+    /function\s*(\w+)\s*\(/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return 'effectFunction';
+}
+
 function convertEffectToLocalFormat(filename, content) {
   const effectInfo = categorizeEffect(filename);
   const baseName = filename.replace(/-(texte|img)\.js$/, '').replace(/-/g, ' ');
   const effectId = baseName.toLowerCase().replace(/\s+/g, '-');
   
-  // Analyser le contenu pour extraire la fonction principale
-  const functionMatch = content.match(/function\s+(\w+)\s*\([^)]*\)\s*\{/);
-  const functionName = functionMatch ? functionMatch[1] : 'effectFunction';
+  // Extraire le nom de la fonction principale
+  const functionName = extractFunctionName(content);
   
-  // Créer un export ES6 compatible
-  const wrappedContent = `
+  // Nettoyer le contenu pour éviter les conflits
+  let cleanContent = content.trim();
+  
+  // Si le contenu ne contient pas déjà d'export, on l'ajoute
+  if (!cleanContent.includes('export') && !cleanContent.includes('module.exports')) {
+    // Créer un wrapper ES6 compatible
+    const wrappedContent = `
 // Effect: ${baseName.toUpperCase()}
-${content}
+// Auto-converted from Effect directory
 
-// Export JSfile compatible
-export const ${effectId.replace(/-/g, '')}Effect = {
+${cleanContent}
+
+// Export ES6 compatible
+const effectConfig = {
   id: "${effectId}",
   name: "${baseName.toUpperCase()}",
   description: "Effet ${baseName.toLowerCase()} ${effectInfo.category === 'text' ? 'pour texte' : effectInfo.category === 'image' ? 'pour image' : 'universel'}",
@@ -58,13 +85,26 @@ export const ${effectId.replace(/-/g, '')}Effect = {
     logo: true,
     background: true
   },
-  tags: ["${effectInfo.category}", "${effectInfo.type}", "jsfile"],
-  engine: ${functionName}
+  tags: ["${effectInfo.category}", "${effectInfo.type}", "local"],
+  engine: typeof ${functionName} !== 'undefined' ? ${functionName} : function() { console.warn('Effect function not found'); }
 };
 
-export default ${effectId.replace(/-/g, '')}Effect;
+export const ${effectId.replace(/-/g, '')}Effect = effectConfig;
+export default effectConfig;
 `;
 
+    return {
+      id: effectId,
+      name: baseName.toUpperCase(),
+      description: `Effet ${baseName.toLowerCase()} ${effectInfo.category === 'text' ? 'pour texte' : effectInfo.category === 'image' ? 'pour image' : 'universel'}`,
+      category: effectInfo.category,
+      type: effectInfo.type,
+      filename: `${effectId}.js`,
+      content: wrappedContent
+    };
+  }
+  
+  // Si le contenu contient déjà des exports, on le garde tel quel
   return {
     id: effectId,
     name: baseName.toUpperCase(),
@@ -72,7 +112,7 @@ export default ${effectId.replace(/-/g, '')}Effect;
     category: effectInfo.category,
     type: effectInfo.type,
     filename: `${effectId}.js`,
-    content: wrappedContent
+    content: cleanContent
   };
 }
 
