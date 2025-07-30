@@ -16,7 +16,7 @@ function scanJSfileEffects() {
   
   if (!fs.existsSync(JSFILE_DIR)) {
     console.error(`❌ JSfile directory not found: ${JSFILE_DIR}`);
-    return;
+    return null;
   }
   
   const files = fs.readdirSync(JSFILE_DIR);
@@ -24,11 +24,15 @@ function scanJSfileEffects() {
   
   console.log(`📁 Found ${effectFiles.length} effect files in JSfile directory`);
   
-  const mapping = {};
+  // Trier les fichiers par ordre alphabétique
+  effectFiles.sort();
   
-  effectFiles.forEach(filename => {
+  const mapping = {};
+  const effectsList = [];
+  
+  effectFiles.forEach((filename, index) => {
     const baseName = filename.replace('.effect.js', '');
-    const id = baseName.toLowerCase().replace(/\s+/g, '-');
+    const id = baseName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
     const name = baseName.toUpperCase();
     
     // Déterminer la catégorie basée sur le nom
@@ -57,7 +61,7 @@ function scanJSfileEffects() {
       type = 'special';
     }
     
-    mapping[filename] = {
+    const effectData = {
       id,
       name,
       description: `${name.charAt(0) + name.slice(1).toLowerCase().replace(/-/g, ' ')} effect`,
@@ -65,26 +69,67 @@ function scanJSfileEffects() {
       type
     };
     
-    console.log(`✅ Mapped: ${filename} -> ${name} (${category}/${type})`);
+    mapping[filename] = effectData;
+    effectsList.push(`'${filename}'`);
+    
+    console.log(`✅ ${index + 1}. Mapped: ${filename} -> ${name} (${category}/${type})`);
   });
   
   // Générer le code TypeScript pour le mapping
   const mappingCode = `// Auto-generated mapping from JSfile directory scan
-const JS_FILE_EFFECTS_MAPPING = ${JSON.stringify(mapping, null, 2).replace(/"([^"]+)":/g, "'$1':")};`;
+// Generated on: ${new Date().toISOString()}
+// Total effects: ${effectFiles.length}
+
+const JS_FILE_EFFECTS_MAPPING = ${JSON.stringify(mapping, null, 2).replace(/"([^"]+)":/g, "'$1':")};
+
+export { JS_FILE_EFFECTS_MAPPING };`;
+  
+  // Générer la liste des effets pour le loader
+  const effectsListCode = `// Auto-generated effects list from JSfile directory scan
+// Generated on: ${new Date().toISOString()}
+// Total effects: ${effectFiles.length}
+
+const KNOWN_JSFILE_EFFECTS = [
+${effectsList.map(effect => `  ${effect}`).join(',\n')}
+];
+
+export { KNOWN_JSFILE_EFFECTS };`;
   
   console.log('\n📝 Generated mapping code:');
   console.log(mappingCode);
   
-  // Sauvegarder dans un fichier temporaire
-  const outputFile = path.join(__dirname, 'jsfile-mapping.ts');
-  fs.writeFileSync(outputFile, mappingCode, 'utf8');
-  console.log(`💾 Mapping saved to: ${outputFile}`);
+  console.log('\n📝 Generated effects list:');
+  console.log(effectsListCode);
   
-  return mapping;
+  // Sauvegarder dans des fichiers temporaires
+  const mappingFile = path.join(__dirname, 'jsfile-mapping.ts');
+  const effectsListFile = path.join(__dirname, 'jsfile-effects-list.ts');
+  
+  fs.writeFileSync(mappingFile, mappingCode, 'utf8');
+  fs.writeFileSync(effectsListFile, effectsListCode, 'utf8');
+  
+  console.log(`💾 Mapping saved to: ${mappingFile}`);
+  console.log(`💾 Effects list saved to: ${effectsListFile}`);
+  
+  // Suggestions pour la mise à jour
+  console.log('\n💡 To update the loader, copy the KNOWN_JSFILE_EFFECTS array to:');
+  console.log('   client/src/lib/local-effects-loader.ts');
+  
+  return {
+    mapping,
+    effectsList: effectFiles,
+    totalEffects: effectFiles.length
+  };
 }
 
 if (require.main === module) {
-  scanJSfileEffects();
+  const result = scanJSfileEffects();
+  if (result) {
+    console.log(`\n🎯 Scan completed: ${result.totalEffects} effects found`);
+  } else {
+    console.log('\n💥 Scan failed!');
+    process.exit(1);
+  }
 }
 
 module.exports = { scanJSfileEffects };
