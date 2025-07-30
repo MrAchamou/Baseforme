@@ -264,22 +264,6 @@ export class EffectLoader {
 
   getLoadedEffectsCount(): number {
     return this.loadedEffects.size;
-  } this.canvas,
-        ctx: ctx
-      };
-
-      // Execute the effect function with proper context
-      if (typeof effect.execute === 'function') {
-        effect.execute(this.canvas, text, effectOptions);
-      } else if (typeof effect === 'function') {
-        // Some effects might be direct functions
-        effect(this.canvas, text, effectOptions);
-      } else {
-        console.warn(`Effect ${effectId} does not have an execute function`);
-      }
-    } catch (error) {
-      console.error(`Error executing effect ${effectId}:`, error);
-    }
   }
 }
 
