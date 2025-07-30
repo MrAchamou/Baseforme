@@ -274,10 +274,10 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                         // Détermine le type d'élément pour filtrer les effets
                         const isImageElement = ['boutique', 'offre', 'signature', 'logo'].includes(element.id);
                         const isTextElement = !isImageElement;
-                        
+
                         // Filtre les effets selon le type d'élément
                         let availableEffects: Effect[] = [];
-                        
+
                         if (isImageElement) {
                           // Pour les éléments image/logo : effets image ou both
                           availableEffects = effects.filter(e => 
@@ -294,7 +294,6 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                         const recommendedEffects = availableEffects.filter(e => 
                           e.name.includes('FIRE') || e.name.includes('ELECTRIC') || 
                           e.name.includes('CRYSTAL') || e.name.includes('PLASMA') ||
-                          e.name.includes('GLOW') || e.name.includes('SPARKLE') ||
                           e.name.includes('TYPEWRITER') || e.name.includes('WAVE')
                         ).slice(0, 5);
 
@@ -329,7 +328,7 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                                     </div>
                                   </SelectItem>
                                 ))}
-                                
+
                                 {otherEffects.length > 0 && <Separator className="my-2" />}
                               </>
                             )}
@@ -368,7 +367,7 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                       })()}
                     </SelectContent>
                   </Select>
-                  
+
                   {/* Indicateur du type d'élément */}
                   <div className="mt-1 text-xs text-muted-foreground">
                     {['boutique', 'offre', 'signature', 'logo'].includes(element.id) ? (

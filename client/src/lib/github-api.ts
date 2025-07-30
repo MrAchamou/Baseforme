@@ -410,8 +410,9 @@ async function discoverEffectsFromRepository(): Promise<string[]> {
     console.info(`Discovered ${effectNames.length} effect directories`);
     return effectNames;
   } catch (error) {
-    console.error('Failed to discover effects from repository:', error);
-    throw error;
+    console.error('Erreur lors du chargement des effets:', error);
+    // Retourner un tableau vide plutôt que de lancer l'erreur pour plus de robustesse
+    return [];
   }
 }
 

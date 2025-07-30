@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimationCanvas } from '@/components/animation-canvas';
-import { AnimationCanvas } from '@/components/animation-canvas';
 import { EffectStatus } from '@/components/effect-status';
 import { ScenarioControls } from '@/components/scenario-controls';
 import { ScenarioPlayer } from '@/components/scenario-player';
@@ -27,7 +26,7 @@ export default function Home() {
   });
   const [canExport, setCanExport] = useState(false);
   const [currentTab, setCurrentTab] = useState<string>('scenario');
-
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const queryClient = useQueryClient();

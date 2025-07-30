@@ -36,6 +36,25 @@ export interface EffectStats {
   avgLoadTime: string;
 }
 
+export interface ScenarioElement {
+  id: string;
+  type: 'text' | 'effect' | 'transition';
+  content?: string;
+  effectId?: string;
+  duration?: number;
+  delay?: number;
+}
+
+export interface Scenario {
+  id: string;
+  title: string;
+  description?: string;
+  elements?: ScenarioElement[];
+  content?: string;
+  text?: string;
+  duration?: number;
+}
+
 export type ScenarioType = 'BASIC' | 'PROMOTION' | 'PREMIUM' | 'DYNAMIQUE' | 'STORYTELLING' | 'EXCLUSIVE';
 
 export interface ScenarioElement {
