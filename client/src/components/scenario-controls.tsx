@@ -18,9 +18,9 @@ interface ScenarioControlsProps {
 }
 
 export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: ScenarioControlsProps) {
-  const [selectedType, setSelectedType] = useState<ScenarioType>('BASIC');
+  const [selectedType, setSelectedType] = useState<ScenarioType>('INTRODUCTION');
   const [scenarioConfig, setScenarioConfig] = useState<ScenarioConfig>({
-    type: 'BASIC',
+    type: 'INTRODUCTION',
     customElements: {}
   });
 

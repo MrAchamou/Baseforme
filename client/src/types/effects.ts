@@ -56,7 +56,7 @@ export interface Scenario {
   duration?: number;
 }
 
-export type ScenarioType = 'BASIC' | 'PROMOTION' | 'PREMIUM' | 'DYNAMIQUE' | 'STORYTELLING' | 'EXCLUSIVE';
+export type ScenarioType = 'INTRODUCTION' | 'PRESENTATION' | 'PROMOTION' | 'URGENCE' | 'HISTOIRE' | 'EXCLUSIF';
 
 export interface ScenarioElement {
   id: string;
@@ -69,10 +69,10 @@ export interface ScenarioElement {
 }
 
 export interface ScenarioTemplate {
-  type: ScenarioType;
+  id: ScenarioType;
   name: string;
-  description: string;
   emoji: string;
+  description: string;
   elements: ScenarioElement[];
 }
 

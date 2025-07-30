@@ -1,382 +1,169 @@
-import { ScenarioTemplate, ScenarioType } from '@/types/effects';
+import { ScenarioType, ScenarioTemplate } from '@/types/effects';
 
-export interface ScenarioElement {
-  id: string;
-  label: string;
-  text: string;
-  effectId: string;
-  duration: number;
-  emoji?: string;
-  required?: boolean;
-  type?: 'text' | 'image' | 'both'; // Type d'élément pour le filtrage
-  zone: 'logo' | 'title' | 'subtitle' | 'cta' | 'footer'; // Zone obligatoire sur le canvas
-}
-
-export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {
-  BASIC: {
-    type: 'BASIC',
+export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
+  {
+    id: 'INTRODUCTION' as ScenarioType,
     name: 'Introduction Simple',
-    description: 'Présentation professionnelle basique',
-    emoji: '✅',
-    elements: [
-      {
-        id: 'welcome',
-        label: 'Message d\'accueil',
-        text: 'Bienvenue !',
-        effectId: '',
-        duration: 2000,
-        emoji: '👋',
-        required: true,
-        type: 'text',
-        zone: 'title'
-      },
-      {
-        id: 'boutique',
-        label: 'Nom de la boutique',
-        text: '',
-        effectId: '',
-        duration: 3000,
-        emoji: '🏪',
-        required: true,
-        type: 'both',
-        zone: 'logo'
-      },
-      {
-        id: 'activite',
-        label: 'Type d\'activité',
-        text: '',
-        effectId: '',
-        duration: 2500,
-        emoji: '💼',
-        required: true,
-        type: 'text',
-        zone: 'subtitle'
-      },
-      {
-        id: 'slogan',
-        label: 'Slogan',
-        text: '',
-        effectId: '',
-        duration: 3000,
-        emoji: '✨',
-        required: false,
-        type: 'text',
-        zone: 'subtitle'
-      },
-      {
-        id: 'contact',
-        label: 'Contact',
-        text: '',
-        effectId: '',
-        duration: 2000,
-        emoji: '📞',
-        required: true,
-        type: 'text',
-        zone: 'cta'
-      }
-    ]
-  },
-
-  PROMOTION: {
-    type: 'PROMOTION',
-    name: 'Offre Promotionnelle',
-    description: 'Mise en avant d\'une offre ou réduction',
-    emoji: '💥',
-    elements: [
-      {
-        id: 'accroche',
-        label: 'Accroche promotionnelle',
-        text: 'OFFRE SPÉCIALE !',
-        effectId: '',
-        duration: 2500,
-        emoji: '🔥',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'offre',
-        label: 'Détails de l\'offre',
-        text: '',
-        effectId: '',
-        duration: 4000,
-        emoji: '🎉',
-        required: true,
-        type: 'both'
-      },
-      {
-        id: 'boutique',
-        label: 'Nom de la boutique',
-        text: '',
-        effectId: '',
-        duration: 2000,
-        emoji: '🏪',
-        required: true,
-        type: 'both'
-      },
-      {
-        id: 'duree',
-        label: 'Durée de l\'offre',
-        text: '',
-        effectId: '',
-        duration: 2500,
-        emoji: '⏳',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'action',
-        label: 'Appel à l\'action',
-        text: '',
-        effectId: '',
-        duration: 3000,
-        emoji: '📲',
-        required: true,
-        type: 'text'
-      }
-    ]
-  },
-
-  PREMIUM: {
-    type: 'PREMIUM',
-    name: 'Présentation Luxueuse',
-    description: 'Présentation élégante et raffinée',
-    emoji: '💎',
-    elements: [
-      {
-        id: 'intro',
-        label: 'Message raffiné',
-        text: '',
-        effectId: '',
-        duration: 3500,
-        emoji: '✨',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'boutique',
-        label: 'Nom boutique + secteur',
-        text: '',
-        effectId: '',
-        duration: 3000,
-        emoji: '💎',
-        required: true,
-        type: 'both'
-      },
-      {
-        id: 'mission',
-        label: 'Slogan ou mission',
-        text: '',
-        effectId: '',
-        duration: 4000,
-        emoji: '🌟',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'signature',
-        label: 'Signature élégante',
-        text: '',
-        effectId: '',
-        duration: 2500,
-        emoji: '👑',
-        required: false,
-        type: 'text'
-      },
-      {
-        id: 'contact',
-        label: 'Contact discret',
-        text: '',
-        effectId: '',
-        duration: 2000,
-        emoji: '📧',
-        required: true,
-        type: 'text'
-      }
-    ]
-  },
-
-  DYNAMIQUE: {
-    type: 'DYNAMIQUE',
-    name: 'Urgence / Dynamique',
-    description: 'Créer un sentiment d\'urgence',
-    emoji: '🚀',
-    elements: [
-      {
-        id: 'urgence',
-        label: 'Phrase d\'urgence',
-        text: 'DERNIERS JOURS !',
-        effectId: '',
-        duration: 2000,
-        emoji: '⚡',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'offre',
-        label: 'Offre limitée',
-        text: '',
-        effectId: '',
-        duration: 3000,
-        emoji: '🔥',
-        required: true,
-        type: 'both'
-      },
-      {
-        id: 'timer',
-        label: 'Indicateur temps',
-        text: '',
-        effectId: '',
-        duration: 2500,
-        emoji: '⏳',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'action',
-        label: 'Call-to-action rapide',
-        text: '',
-        effectId: '',
-        duration: 2000,
-        emoji: '🎯',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'contact',
-        label: 'Contact direct',
-        text: '',
-        effectId: '',
-        duration: 1500,
-        emoji: '📲',
-        required: true,
-        type: 'text'
-      }
-    ]
-  },
-
-  STORYTELLING: {
-    type: 'STORYTELLING',
-    name: 'Histoire Émotionnelle',
-    description: 'Narration courte et inspirante',
-    emoji: '🧠',
+    emoji: '👋',
+    description: 'Présentation professionnelle basique avec une séquence d\'introduction élégante et rapide',
     elements: [
       {
         id: 'debut',
-        label: 'Début narratif',
-        text: 'Tout a commencé...',
-        effectId: '',
-        duration: 3500,
-        emoji: '📖',
-        required: true,
-        type: 'text'
+        emoji: '✨',
+        label: 'Message d\'accueil',
+        text: 'Bienvenue chez nous !',
+        effectId: 'neon-glow',
+        duration: 3000,
+        required: true
       },
       {
-        id: 'valeurs',
-        label: 'Valeurs de la marque',
-        text: '',
-        effectId: '',
+        id: 'signature',
+        emoji: '🏢',
+        label: 'Nom de l\'entreprise',
+        text: 'Mon Entreprise',
+        effectId: 'fire-write',
         duration: 4000,
-        emoji: '❤️',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'evolution',
-        label: 'Moment clé',
-        text: '',
-        effectId: '',
-        duration: 3500,
-        emoji: '🌟',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'inspiration',
-        label: 'Message inspirant',
-        text: '',
-        effectId: '',
-        duration: 4000,
-        emoji: '🚀',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'contact',
-        label: 'Contact discret',
-        text: '',
-        effectId: '',
-        duration: 2000,
-        emoji: '🔗',
-        required: true,
-        type: 'text'
+        required: true
       }
     ]
   },
-
-  EXCLUSIVE: {
-    type: 'EXCLUSIVE',
-    name: 'Exclusif / VIP',
-    description: 'Message pour clientèle spéciale',
-    emoji: '🎁',
+  {
+    id: 'PROMOTION' as ScenarioType,
+    name: 'Offre Promotionnelle',
+    emoji: '🎯',
+    description: 'Message pour clientèle spécialisée avec présentation d\'offre attrayante et incitation',
     elements: [
       {
-        id: 'exclusif',
-        label: 'Message exclusif',
-        text: 'Pour nos clients fidèles...',
-        effectId: '',
-        duration: 3000,
-        emoji: '👑',
-        required: true,
-        type: 'text'
-      },
-      {
-        id: 'avantage',
-        label: 'Avantage VIP',
-        text: '',
-        effectId: '',
-        duration: 4000,
+        id: 'offre',
         emoji: '🎁',
-        required: true,
-        type: 'both'
+        label: 'Titre de l\'offre',
+        text: 'Offre Spéciale -50%',
+        effectId: 'electric-spark',
+        duration: 3500,
+        required: true
       },
       {
         id: 'boutique',
+        emoji: '🏪',
         label: 'Nom de la boutique',
-        text: '',
-        effectId: '',
+        text: 'Ma Boutique',
+        effectId: 'crystal-shine',
+        duration: 4000,
+        required: true
+      }
+    ]
+  },
+  {
+    id: 'PRESENTATION' as ScenarioType,
+    name: 'Présentation Luxe',
+    emoji: '💎',
+    description: 'Présentation professionnelle haut de gamme avec séquence sophistiquée et raffinée',
+    elements: [
+      {
+        id: 'valeurs',
+        emoji: '⭐',
+        label: 'Valeurs de l\'entreprise',
+        text: 'Excellence • Innovation • Qualité',
+        effectId: 'liquid-morph',
+        duration: 5000,
+        required: true
+      },
+      {
+        id: 'evolution',
+        emoji: '📈',
+        label: 'Message d\'évolution',
+        text: 'Nous évoluons constamment pour vous servir',
+        effectId: 'plasma-wave',
+        duration: 4500,
+        required: true
+      }
+    ]
+  },
+  {
+    id: 'URGENCE' as ScenarioType,
+    name: 'Urgence / Dynamique',
+    emoji: '🚀',
+    description: 'Créer un sentiment d\'urgence avec animation courte et message énergique',
+    elements: [
+      {
+        id: 'urgence',
+        emoji: '⚡',
+        label: 'Message d\'urgence',
+        text: 'Dernières heures !',
+        effectId: 'fire-burst',
         duration: 2500,
-        emoji: '💎',
-        required: true,
-        type: 'both'
+        required: true
       },
       {
-        id: 'prive',
-        label: 'Accès privé',
-        text: '',
-        effectId: '',
+        id: 'action',
+        emoji: '💥',
+        label: 'Appel à l\'action',
+        text: 'Réservez maintenant',
+        effectId: 'electric-storm',
         duration: 3000,
-        emoji: '🔐',
-        required: false,
-        type: 'text'
+        required: true
+      }
+    ]
+  },
+  {
+    id: 'HISTOIRE' as ScenarioType,
+    name: 'Histoire Emotionnelle',
+    emoji: '💝',
+    description: 'Narration courte et impactante pour clientèle spécialisée',
+    elements: [
+      {
+        id: 'emotion',
+        emoji: '❤️',
+        label: 'Message émotionnel',
+        text: 'Votre bonheur, notre passion',
+        effectId: 'heartbeat',
+        duration: 4000,
+        required: true
       },
       {
-        id: 'contact',
-        label: 'Contact spécial',
-        text: '',
-        effectId: '',
-        duration: 2000,
-        emoji: '📧',
-        required: true,
-        type: 'text'
+        id: 'histoire',
+        emoji: '📖',
+        label: 'Notre histoire',
+        text: 'Depuis 10 ans à vos côtés',
+        effectId: 'typewriter',
+        duration: 5000,
+        required: true
+      }
+    ]
+  },
+  {
+    id: 'EXCLUSIF' as ScenarioType,
+    name: 'Exclusif / VIP',
+    emoji: '👑',
+    description: 'Message pour clientèle spécialisée avec traitement VIP exclusif',
+    elements: [
+      {
+        id: 'exclusivite',
+        emoji: '💎',
+        label: 'Message exclusif',
+        text: 'Accès VIP Exclusif',
+        effectId: 'crystal-formation',
+        duration: 4000,
+        required: true
+      },
+      {
+        id: 'privilege',
+        emoji: '🌟',
+        label: 'Privilège client',
+        text: 'Vous êtes privilégié',
+        effectId: 'golden-sparkle',
+        duration: 3500,
+        required: true
       }
     ]
   }
-};
+];
 
 export function getScenarioTemplate(type: ScenarioType): ScenarioTemplate {
-  return SCENARIO_TEMPLATES[type];
+  const template = SCENARIO_TEMPLATES.find(t => t.id === type);
+  return template || SCENARIO_TEMPLATES[0];
 }
 
 export function getAllScenarioTypes(): ScenarioType[] {
-  return Object.keys(SCENARIO_TEMPLATES) as ScenarioType[];
+  return SCENARIO_TEMPLATES.map(t => t.id);
 }
