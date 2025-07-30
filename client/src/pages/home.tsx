@@ -187,15 +187,94 @@ export default function Home() {
   };
 
   const handleExportGif = async () => {
-    // TODO: Implement GIF export functionality
-    console.log("Exporting as GIF...");
-    alert("L'export GIF sera bientôt disponible !");
+    if (!canvasRef.current || !selectedEffect) {
+      alert('❌ Veuillez d\'abord générer une animation.');
+      return;
+    }
+
+    try {
+      const { default: GIF } = await import('gif.js');
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: canvasRef.current.width,
+        height: canvasRef.current.height,
+        workerScript: '/gif.worker.js'
+      });
+
+      // Record animation frames
+      let frameCount = 0;
+      const maxFrames = 60; // 3 seconds at 20fps
+      
+      const recordFrame = () => {
+        if (frameCount < maxFrames) {
+          gif.addFrame(canvasRef.current!, { delay: 50 });
+          frameCount++;
+          setTimeout(recordFrame, 50);
+        } else {
+          gif.on('finished', (blob: Blob) => {
+            const link = document.createElement('a');
+            link.download = `animation-${selectedEffect.name.toLowerCase().replace(/\s+/g, '-')}.gif`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            console.log('✅ Export GIF réussi');
+          });
+          gif.render();
+        }
+      };
+
+      // Start animation and recording
+      handleGenerate();
+      setTimeout(recordFrame, 500);
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'export GIF:', error);
+      alert('Erreur lors de l\'export GIF');
+    }
   };
 
   const handleExportMp4 = async () => {
-    // TODO: Implement MP4 export functionality  
-    console.log("Exporting as MP4...");
-    alert("L'export MP4 sera bientôt disponible !");
+    if (!canvasRef.current || !selectedEffect) {
+      alert('❌ Veuillez d\'abord générer une animation.');
+      return;
+    }
+
+    try {
+      const stream = canvasRef.current.captureStream(30);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9'
+      });
+
+      const chunks: Blob[] = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const link = document.createElement('a');
+        link.download = `animation-${selectedEffect.name.toLowerCase().replace(/\s+/g, '-')}.webm`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        console.log('✅ Export MP4 réussi');
+      };
+
+      // Start recording and animation
+      mediaRecorder.start();
+      handleGenerate();
+      
+      // Stop recording after 5 seconds
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 5000);
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'export MP4:', error);
+      alert('Erreur lors de l\'export MP4');
+    }
   };
 
   if (error) {

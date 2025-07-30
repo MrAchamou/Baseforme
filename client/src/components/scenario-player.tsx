@@ -209,23 +209,101 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
     }
   };
 
-  const exportCanvasAsImage = () => {
-    if (!canvasRef.current) {
+  const exportCanvasAsGif = async () => {
+    if (!canvasRef.current || !effectLoader) {
       alert('❌ Aucun contenu à exporter. Veuillez d\'abord lancer une étape du scénario.');
       return;
     }
 
     try {
-      // Create download link
-      const link = document.createElement('a');
-      link.download = `scenario-step-${currentStep + 1}.png`;
-      link.href = canvasRef.current.toDataURL('image/png');
-      link.click();
+      const { default: GIF } = await import('gif.js');
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: canvasRef.current.width,
+        height: canvasRef.current.height,
+        workerScript: '/gif.worker.js'
+      });
+
+      const step = steps[currentStep];
+      const effect = effects.find(e => e.id === step.effectId);
       
-      console.log('✅ Export réussi:', link.download);
+      if (!effect) return;
+
+      // Record animation frames
+      let frameCount = 0;
+      const maxFrames = 60; // 3 seconds at 20fps
+      
+      const recordFrame = () => {
+        if (frameCount < maxFrames) {
+          gif.addFrame(canvasRef.current!, { delay: 50 });
+          frameCount++;
+          setTimeout(recordFrame, 50);
+        } else {
+          gif.on('finished', (blob: Blob) => {
+            const link = document.createElement('a');
+            link.download = `scenario-step-${currentStep + 1}.gif`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            console.log('✅ Export GIF réussi');
+          });
+          gif.render();
+        }
+      };
+
+      // Start recording
+      await playStep(currentStep);
+      recordFrame();
+      
     } catch (error) {
-      console.error('❌ Erreur lors de l\'export:', error);
-      alert('Erreur lors de l\'export de l\'image');
+      console.error('❌ Erreur lors de l\'export GIF:', error);
+      alert('Erreur lors de l\'export GIF');
+    }
+  };
+
+  const exportCanvasAsMP4 = async () => {
+    if (!canvasRef.current || !effectLoader) {
+      alert('❌ Aucun contenu à exporter. Veuillez d\'abord lancer une étape du scénario.');
+      return;
+    }
+
+    try {
+      const stream = canvasRef.current.captureStream(30);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9'
+      });
+
+      const chunks: Blob[] = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const link = document.createElement('a');
+        link.download = `scenario-step-${currentStep + 1}.webm`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        console.log('✅ Export MP4 réussi');
+      };
+
+      // Start recording
+      mediaRecorder.start();
+      
+      // Play the effect and record for duration
+      await playStep(currentStep);
+      
+      // Stop recording after step duration
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, steps[currentStep].duration + 500);
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'export MP4:', error);
+      alert('Erreur lors de l\'export MP4');
     }
   };
 
@@ -357,13 +435,24 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
         <div className="flex gap-2 justify-center mt-3 pt-3 border-t">
           <Button
             variant="outline"
-            onClick={exportCanvasAsImage}
+            onClick={exportCanvasAsGif}
             disabled={isPlaying}
-            data-testid="button-export-image"
+            data-testid="button-export-gif"
             className="text-green-600 hover:text-green-700 hover:bg-green-50"
           >
             <Download className="w-4 h-4 mr-2" />
-            Exporter PNG
+            Exporter GIF
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={exportCanvasAsMP4}
+            disabled={isPlaying}
+            data-testid="button-export-mp4"
+            className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Exporter MP4
           </Button>
 
           <Button

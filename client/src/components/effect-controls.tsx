@@ -293,25 +293,27 @@ export function EffectControls({
         </Card>
       )}
 
-      {/* Export Options (Future) */}
-      <Card className="bg-dark-surface/50 border-dark-border border-dashed opacity-75">
+      {/* Export Options */}
+      <Card className="bg-dark-surface/50 border-dark-border">
         <CardHeader>
           <CardTitle className="flex items-center text-lg">
-            <Download className="w-5 h-5 text-slate-500 mr-2" />
-            Export (Bientôt)
+            <Download className="w-5 h-5 text-green-500 mr-2" />
+            Export Disponible
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Button 
-            disabled
-            className="w-full bg-slate-700/50 text-slate-500 cursor-not-allowed"
+            onClick={onExportMp4}
+            disabled={!canExport}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
             data-testid="button-export-mp4"
           >
             Exporter en MP4
           </Button>
           <Button 
-            disabled
-            className="w-full bg-slate-700/50 text-slate-500 cursor-not-allowed"
+            onClick={onExportGif}
+            disabled={!canExport}
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
             data-testid="button-export-gif"
           >
             Exporter en GIF
