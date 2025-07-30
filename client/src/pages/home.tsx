@@ -193,7 +193,8 @@ export default function Home() {
     }
 
     try {
-      const { default: GIF } = await import('gif.js');
+      // @ts-ignore
+      const GIF = window.GIF || (await import('gif.js')).default;
       const gif = new GIF({
         workers: 2,
         quality: 10,

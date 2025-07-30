@@ -264,38 +264,7 @@ export class EffectLoader {
 
   getLoadedEffectsCount(): number {
     return this.loadedEffects.size;
-  }
-
-  executeEffect(effectId: string, text: string, image?: HTMLImageElement, options: any = {}) {
-    if (!this.canvas || !this.loadedEffects.has(effectId)) {
-      console.error('Canvas not set or effect not loaded');
-      return;
-    }
-
-    const effect = this.loadedEffects.get(effectId);
-    if (!effect) return;
-
-    try {
-      console.log(`🎬 Executing effect: ${effectId} with text: "${text}"`);
-
-      // Prepare canvas context
-      const ctx = this.canvas.getContext('2d');
-      if (!ctx) return;
-
-      // Set canvas size if not already set
-      if (this.canvas.width === 0 || this.canvas.height === 0) {
-        this.canvas.width = 800;
-        this.canvas.height = 400;
-      }
-
-      // Clear canvas
-      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      // Prepare options with image if provided
-      const effectOptions = {
-        ...options,
-        image: image,
-        canvas: this.canvas,
+  } this.canvas,
         ctx: ctx
       };
 
