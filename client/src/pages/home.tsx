@@ -34,7 +34,18 @@ export default function Home() {
     queryKey: ['effects'],
     queryFn: loadEffectsFromGitHub,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  // Log des informations de débogage
+  useEffect(() => {
+    console.log('Effect loading state:', { 
+      isLoading, 
+      effectsCount: effects.length, 
+      error: error?.message || 'none' 
+    });
+  }, [isLoading, effects.length, error]);
 
   const handleRefreshEffects = async () => {
     // Utiliser directement la fonction refetch du hook

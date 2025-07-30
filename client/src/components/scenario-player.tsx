@@ -367,15 +367,12 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
     }
   };
 
-  if (steps.length === 0) {
+  // Vérification de sécurité pour éviter l'erreur
+  if (!scenario || !scenario.elements || scenario.elements.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <p className="text-muted-foreground">
-            Aucune étape configurée. Ajoutez du contenu dans les sections ci-dessus.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="text-center p-4">
+        <p className="text-slate-400">Aucun scénario disponible</p>
+      </div>
     );
   }
 

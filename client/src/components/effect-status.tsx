@@ -66,65 +66,80 @@ export function EffectStatus({ effects, isLoading, onRefresh }: EffectStatusProp
   }, [effects.length, isLoading]);
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          {status.isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : status.isConnected ? (
-            <CheckCircle className="h-5 w-5 text-green-500" />
-          ) : (
-            <AlertCircle className="h-5 w-5 text-red-500" />
-          )}
-          Statut GitHub
+    <Card className="bg-dark-surface border-dark-border">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-slate-50">
+          État des Effets
         </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Connection:</span>
-          <Badge variant={status.isConnected ? "default" : "destructive"}>
-            {status.isConnected ? "Connecté" : "Déconnecté"}
-          </Badge>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Effets chargés:</span>
-          <Badge variant="outline">
-            {status.effectsCount} effets
-          </Badge>
-        </div>
-
-        {status.lastCheck && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Dernière vérification:</span>
-            <span className="text-xs text-muted-foreground">
-              {status.lastCheck.toLocaleTimeString()}
-            </span>
-          </div>
-        )}
-
-        {status.error && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Erreur:</span>
-            <span className="text-xs text-red-400 max-w-32 truncate">
-              {status.error}
-            </span>
-          </div>
-        )}
-
-        <Button 
-          onClick={onRefresh} 
-          disabled={status.isLoading}
-          className="w-full"
+        <Button
+          variant="ghost"
           size="sm"
+          onClick={onRefresh}
+          disabled={status.isLoading}
+          className="h-8 w-8 p-0"
         >
           {status.isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4" />
           )}
-          Actualiser
         </Button>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-slate-400">Connexion GitHub</span>
+            <Badge
+              variant={status.isConnected ? "default" : "destructive"}
+              className={`text-xs ${
+                status.isConnected 
+                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/20" 
+                  : "bg-red-500/20 text-red-400 border-red-500/20"
+              }`}
+            >
+              {status.isConnected ? (
+                <CheckCircle className="w-3 h-3 mr-1" />
+              ) : (
+                <AlertCircle className="w-3 h-3 mr-1" />
+              )}
+              {status.isConnected ? "Connecté" : "Déconnecté"}
+            </Badge>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-slate-400">Effets chargés</span>
+            <span className="text-sm font-medium text-slate-50">
+              {status.isLoading ? "Chargement..." : status.effectsCount}
+            </span>
+          </div>
+
+          {status.lastCheck && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-400">Dernière vérification</span>
+              <span className="text-xs text-slate-500">
+                {status.lastCheck.toLocaleTimeString()}
+              </span>
+            </div>
+          )}
+
+          {status.error && (
+            <div className="p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-400">
+              Erreur: {status.error}
+            </div>
+          )}
+
+          {isLoading && (
+            <div className="p-2 bg-blue-500/10 border border-blue-500/20 rounded text-xs text-blue-400">
+              Chargement des effets depuis GitHub...
+            </div>
+          )}
+
+          {!isLoading && status.effectsCount === 0 && (
+            <div className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-xs text-yellow-400">
+              Aucun effet trouvé. Vérifiez la connexion GitHub.
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
