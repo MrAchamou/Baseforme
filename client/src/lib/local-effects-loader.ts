@@ -1,4 +1,3 @@
-
 import { Effect } from '../types/effects';
 
 export async function loadEffectsFromLocal(): Promise<Effect[]> {
@@ -75,18 +74,18 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
       try {
         // Charger le script depuis le dossier Effect
         const response = await fetch(`/Effect/${fileName}`);
-        
+
         if (!response.ok) {
           console.warn(`⚠️ Impossible de charger ${fileName}: ${response.status}`);
           continue;
         }
 
         const scriptContent = await response.text();
-        
+
         // Créer l'effet
         const effectName = fileName.replace('-effect-texte.js', '').replace('-effect-img.js', '');
         const effectType = fileName.includes('-texte.js') ? 'text' : 'image';
-        
+
         const effect: Effect = {
           id: effectName.replace(/-/g, '_'),
           name: effectName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
@@ -100,7 +99,7 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
 
         loadedEffects.push(effect);
         console.log(`✅ Effet chargé: ${effect.name} (${effect.type})`);
-        
+
       } catch (error) {
         console.error(`❌ Erreur lors du chargement de ${fileName}:`, error);
       }
@@ -135,42 +134,70 @@ function createEffectExecutor(scriptContent: string, effectName: string) {
       if (scriptContent.includes('function')) {
         // Tenter d'exécuter le script
         try {
-          // Créer un contexte sécurisé pour l'exécution
           const effectFunction = new Function('canvas', 'text', 'options', `
             const ctx = canvas.getContext('2d');
-            ${scriptContent}
-            // Si une fonction principale existe, l'appeler
-            if (typeof main === 'function') {
-              main(canvas, text, options);
-            } else if (typeof animate === 'function') {
-              animate(canvas, text, options);
+            if (!ctx) return;
+
+            // Configuration par défaut
+            const fontSize = options.fontSize || 48;
+            const color = options.color || '#ffffff';
+            const duration = options.duration || 3000;
+            const isImage = options.isImage || false;
+            const isText = options.isText || false;
+            const element = options.element || null;
+            const zone = options.zone || null;
+
+            // Si c'est une image, adapter le comportement
+            if (isImage && element) {
+              // L'effet doit agir sur l'élément image
+              console.log('🖼️ Application effet sur image:', text);
+
+              // Exécuter le script d'effet adapté pour les images
+              try {
+                ${scriptContent}
+              } catch (e) {
+                console.log('Effet image standard appliqué');
+                // Animation de base pour les images
+                let frame = 0;
+                const animate = () => {
+                  if (frame < 60) {
+                    const scale = 1 + 0.1 * Math.sin(frame * 0.2);
+                    element.style.transform = \`scale(\${scale})\`;
+                    frame++;
+                    requestAnimationFrame(animate);
+                  } else {
+                    element.style.transform = '';
+                  }
+                };
+                animate();
+              }
+            } else if (isText && element) {
+              // L'effet doit agir sur l'élément texte
+              console.log('📝 Application effet sur texte:', text);
+
+              try {
+                ${scriptContent}
+              } catch (e) {
+                console.log('Effet texte standard appliqué');
+                // Animation de base pour le texte
+                let frame = 0;
+                const animate = () => {
+                  if (frame < 60) {
+                    const intensity = Math.sin(frame * 0.3);
+                    element.style.textShadow = \`0 0 \${10 + intensity * 5}px \${color}\`;
+                    element.style.transform = \`translateY(\${intensity * 2}px)\`;
+                    frame++;
+                    requestAnimationFrame(animate);
+                  } else {
+                    element.style.textShadow = '';
+                    element.style.transform = '';
+                  }
+                };
+                animate();
+              }
             } else {
-              // Animation par défaut
-              runDefaultAnimation(ctx, text, options);
-            }
-            
-            function runDefaultAnimation(ctx, text, options) {
-              let frame = 0;
-              const animate = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Style de base
-                ctx.font = options.fontSize ? options.fontSize + 'px Arial' : '48px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillStyle = options.color || '#ffffff';
-                
-                const x = canvas.width / 2;
-                const y = canvas.height / 2;
-                
-                // Animation basée sur le nom de l'effet
-                ${getAnimationByName(effectName)}
-                
-                frame++;
-                if (frame < 180) { // 3 secondes à 60fps
-                  requestAnimationFrame(animate);
-                }
-              };
-              animate();
+              // Mode compatibilité - ancien comportement
+              ${scriptContent}
             }
           `);
 
@@ -202,7 +229,7 @@ function getAnimationByName(effectName: string): string {
       ctx.restore();
     `;
   }
-  
+
   if (effectName.includes('electric')) {
     return `
       const jitter = (Math.random() - 0.5) * 4;
@@ -213,7 +240,7 @@ function getAnimationByName(effectName: string): string {
       ctx.shadowBlur = 0;
     `;
   }
-  
+
   if (effectName.includes('neon')) {
     return `
       const glow = Math.sin(frame * 0.2) * 15 + 20;
@@ -224,7 +251,7 @@ function getAnimationByName(effectName: string): string {
       ctx.shadowBlur = 0;
     `;
   }
-  
+
   if (effectName.includes('wave')) {
     return `
       const chars = text.split('');
@@ -235,7 +262,7 @@ function getAnimationByName(effectName: string): string {
       });
     `;
   }
-  
+
   // Animation par défaut avec pulsation
   return `
     const scale = Math.sin(frame * 0.15) * 0.2 + 1;
@@ -249,18 +276,18 @@ function getAnimationByName(effectName: string): string {
 
 function runFallbackAnimation(ctx: CanvasRenderingContext2D, text: string, options: any, effectName: string) {
   let frame = 0;
-  
+
   const animate = () => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
+
     // Style de base
     ctx.font = `${options.fontSize || 48}px Arial`;
     ctx.textAlign = 'center';
     ctx.fillStyle = options.color || '#ffffff';
-    
+
     const x = ctx.canvas.width / 2;
     const y = ctx.canvas.height / 2;
-    
+
     // Animation simple basée sur le nom
     if (effectName.includes('heartbeat')) {
       const beat = Math.abs(Math.sin(frame * 0.3)) * 0.3 + 0.8;
@@ -288,13 +315,13 @@ function runFallbackAnimation(ctx: CanvasRenderingContext2D, text: string, optio
       ctx.fillText(text, 0, 0);
       ctx.restore();
     }
-    
+
     frame++;
     if (frame < 200) {
       requestAnimationFrame(animate);
     }
   };
-  
+
   animate();
 }
 

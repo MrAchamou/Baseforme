@@ -192,47 +192,167 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
       
       if (!zone) return;
 
-      // Obtenir le contenu pour cet élément
-      let content = '';
-      switch (elementId) {
-        case 'logo':
-          content = logoPreview ? 'LOGO' : 'Logo';
-          break;
-        case 'mainText':
-          content = selectedTemplate ? generateTemplate(selectedTemplate.mainTextTemplate, templateData) : 'Texte Principal';
-          break;
-        case 'secondaryText':
-          content = selectedTemplate ? generateTemplate(selectedTemplate.secondaryTextTemplate, templateData) : 'Texte Secondaire';
-          break;
-        case 'contact':
-          content = templateData.telephone || 'Contact';
-          break;
-      }
-
-      // Créer un canvas temporaire pour cet élément
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = zone.width;
-      tempCanvas.height = zone.height;
-      
-      // Appliquer l'effet sur la zone spécifique
-      const options = {
-        fontSize: elementId === 'mainText' ? 32 : 24,
-        color: '#ffffff',
-        duration: 2000,
-        zone: zone
-      };
-
       console.log(`✨ Application de l'effet ${effect.name} sur ${elementId}`);
-      await effect.execute(tempCanvas, content, options);
-      
-      // Copier le résultat sur le canvas principal
-      ctx.drawImage(tempCanvas, zone.x, zone.y);
+
+      // Traitement spécialisé selon le type d'élément
+      if (elementId === 'logo' && logoPreview) {
+        // Pour le logo : appliquer l'effet sur l'image importée
+        await applyEffectToImage(effect, zone, logoPreview, ctx);
+      } else {
+        // Pour le texte : appliquer l'effet sur le texte saisi
+        let content = '';
+        switch (elementId) {
+          case 'mainText':
+            content = selectedTemplate ? generateTemplate(selectedTemplate.mainTextTemplate, templateData) : 'Texte Principal';
+            break;
+          case 'secondaryText':
+            content = selectedTemplate ? generateTemplate(selectedTemplate.secondaryTextTemplate, templateData) : 'Texte Secondaire';
+            break;
+          case 'contact':
+            content = templateData.telephone || 'Contact';
+            break;
+          default:
+            content = 'Texte par défaut';
+        }
+        
+        await applyEffectToText(effect, zone, content, ctx, elementId);
+      }
       
     } catch (error) {
       console.error(`❌ Erreur lors de l'application de l'effet sur ${elementId}:`, error);
     }
     
     setIsGenerating(false);
+  };
+
+  const applyEffectToImage = async (effect: Effect, zone: any, imageUrl: string, ctx: CanvasRenderingContext2D) => {
+    try {
+      // Créer un élément image temporaire
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      return new Promise((resolve, reject) => {
+        img.onload = async () => {
+          // Créer un canvas temporaire pour l'image
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = zone.width;
+          tempCanvas.height = zone.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          if (!tempCtx) {
+            reject('Impossible de créer le contexte temporaire');
+            return;
+          }
+
+          // Dessiner l'image redimensionnée
+          tempCtx.drawImage(img, 0, 0, zone.width, zone.height);
+          
+          // Créer un élément div temporaire pour l'effet
+          const tempDiv = document.createElement('div');
+          tempDiv.style.position = 'absolute';
+          tempDiv.style.left = '-9999px';
+          tempDiv.style.width = `${zone.width}px`;
+          tempDiv.style.height = `${zone.height}px`;
+          tempDiv.style.backgroundImage = `url(${tempCanvas.toDataURL()})`;
+          tempDiv.style.backgroundSize = 'cover';
+          tempDiv.style.backgroundPosition = 'center';
+          document.body.appendChild(tempDiv);
+
+          try {
+            // Appliquer l'effet sur l'élément
+            if (effect.execute) {
+              await effect.execute(tempCanvas, '', {
+                isImage: true,
+                zone: zone,
+                element: tempDiv
+              });
+            }
+            
+            // Copier le résultat sur le canvas principal
+            ctx.drawImage(tempCanvas, zone.x, zone.y);
+            
+            resolve(true);
+          } catch (effectError) {
+            console.warn(`Effet ${effect.name} échoué, affichage de l'image normale:`, effectError);
+            // Afficher l'image normale en cas d'échec
+            ctx.drawImage(img, zone.x, zone.y, zone.width, zone.height);
+            resolve(true);
+          } finally {
+            // Nettoyer l'élément temporaire
+            document.body.removeChild(tempDiv);
+          }
+        };
+
+        img.onerror = () => {
+          reject('Erreur de chargement de l\'image');
+        };
+
+        img.src = imageUrl;
+      });
+    } catch (error) {
+      console.error('Erreur dans applyEffectToImage:', error);
+      throw error;
+    }
+  };
+
+  const applyEffectToText = async (effect: Effect, zone: any, text: string, ctx: CanvasRenderingContext2D, elementId: string) => {
+    try {
+      // Créer un canvas temporaire pour le texte
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = zone.width;
+      tempCanvas.height = zone.height;
+      
+      // Créer un élément div temporaire pour l'effet
+      const tempDiv = document.createElement('div');
+      tempDiv.textContent = text;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = `${zone.width}px`;
+      tempDiv.style.height = `${zone.height}px`;
+      tempDiv.style.color = '#ffffff';
+      tempDiv.style.fontSize = elementId === 'mainText' ? '32px' : '24px';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.style.fontWeight = 'bold';
+      tempDiv.style.display = 'flex';
+      tempDiv.style.alignItems = 'center';
+      tempDiv.style.justifyContent = 'center';
+      tempDiv.style.textAlign = 'center';
+      tempDiv.style.wordWrap = 'break-word';
+      document.body.appendChild(tempDiv);
+
+      try {
+        // Appliquer l'effet sur le texte
+        if (effect.execute) {
+          const options = {
+            fontSize: elementId === 'mainText' ? 32 : 24,
+            color: '#ffffff',
+            duration: 2000,
+            zone: zone,
+            element: tempDiv,
+            isText: true
+          };
+
+          await effect.execute(tempCanvas, text, options);
+        }
+        
+        // Copier le résultat sur le canvas principal
+        ctx.drawImage(tempCanvas, zone.x, zone.y);
+        
+      } catch (effectError) {
+        console.warn(`Effet ${effect.name} échoué, affichage du texte normal:`, effectError);
+        // Afficher le texte normal en cas d'échec
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `${elementId === 'mainText' ? 32 : 24}px Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(text, zone.x + zone.width / 2, zone.y + zone.height / 2);
+      } finally {
+        // Nettoyer l'élément temporaire
+        document.body.removeChild(tempDiv);
+      }
+    } catch (error) {
+      console.error('Erreur dans applyEffectToText:', error);
+      throw error;
+    }
   };
 
   const getElementZones = (format: string) => {
