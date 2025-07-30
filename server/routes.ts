@@ -24,3 +24,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+import { Express } from "express";
+import { createServer } from "http";
+
+export async function registerRoutes(app: Express) {
+  const server = createServer(app);
+
+  // API routes
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // GitHub API proxy for effects
+  app.get("/api/effects", async (req, res) => {
+    try {
+      // Placeholder for GitHub API integration
+      res.json({ effects: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch effects" });
+    }
+  });
+
+  return server;
+}

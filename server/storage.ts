@@ -36,3 +36,8 @@ export class MemStorage implements IStorage {
 }
 
 export const storage = new MemStorage();
+// Storage configuration for session management
+export const storage = {
+  // Configuration for PostgreSQL or memory storage
+  // Will be implemented based on environment
+};
