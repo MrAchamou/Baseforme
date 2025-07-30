@@ -242,4 +242,50 @@ export class EffectLoader {
   }
 }
 
+// Effets de démonstration si GitHub échoue
+const DEMO_EFFECTS: Effect[] = [
+  {
+    id: 'demo-fire-text',
+    name: 'FIRE_TEXT',
+    category: 'text',
+    path: '/demo/fire-text.js',
+    description: 'Effet de feu sur texte'
+  },
+  {
+    id: 'demo-electric-text',
+    name: 'ELECTRIC_TEXT',
+    category: 'text',
+    path: '/demo/electric-text.js',
+    description: 'Effet électrique sur texte'
+  },
+  {
+    id: 'demo-crystal-image',
+    name: 'CRYSTAL_IMAGE',
+    category: 'image',
+    path: '/demo/crystal-image.js',
+    description: 'Effet cristal sur image'
+  },
+  {
+    id: 'demo-sparkle-both',
+    name: 'SPARKLE_UNIVERSAL',
+    category: 'both',
+    path: '/demo/sparkle-universal.js',
+    description: 'Effet paillettes universel'
+  },
+  {
+    id: 'demo-glow-text',
+    name: 'GLOW_TEXT',
+    category: 'text',
+    path: '/demo/glow-text.js',
+    description: 'Effet de lueur sur texte'
+  },
+  {
+    id: 'demo-wave-image',
+    name: 'WAVE_IMAGE',
+    category: 'image',
+    path: '/demo/wave-image.js',
+    description: 'Effet de vague sur image'
+  }
+];
+
 export const effectLoader = new EffectLoader();

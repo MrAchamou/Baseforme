@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { effectLoader } from '@/lib/effect-loader';
 import type { Effect } from '@/types/effects';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ const formatMap: Record<string, [number, number]> = {
   "3:4": [810, 1080],
 };
 
-export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestart, selectedFormat }: AnimationCanvasProps) {
+export const AnimationCanvas = React.forwardRef<HTMLCanvasElement, AnimationCanvasProps>(({ className, ...props }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEffectLoaded, setIsEffectLoaded] = useState(false);
@@ -33,12 +33,12 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
   useEffect(() => {
     if (canvasRef.current) {
       effectLoader.setCanvas(canvasRef.current);
-      
+
       // Set initial canvas size
       const canvas = canvasRef.current;
       canvas.width = containerDimensions.width;
       canvas.height = containerDimensions.height;
-      
+
       console.log(`🎯 Canvas initialized: ${canvas.width}x${canvas.height}`);
     }
   }, [containerDimensions]);
@@ -56,7 +56,7 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
 
     try {
       console.log(`🎬 Executing effect: ${effect.name} with text: "${text}"`);
-      
+
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -67,7 +67,7 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Set canvas background
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -77,10 +77,10 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
         console.log(`📥 Loading effect ${effect.name} first...`);
         await effectLoader.loadEffect(effect);
       }
-      
+
       // Start the animation with the current text
       const result = effectLoader.executeEffect(effect.id, text);
-      
+
       if (result) {
         console.log(`✅ Effect ${effect.name} started successfully`);
         setIsEffectLoaded(true);
@@ -88,7 +88,7 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
       } else {
         throw new Error(`Failed to start effect ${effect.name}`);
       }
-      
+
     } catch (error) {
       console.error('Failed to execute effect:', error);
       setError(error instanceof Error ? error.message : 'Unknown error');
@@ -181,7 +181,7 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
 
     // Execute effect immediately when playing
     executeEffect();
-    
+
   }, [isPlaying, effect, text, containerDimensions]);
 
   return (
@@ -291,4 +291,4 @@ export function AnimationCanvas({ effect, text, isPlaying, onPlayPause, onRestar
       </div>
     </div>
   );
-}
+});

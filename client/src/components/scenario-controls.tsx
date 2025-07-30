@@ -356,7 +356,7 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                             ))}
 
                             {availableEffects.length === 0 && (
-                              <SelectItem value="" disabled>
+                              <SelectItem value="no-effects-available" disabled>
                                 <span className="text-muted-foreground">
                                   Aucun effet compatible disponible
                                 </span>

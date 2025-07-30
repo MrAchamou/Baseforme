@@ -381,7 +381,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
   }
 
   // Vérification pour les éléments (nouveau format)
-  if (scenario.elements && scenario.elements.length === 0) {
+  if (!scenario.elements || scenario.elements.length === 0) {
     return (
       <Card>
         <CardContent className="p-6 text-center">

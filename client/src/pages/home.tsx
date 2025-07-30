@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,8 @@ import type { Effect, EffectStats } from '@/types/effects';
 export default function Home() {
   const [text, setText] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [activeScenario, setActiveScenario] = useState<any>(null);
   const [selectedFormat, setSelectedFormat] = useState<string>('16:9');
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stats, setStats] = useState<EffectStats>({
     effectsLoaded: 0,
     animationsPlayed: 0,
@@ -26,8 +26,6 @@ export default function Home() {
   });
   const [canExport, setCanExport] = useState(false);
   const [currentTab, setCurrentTab] = useState<string>('scenario');
-  
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const queryClient = useQueryClient();
   const { data: effects = [], isLoading, error, refetch } = useQuery({
