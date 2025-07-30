@@ -479,5 +479,8 @@ class EffectLoader {
 
 export default EffectLoader;
 
+// Export named class for backward compatibility
+export { EffectLoader };
+
 // Export singleton instance for convenience
 export const effectLoader = new EffectLoader();
