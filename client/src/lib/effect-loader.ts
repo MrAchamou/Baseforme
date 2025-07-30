@@ -2,17 +2,17 @@
 import { Effect } from '../types/effects';
 import { 
   loadEffectsFromLocal, 
-  getLocalEffectsStats, 
-  loadEffectScript,
-  validateJSfileEffect 
+  loadEffectScript, 
+  validateJSfileEffect, 
+  getLocalEffectsStats 
 } from './local-effects-loader';
-import { logEffectSources } from './effect-validator';
 
 interface LoadedEffect {
   effect: Effect;
   script: string;
   loadedAt: Date;
   source: string;
+  module?: any; // Stocker le module JSfile chargé
 }
 
 interface AnimationContext {
@@ -22,6 +22,16 @@ interface AnimationContext {
   animationFrame: number;
   startTime: number;
   image?: HTMLImageElement;
+}
+
+function logEffectSources(effects: Effect[]): void {
+  const sources = effects.reduce((acc, effect) => {
+    const source = effect.source || 'unknown';
+    acc[source] = (acc[source] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  console.log('📊 Effect sources:', sources);
 }
 
 class EffectLoader {
@@ -74,11 +84,15 @@ class EffectLoader {
 
       const scriptContent = await loadEffectScript(effect.scriptUrl);
 
+      // Charger aussi le module JSfile pour l'exécution
+      const effectModule = await this.loadJSfileModule(effect.scriptUrl);
+
       this.loadedEffects.set(effect.id, {
         effect,
         script: scriptContent,
         loadedAt: new Date(),
-        source: 'JSfile'
+        source: 'JSfile',
+        module: effectModule
       });
 
       console.log(`✅ JSfile effect ${effect.name} loaded successfully from ${effect.scriptUrl}`);
@@ -87,6 +101,29 @@ class EffectLoader {
     } catch (error) {
       console.error(`❌ Failed to load JSfile effect ${effect.name}:`, error);
       return false;
+    }
+  }
+
+  private async loadJSfileModule(scriptUrl: string): Promise<any> {
+    try {
+      const response = await fetch(scriptUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const content = await response.text();
+      const blob = new Blob([content], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+
+      try {
+        const module = await import(url);
+        return module;
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error(`Failed to load JSfile module ${scriptUrl}:`, error);
+      throw error;
     }
   }
 
@@ -123,7 +160,7 @@ class EffectLoader {
         image
       };
 
-      // Alternative execution strategy pour les effets JSfile
+      // Exécuter l'effet JSfile avec le module chargé
       await this.executeJSfileEffect(loadedEffect, ctx, text, image, options);
 
     } catch (error) {
@@ -140,172 +177,192 @@ class EffectLoader {
     options: any = {}
   ): Promise<void> {
     try {
-      // Créer un environnement d'exécution sécurisé et compatible
-      const safeGlobals = {
-        Math,
-        Date,
-        setTimeout,
-        clearTimeout,
-        setInterval,
-        clearInterval,
-        requestAnimationFrame: window.requestAnimationFrame.bind(window),
-        cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
-        console: {
-          log: console.log.bind(console),
-          error: console.error.bind(console),
-          warn: console.warn.bind(console)
-        }
-      };
-
-      // Créer le contexte d'effet
-      const effectContext = {
-        canvas: this.canvas!,
-        ctx,
-        text,
-        image,
-        options,
-        width: this.canvas!.width,
-        height: this.canvas!.height,
-        time: 0,
-        frame: 0,
-        ...safeGlobals
-      };
-
-      // Stratégie 1: Essayer d'exécuter comme fonction directe
-      try {
-        const wrappedScript = `
-          (function(canvas, ctx, text, image, options, width, height) {
-            ${loadedEffect.script}
-          })
-        `;
-        
-        const effectFunction = eval(wrappedScript);
-        effectFunction(
-          effectContext.canvas,
-          effectContext.ctx,
-          effectContext.text,
-          effectContext.image,
-          effectContext.options,
-          effectContext.width,
-          effectContext.height
-        );
-        
-        console.log(`✅ Effect ${loadedEffect.effect.name} executed successfully (direct)`);
-        return;
-        
-      } catch (directError) {
-        console.warn(`Direct execution failed for ${loadedEffect.effect.name}, trying module approach...`);
+      if (!loadedEffect.module) {
+        throw new Error('JSfile module not loaded');
       }
 
-      // Stratégie 2: Essayer comme module avec exports
-      try {
-        const moduleScript = `
-          const exports = {};
-          const module = { exports };
-          
-          ${loadedEffect.script}
-          
-          // Retourner la fonction d'effet
-          if (typeof exports.default === 'function') {
-            exports.default;
-          } else if (typeof module.exports === 'function') {
-            module.exports;
-          } else if (typeof exports.animate === 'function') {
-            exports.animate;
-          } else if (typeof exports.effect === 'function') {
-            exports.effect;
-          } else {
-            null;
+      // Chercher l'objet d'effet dans le module
+      let effectObject = null;
+
+      if (loadedEffect.module.default && this.isValidJSfileEffect(loadedEffect.module.default)) {
+        effectObject = loadedEffect.module.default;
+      } else {
+        const keys = Object.keys(loadedEffect.module);
+        for (const key of keys) {
+          if (this.isValidJSfileEffect(loadedEffect.module[key])) {
+            effectObject = loadedEffect.module[key];
+            break;
           }
-        `;
-        
-        const effectFunction = eval(`(function() { ${moduleScript} })()`);
-        
-        if (effectFunction) {
-          effectFunction(effectContext);
-          console.log(`✅ Effect ${loadedEffect.effect.name} executed successfully (module)`);
-          return;
         }
-        
-      } catch (moduleError) {
-        console.warn(`Module execution failed for ${loadedEffect.effect.name}, trying animation loop...`);
       }
 
-      // Stratégie 3: Créer une boucle d'animation générique
-      this.createGenericAnimationLoop(loadedEffect, effectContext);
-      
+      if (!effectObject || !effectObject.engine) {
+        throw new Error('No valid effect engine found in JSfile module');
+      }
+
+      console.log(`🎬 Executing JSfile effect: ${effectObject.name}`);
+
+      // Préparer les paramètres pour l'effet
+      const effectParams = {
+        vitesse: 1,
+        intensite: 0.5,
+        ...effectObject.parameters,
+        ...options
+      };
+
+      // Créer l'élément pour l'effet (canvas ou div)
+      const effectElement = this.createEffectElement(text, image);
+
+      // Exécuter l'engine de l'effet JSfile
+      const cleanup = effectObject.engine(effectElement, effectParams);
+
+      // Démarrer l'animation de rendu
+      this.startRenderLoop(effectElement, cleanup);
+
+      console.log(`✅ JSfile effect ${effectObject.name} started successfully`);
+
     } catch (error) {
       console.error(`Failed to execute JSfile effect ${loadedEffect.effect.name}:`, error);
-      throw error;
+      this.createFallbackAnimation(text, `JSfile execution error: ${error.message}`);
     }
   }
 
-  private createGenericAnimationLoop(loadedEffect: LoadedEffect, effectContext: any): void {
+  private createEffectElement(text: string, image?: HTMLImageElement): HTMLElement {
+    if (!this.canvas) {
+      throw new Error('Canvas not available');
+    }
+
+    // Créer un élément div pour l'effet (similaire à DOM)
+    const element = document.createElement('div');
+    element.textContent = text;
+    element.style.position = 'absolute';
+    element.style.left = '50%';
+    element.style.top = '50%';
+    element.style.transform = 'translate(-50%, -50%)';
+    element.style.fontSize = '32px';
+    element.style.fontWeight = 'bold';
+    element.style.color = 'white';
+    element.style.textAlign = 'center';
+    element.style.whiteSpace = 'nowrap';
+
+    // Ajouter temporairement à la page pour les calculs de style
+    element.style.visibility = 'hidden';
+    document.body.appendChild(element);
+
+    return element;
+  }
+
+  private startRenderLoop(effectElement: HTMLElement, cleanup?: () => void): void {
     let frame = 0;
     const startTime = Date.now();
 
-    const animate = () => {
-      if (!this.canvas || !this.currentContext) return;
+    const render = () => {
+      if (!this.canvas || !this.currentContext) {
+        if (cleanup) cleanup();
+        return;
+      }
 
-      const ctx = effectContext.ctx;
-      const currentTime = Date.now();
-      const elapsed = (currentTime - startTime) / 1000;
-
+      const ctx = this.currentContext.ctx;
+      
       // Clear canvas
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+      // Dessiner un fond
+      const gradient = ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(1, '#16213e');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // Lire les propriétés de style de l'élément et les appliquer au canvas
       try {
-        // Essayer d'exécuter le script avec le contexte mis à jour
-        const updatedContext = {
-          ...effectContext,
-          time: elapsed,
-          frame,
-          deltaTime: elapsed / 60
-        };
+        const styles = window.getComputedStyle(effectElement);
+        const transform = styles.transform;
+        const opacity = styles.opacity;
+        
+        ctx.save();
+        
+        // Appliquer l'opacité
+        if (opacity && opacity !== '1') {
+          ctx.globalAlpha = parseFloat(opacity);
+        }
 
-        // Environnement d'exécution avec variables globales
-        const scriptWithContext = `
-          const canvas = arguments[0];
-          const ctx = arguments[1];
-          const text = arguments[2];
-          const image = arguments[3];
-          const options = arguments[4];
-          const width = arguments[5];
-          const height = arguments[6];
-          const time = arguments[7];
-          const frame = arguments[8];
-          
-          ${loadedEffect.script}
-        `;
+        // Appliquer les transformations (scale, rotate, etc.)
+        if (transform && transform !== 'none') {
+          this.applyTransformToCanvas(ctx, transform);
+        }
 
-        const contextFunction = new Function(scriptWithContext);
-        contextFunction(
-          updatedContext.canvas,
-          updatedContext.ctx,
-          updatedContext.text,
-          updatedContext.image,
-          updatedContext.options,
-          updatedContext.width,
-          updatedContext.height,
-          updatedContext.time,
-          updatedContext.frame
-        );
+        // Dessiner le texte avec les styles appliqués
+        const x = this.canvas.width / 2;
+        const y = this.canvas.height / 2;
+        
+        ctx.font = '32px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = styles.color || 'white';
+        
+        // Appliquer shadow si présent
+        if (styles.textShadow && styles.textShadow !== 'none') {
+          ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+          ctx.shadowBlur = 10;
+        }
+        
+        ctx.fillText(effectElement.textContent || '', x, y);
+        
+        ctx.restore();
 
-      } catch (frameError) {
-        // Si l'exécution échoue, créer une animation de base
-        this.drawBasicTextAnimation(ctx, effectContext.text, frame);
+      } catch (error) {
+        // Fallback rendering
+        this.drawBasicTextAnimation(ctx, effectElement.textContent || '', frame);
       }
 
       frame++;
       
-      // Limiter à 5 secondes d'animation
-      if (elapsed < 5) {
-        this.animationFrame = requestAnimationFrame(animate);
+      // Limiter à 10 secondes d'animation
+      if ((Date.now() - startTime) < 10000) {
+        this.animationFrame = requestAnimationFrame(render);
+      } else {
+        if (cleanup) cleanup();
+        // Nettoyer l'élément
+        if (effectElement.parentNode) {
+          effectElement.parentNode.removeChild(effectElement);
+        }
       }
     };
 
-    console.log(`🔄 Starting generic animation loop for ${loadedEffect.effect.name}`);
-    animate();
+    render();
+  }
+
+  private applyTransformToCanvas(ctx: CanvasRenderingContext2D, transform: string): void {
+    // Parser les transformations CSS et les appliquer au canvas
+    const scaleMatch = transform.match(/scale\(([^)]+)\)/);
+    const rotateMatch = transform.match(/rotate\(([^)]+)\)/);
+    const translateMatch = transform.match(/translate\(([^)]+)\)/);
+
+    if (scaleMatch) {
+      const scale = parseFloat(scaleMatch[1]);
+      ctx.scale(scale, scale);
+    }
+
+    if (rotateMatch) {
+      const angle = parseFloat(rotateMatch[1]);
+      ctx.rotate(angle * Math.PI / 180);
+    }
+
+    if (translateMatch) {
+      const values = translateMatch[1].split(',');
+      const x = parseFloat(values[0]);
+      const y = values[1] ? parseFloat(values[1]) : 0;
+      ctx.translate(x, y);
+    }
+  }
+
+  private isValidJSfileEffect(obj: any): boolean {
+    return obj && 
+           typeof obj === 'object' &&
+           typeof obj.id === 'string' &&
+           typeof obj.name === 'string' &&
+           typeof obj.engine === 'function';
   }
 
   private drawBasicTextAnimation(ctx: CanvasRenderingContext2D, text: string, frame: number): void {
@@ -314,14 +371,6 @@ class EffectLoader {
     const x = this.canvas.width / 2;
     const y = this.canvas.height / 2;
 
-    // Gradient background
-    const gradient = ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
-    gradient.addColorStop(0, '#1a1a2e');
-    gradient.addColorStop(1, '#16213e');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Animated text
     ctx.font = 'bold 36px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
