@@ -1,5 +1,6 @@
 import type { Effect } from '@/types/effects';
 import { loadEffectsFromLocal, loadEffectScript } from './local-effects-loader';
+import { validateJSfileEffect, logEffectSources } from './effect-validator';
 
 interface AnimationContext {
   ctx: CanvasRenderingContext2D;
@@ -28,32 +29,34 @@ export class EffectLoader {
     }
 
     try {
-      console.log(`Loading local effect: ${effect.name}`);
+      console.log(`Loading JSfile effect: ${effect.name}`);
 
-      // Charge le script depuis le système local
-      let scriptContent: string;
-
-      if (effect.scriptUrl) {
-        scriptContent = await loadEffectScript(effect.scriptUrl);
-      } else if (effect.script) {
-        // Utilise le script intégré pour les effets de démonstration
-        scriptContent = effect.script;
-      } else {
-        throw new Error('No script available for this effect');
+      // Validation complète de l'effet
+      if (!validateJSfileEffect(effect)) {
+        throw new Error(`Effect validation failed: ${effect.name} does not meet JSfile requirements`);
       }
+
+      // Validation : s'assurer que l'effet provient du dossier JSfile
+      if (!effect.scriptUrl || !effect.scriptUrl.startsWith('/JSfile/')) {
+        throw new Error(`Security validation failed: Effect must come from JSfile directory. Effect: ${effect.name}`);
+      }
+
+      // Charge le script depuis le dossier JSfile uniquement
+      const scriptContent = await loadEffectScript(effect.scriptUrl);
 
       // Enregistre l'effet comme chargé
       this.loadedEffects.set(effect.id, {
         effect,
         script: scriptContent,
-        loadedAt: new Date()
+        loadedAt: new Date(),
+        source: 'JSfile'
       });
 
-      console.log(`✅ Local effect ${effect.name} loaded successfully`);
+      console.log(`✅ JSfile effect ${effect.name} loaded successfully from ${effect.scriptUrl}`);
       return true;
 
     } catch (error) {
-      console.error(`❌ Failed to load local effect ${effect.name}:`, error);
+      console.error(`❌ Failed to load JSfile effect ${effect.name}:`, error);
       return false;
     }
   }
@@ -253,57 +256,5 @@ export class EffectLoader {
     return this.loadedEffects.size;
   }
 }
-
-// Effets de démonstration si GitHub échoue
-const DEMO_EFFECTS: Effect[] = [
-  {
-    id: 'demo-fire-text',
-    name: 'FIRE_TEXT',
-    category: 'text',
-    type: 'animation',
-    path: '/demo/fire-text.js',
-    description: 'Effet de feu sur texte'
-  },
-  {
-    id: 'demo-electric-text',
-    name: 'ELECTRIC_TEXT',
-    category: 'text',
-    type: 'animation',
-    path: '/demo/electric-text.js',
-    description: 'Effet électrique sur texte'
-  },
-  {
-    id: 'demo-crystal-image',
-    name: 'CRYSTAL_IMAGE',
-    category: 'image',
-    type: 'animation',
-    path: '/demo/crystal-image.js',
-    description: 'Effet cristal sur image'
-  },
-  {
-    id: 'demo-sparkle-both',
-    name: 'SPARKLE_UNIVERSAL',
-    category: 'both',
-    type: 'special',
-    path: '/demo/sparkle-universal.js',
-    description: 'Effet paillettes universel'
-  },
-  {
-    id: 'demo-glow-text',
-    name: 'GLOW_TEXT',
-    category: 'text',
-    type: 'animation',
-    path: '/demo/glow-text.js',
-    description: 'Effet de lueur sur texte'
-  },
-  {
-    id: 'demo-wave-image',
-    name: 'WAVE_IMAGE',
-    category: 'image',
-    type: 'animation',
-    path: '/demo/wave-image.js',
-    description: 'Effet de vague sur image'
-  }
-];
 
 export const effectLoader = new EffectLoader();

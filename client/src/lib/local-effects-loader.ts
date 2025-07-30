@@ -424,16 +424,27 @@ export async function loadEffectsFromLocal(): Promise<Effect[]> {
   try {
     const effects: Effect[] = [];
     
-    // Convertir le mapping en effets
+    // Validation : s'assurer que seuls les effets JSfile sont chargés
     Object.entries(JS_FILE_EFFECTS_MAPPING).forEach(([filename, metadata]) => {
-      effects.push({
+      // Vérification que l'effet provient bien du dossier JSfile
+      if (!filename.includes('.effect.js')) {
+        console.warn(`⚠️ Skipping invalid effect file: ${filename}`);
+        return;
+      }
+
+      const effect = {
         ...metadata,
         path: `/JSfile/${filename}`,
-        scriptUrl: `/JSfile/${filename}`
-      });
+        scriptUrl: `/JSfile/${filename}`,
+        source: 'JSfile' // Marqueur pour identifier la source
+      };
+
+      effects.push(effect);
+      console.log(`✅ Loaded JSfile effect: ${metadata.name} (${filename})`);
     });
 
     console.log(`✅ Successfully loaded ${effects.length} effects from JSfile directory`);
+    console.log(`🔒 All effects are verified to come from JSfile source`);
     return effects;
     
   } catch (error) {
@@ -446,6 +457,11 @@ export async function loadEffectScript(scriptUrl: string): Promise<string> {
   try {
     console.log(`📥 Loading script from: ${scriptUrl}`);
     
+    // Validation de sécurité : s'assurer que le script provient du dossier JSfile
+    if (!scriptUrl.startsWith('/JSfile/') || !scriptUrl.endsWith('.effect.js')) {
+      throw new Error(`Security check failed: Script must be from JSfile directory and have .effect.js extension. Got: ${scriptUrl}`);
+    }
+    
     // Charger le fichier depuis le dossier JSfile
     const response = await fetch(scriptUrl);
     
@@ -454,11 +470,11 @@ export async function loadEffectScript(scriptUrl: string): Promise<string> {
     }
     
     const script = await response.text();
-    console.log(`✅ Script loaded successfully: ${scriptUrl}`);
+    console.log(`✅ JSfile script loaded successfully: ${scriptUrl}`);
     return script;
     
   } catch (error) {
-    console.error(`❌ Failed to load script ${scriptUrl}:`, error);
+    console.error(`❌ Failed to load JSfile script ${scriptUrl}:`, error);
     throw error;
   }
 }
