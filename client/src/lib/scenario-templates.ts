@@ -9,7 +9,7 @@ export interface ScenarioElement {
   emoji?: string;
   required?: boolean;
   type?: 'text' | 'image' | 'both'; // Type d'élément pour le filtrage
-  zone?: 'logo' | 'title' | 'subtitle' | 'cta'; // Zone de contrainte sur le canvas
+  zone: 'logo' | 'title' | 'subtitle' | 'cta' | 'footer'; // Zone obligatoire sur le canvas
 }
 
 export const SCENARIO_TEMPLATES: Record<ScenarioType, ScenarioTemplate> = {

@@ -173,19 +173,18 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
       const mainText = generateTemplate(selectedTemplate.mainTextTemplate, templateData);
       const secondaryText = generateTemplate(selectedTemplate.secondaryTextTemplate, templateData);
       
-      // Load and execute the effect in both systems
-      await effectLoader.loadEffect(selectedEffect, mainText);
-      await previewEngine.loadEffect(selectedEffect, mainText);
+      // Créer les éléments de scénario avec zones définies
+      const scenarioElements = [
+        { elementId: 'main', zoneId: 'title', text: mainText, effect: selectedEffect },
+        { elementId: 'secondary', zoneId: 'subtitle', text: secondaryText, effect: null },
+        { elementId: 'boutique', zoneId: 'logo', text: templateData.boutique || '', effect: null },
+        { elementId: 'contact', zoneId: 'footer', text: templateData.telephone || '', effect: null }
+      ].filter(el => el.text.trim()); // Garder seulement les éléments avec du contenu
+
+      // Charger le scénario dans le preview engine
+      await previewEngine.loadScenario(scenarioElements);
       
-      // Apply the effect to the canvas
-      if (canvasRef.current) {
-        effectLoader.executeEffect(selectedEffect.id, mainText);
-      }
-      
-      // Démarrer le preview temps réel
-      previewEngine.setRealtimeMode(true);
-      
-      console.info('✅ Template généré avec preview temps réel:', { mainText, secondaryText });
+      console.info('✅ Template généré avec zones définies:', scenarioElements);
     } catch (error) {
       console.error('❌ Erreur lors de la génération:', error);
     } finally {
