@@ -367,12 +367,29 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
     }
   };
 
-  // Vérification de sécurité pour éviter l'erreur
-  if (!scenario || !scenario.elements || scenario.elements.length === 0) {
+  // Vérification de sécurité renforcée
+  if (!scenario) {
     return (
-      <div className="text-center p-4">
-        <p className="text-slate-400">Aucun scénario disponible</p>
-      </div>
+      <Card>
+        <CardContent className="p-6 text-center">
+          <p className="text-muted-foreground">
+            Aucun scénario sélectionné. Choisissez un template dans les contrôles.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Vérification pour les éléments (nouveau format)
+  if (scenario.elements && scenario.elements.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <p className="text-muted-foreground">
+            Scénario vide. Ajoutez du contenu dans les sections ci-dessus.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 

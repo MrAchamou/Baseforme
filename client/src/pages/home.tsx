@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimationCanvas } from '@/components/animation-canvas';
+import { AnimationCanvas } from '@/components/animation-canvas';
 import { EffectStatus } from '@/components/effect-status';
 import { ScenarioControls } from '@/components/scenario-controls';
 import { ScenarioPlayer } from '@/components/scenario-player';
@@ -346,12 +347,21 @@ export default function Home() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <ScenarioPlayer
-                    activeScenario={activeScenario}
-                    isPlaying={isPlaying}
-                    onComplete={handleScenarioComplete}
-                    selectedFormat={selectedFormat}
-                  />
+                  {activeScenario ? (
+                    <ScenarioPlayer
+                      scenario={activeScenario}
+                      effects={effects}
+                      canvasRef={canvasRef}
+                      onComplete={handleScenarioComplete}
+                    />
+                  ) : (
+                    <div className="h-96 flex items-center justify-center">
+                      <AnimationCanvas 
+                        ref={canvasRef}
+                        className="w-full h-full max-w-2xl mx-auto rounded-lg border border-dark-border"
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : (
