@@ -413,13 +413,12 @@ export function PhoneMockupPreview({
               {/* Action Buttons */}
               <div className="absolute bottom-6 right-4 left-4 z-20 flex justify-between items-center">
                 {/* WhatsApp Contact Button */}
-                {telephone && selectedNetwork === 'whatsapp' && (
+                {selectedNetwork === 'whatsapp' && telephone && (
                   <Button
                     onClick={onWhatsAppContact}
-                    className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6 py-2 text-sm font-medium shadow-lg"
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-full font-medium shadow-lg text-sm"
                   >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Contacter
+                    💬
                   </Button>
                 )}
 
