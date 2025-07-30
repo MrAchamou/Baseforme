@@ -83,6 +83,17 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
     { elementId: 'secondaryText', effect: null, isActive: false },
     { elementId: 'contact', effect: null, isActive: false }
   ]);
+
+  // Debug des effets
+  useEffect(() => {
+    console.log('🔍 Debug des effets dans TemplateCreator:');
+    console.log(`Total effets: ${effects.length}`);
+    console.log('Effets texte:', effects.filter(e => e.category === 'text' || e.category === 'both').length);
+    console.log('Effets image:', effects.filter(e => e.category === 'image' || e.category === 'both').length);
+    effects.slice(0, 5).forEach(effect => {
+      console.log(`- ${effect.name} (${effect.category})`);
+    });
+  }, [effects]);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -367,9 +378,9 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                           <SelectValue placeholder="Effet" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-600">
-                          {effects.filter(e => e.name.includes('img')).map((effect) => (
+                          {effects.filter(e => e.category === 'image' || e.category === 'both').map((effect) => (
                             <SelectItem key={effect.id} value={effect.id} className="text-xs">
-                              {effect.name.replace('-img.js', '')}
+                              {effect.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -416,9 +427,9 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
                           <SelectValue placeholder="Effet" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-800 border-slate-600">
-                          {effects.filter(e => e.name.includes('texte')).map((effect) => (
+                          {effects.filter(e => e.category === 'text' || e.category === 'both').map((effect) => (
                             <SelectItem key={effect.id} value={effect.id} className="text-xs">
-                              {effect.name.replace('-texte.js', '')}
+                              {effect.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
