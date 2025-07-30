@@ -17,16 +17,26 @@ interface ScenarioStep {
 
 interface ScenarioPlayerProps {
   scenario: {
-    logoText: string;
-    logoImage: File | null;
-    logoEffect: string;
-    storyText: string;
-    storyEffect: string;
-    mainText: string;
-    mainImage: File | null;
-    mainEffect: string;
-    sloganText: string;
-    sloganEffect: string;
+    type?: string;
+    elements?: Array<{
+      id: string;
+      title: string;
+      text: string;
+      image?: File | null;
+      effectId: string;
+      duration: number;
+    }>;
+    // Legacy format support
+    logoText?: string;
+    logoImage?: File | null;
+    logoEffect?: string;
+    storyText?: string;
+    storyEffect?: string;
+    mainText?: string;
+    mainImage?: File | null;
+    mainEffect?: string;
+    sloganText?: string;
+    sloganEffect?: string;
   };
   effects: Effect[];
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -39,38 +49,49 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
   const [progress, setProgress] = useState(0);
   const [effectLoader, setEffectLoader] = useState<EffectLoader | null>(null);
 
-  const steps: ScenarioStep[] = [
-    ...(scenario.logoText ? [{
-      id: 'logo',
-      title: 'Logo Animé',
-      text: scenario.logoText,
-      image: scenario.logoImage,
-      effectId: scenario.logoEffect,
-      duration: 3000
-    }] : []),
-    ...(scenario.storyText ? [{
-      id: 'story',
-      title: 'Histoire Immersive',
-      text: scenario.storyText,
-      effectId: scenario.storyEffect,
-      duration: 5000
-    }] : []),
-    ...(scenario.mainText ? [{
-      id: 'main',
-      title: 'Effet Principal',
-      text: scenario.mainText,
-      image: scenario.mainImage,
-      effectId: scenario.mainEffect,
-      duration: 4000
-    }] : []),
-    ...(scenario.sloganText ? [{
-      id: 'slogan',
-      title: 'Signature Finale',
-      text: scenario.sloganText,
-      effectId: scenario.sloganEffect,
-      duration: 3000
-    }] : [])
-  ];
+  const steps: ScenarioStep[] = scenario.elements ? 
+    // New format with custom elements
+    scenario.elements.map(element => ({
+      id: element.id,
+      title: element.title,
+      text: element.text,
+      image: element.image,
+      effectId: element.effectId,
+      duration: element.duration
+    })) :
+    // Legacy format support
+    [
+      ...(scenario.logoText ? [{
+        id: 'logo',
+        title: 'Logo Animé',
+        text: scenario.logoText,
+        image: scenario.logoImage,
+        effectId: scenario.logoEffect,
+        duration: 3000
+      }] : []),
+      ...(scenario.storyText ? [{
+        id: 'story',
+        title: 'Histoire Immersive',
+        text: scenario.storyText,
+        effectId: scenario.storyEffect,
+        duration: 5000
+      }] : []),
+      ...(scenario.mainText ? [{
+        id: 'main',
+        title: 'Effet Principal',
+        text: scenario.mainText,
+        image: scenario.mainImage,
+        effectId: scenario.mainEffect,
+        duration: 4000
+      }] : []),
+      ...(scenario.sloganText ? [{
+        id: 'slogan',
+        title: 'Signature Finale',
+        text: scenario.sloganText,
+        effectId: scenario.sloganEffect,
+        duration: 3000
+      }] : [])
+    ];
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -362,7 +383,19 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lecteur de Scénario</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          {scenario.type && (
+            <span className="text-lg">
+              {scenario.type === 'BASIC' ? '✅' : 
+               scenario.type === 'PROMOTION' ? '💥' : 
+               scenario.type === 'PREMIUM' ? '💎' : 
+               scenario.type === 'DYNAMIQUE' ? '🚀' : 
+               scenario.type === 'STORYTELLING' ? '🧠' : 
+               scenario.type === 'EXCLUSIVE' ? '🎁' : '🎬'}
+            </span>
+          )}
+          Lecteur de Scénario {scenario.type ? `- ${scenario.type}` : ''}
+        </CardTitle>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Étape {currentStep + 1} sur {steps.length}</span>
           <span>{currentStepData?.title}</span>

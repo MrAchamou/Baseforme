@@ -35,3 +35,32 @@ export interface EffectStats {
   animationsPlayed: number;
   avgLoadTime: string;
 }
+
+export type ScenarioType = 'BASIC' | 'PROMOTION' | 'PREMIUM' | 'DYNAMIQUE' | 'STORYTELLING' | 'EXCLUSIVE';
+
+export interface ScenarioElement {
+  id: string;
+  label: string;
+  text: string;
+  effectId: string;
+  duration: number;
+  emoji?: string;
+  required?: boolean;
+}
+
+export interface ScenarioTemplate {
+  type: ScenarioType;
+  name: string;
+  description: string;
+  emoji: string;
+  elements: ScenarioElement[];
+}
+
+export interface ScenarioConfig {
+  type: ScenarioType;
+  customElements: Record<string, {
+    text: string;
+    effectId: string;
+    image?: File | null;
+  }>;
+}

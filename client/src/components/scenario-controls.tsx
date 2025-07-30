@@ -6,317 +6,272 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Upload, Image, Type, Sparkles, FileText } from "lucide-react";
+import { Upload, Image, Type, Sparkles, FileText, Trash2 } from "lucide-react";
 import { Effect } from "@/types/effects";
-
-interface ScenarioData {
-  logoText: string;
-  logoImage: File | null;
-  logoEffect: string;
-
-  storyText: string;
-  storyEffect: string;
-
-  mainText: string;
-  mainImage: File | null;
-  mainEffect: string;
-
-  sloganText: string;
-  sloganEffect: string;
-}
+import { ScenarioType, ScenarioConfig, ScenarioElement } from "@/types/effects";
+import { SCENARIO_TEMPLATES, getScenarioTemplate, getAllScenarioTypes } from "@/lib/scenario-templates";
 
 interface ScenarioControlsProps {
   effects: Effect[];
-  onScenarioPlay: (scenario: ScenarioData) => void;
+  onScenarioPlay: (scenario: any) => void;
   isPlaying: boolean;
 }
 
 export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: ScenarioControlsProps) {
-  const [scenario, setScenario] = useState<ScenarioData>({
-    logoText: '',
-    logoImage: null,
-    logoEffect: '',
-    storyText: '',
-    storyEffect: '',
-    mainText: '',
-    mainImage: null,
-    mainEffect: '',
-    sloganText: '',
-    sloganEffect: ''
+  const [selectedType, setSelectedType] = useState<ScenarioType>('BASIC');
+  const [scenarioConfig, setScenarioConfig] = useState<ScenarioConfig>({
+    type: 'BASIC',
+    customElements: {}
   });
 
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const mainInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const handleImageUpload = (type: 'logo' | 'main', event: React.ChangeEvent<HTMLInputElement>) => {
+  const currentTemplate = getScenarioTemplate(selectedType);
+
+  const handleTypeChange = (type: ScenarioType) => {
+    setSelectedType(type);
+    setScenarioConfig({
+      type,
+      customElements: {}
+    });
+  };
+
+  const updateElementText = (elementId: string, text: string) => {
+    setScenarioConfig(prev => ({
+      ...prev,
+      customElements: {
+        ...prev.customElements,
+        [elementId]: {
+          ...prev.customElements[elementId],
+          text,
+          effectId: prev.customElements[elementId]?.effectId || ''
+        }
+      }
+    }));
+  };
+
+  const updateElementEffect = (elementId: string, effectId: string) => {
+    setScenarioConfig(prev => ({
+      ...prev,
+      customElements: {
+        ...prev.customElements,
+        [elementId]: {
+          ...prev.customElements[elementId],
+          text: prev.customElements[elementId]?.text || '',
+          effectId
+        }
+      }
+    }));
+  };
+
+  const updateElementImage = (elementId: string, image: File | null) => {
+    setScenarioConfig(prev => ({
+      ...prev,
+      customElements: {
+        ...prev.customElements,
+        [elementId]: {
+          ...prev.customElements[elementId],
+          image
+        }
+      }
+    }));
+  };
+
+  const handleImageUpload = (elementId: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      setScenario(prev => ({
-        ...prev,
-        [type === 'logo' ? 'logoImage' : 'mainImage']: file
-      }));
+      updateElementImage(elementId, file);
+    }
+  };
+
+  const removeImage = (elementId: string) => {
+    updateElementImage(elementId, null);
+    if (imageInputRefs.current[elementId]) {
+      imageInputRefs.current[elementId]!.value = '';
     }
   };
 
   const handlePlayScenario = () => {
-    // Validation plus robuste
-    const hasContent = scenario.logoText.trim() || 
-                      scenario.storyText.trim() || 
-                      scenario.mainText.trim() || 
-                      scenario.sloganText.trim();
-    
-    if (!hasContent) {
-      alert('⚠️ Veuillez ajouter au moins un texte dans une des sections pour créer votre scénario.');
+    // Validation des éléments requis
+    const requiredElements = currentTemplate.elements.filter(el => el.required);
+    const missingElements = requiredElements.filter(el => {
+      const config = scenarioConfig.customElements[el.id];
+      return !config?.text?.trim() || !config?.effectId;
+    });
+
+    if (missingElements.length > 0) {
+      const missingNames = missingElements.map(el => el.label).join(', ');
+      alert(`⚠️ Veuillez compléter les éléments requis : ${missingNames}`);
       return;
     }
 
-    // Validation des effets pour les sections avec du contenu
-    const sections = [];
-    if (scenario.logoText.trim() && !scenario.logoEffect) {
-      sections.push('Logo');
-    }
-    if (scenario.storyText.trim() && !scenario.storyEffect) {
-      sections.push('Histoire');
-    }
-    if (scenario.mainText.trim() && !scenario.mainEffect) {
-      sections.push('Effet Principal');
-    }
-    if (scenario.sloganText.trim() && !scenario.sloganEffect) {
-      sections.push('Slogan');
-    }
+    // Convertir en format attendu par le ScenarioPlayer
+    const convertedScenario = {
+      type: selectedType,
+      elements: currentTemplate.elements.map((element, index) => {
+        const config = scenarioConfig.customElements[element.id];
+        return {
+          id: element.id,
+          title: `${element.emoji} ${element.label}`,
+          text: config?.text || element.text,
+          image: config?.image || null,
+          effectId: config?.effectId || element.effectId,
+          duration: element.duration
+        };
+      }).filter(el => el.text.trim() && el.effectId)
+    };
 
-    if (sections.length > 0) {
-      alert(`⚠️ Veuillez sélectionner un effet pour : ${sections.join(', ')}`);
-      return;
-    }
-
-    // Vérifier que les effets sélectionnés existent
-    const selectedEffectIds = [
-      scenario.logoEffect,
-      scenario.storyEffect,
-      scenario.mainEffect,
-      scenario.sloganEffect
-    ].filter(Boolean);
-
-    const missingEffects = selectedEffectIds.filter(effectId => 
-      !effects.find(e => e.id === effectId)
-    );
-
-    if (missingEffects.length > 0) {
-      alert(`⚠️ Certains effets sélectionnés ne sont pas disponibles. Veuillez les resélectionner.`);
-      return;
-    }
-
-    console.log('🎬 Lancement du scénario avec', selectedEffectIds.length, 'effets:', scenario);
-    onScenarioPlay(scenario);
+    console.log('🎬 Lancement du scénario', selectedType, ':', convertedScenario);
+    onScenarioPlay(convertedScenario);
   };
 
-  // Filter effects by category and type for better organization
-  const logoEffects = effects.filter(e => 
-    e.category === 'both' || e.category === 'text' ||
-    e.name.includes('GLOW') || 
-    e.name.includes('APPEAR') || 
-    e.name.includes('FADE') ||
-    e.name.includes('AURA')
-  );
-
-  const textEffects = effects.filter(e => 
-    e.category === 'text' || 
-    (e.category === 'both' && (
-      e.name.includes('WRITE') || 
-      e.name.includes('TYPE') || 
-      e.name.includes('ECHO') ||
-      e.name.includes('SPARKLE')
-    ))
-  );
-
-  const visualEffects = effects.filter(e => 
-    e.category === 'both' ||
-    e.name.includes('FIRE') || 
-    e.name.includes('ELECTRIC') || 
-    e.name.includes('CRYSTAL') ||
-    e.name.includes('PLASMA') ||
-    e.name.includes('ENERGY')
-  );
-
-  const imageEffects = effects.filter(e => 
-    e.category === 'image' || 
-    (e.category === 'both' && e.name.includes('MORPH'))
-  );
-
+  // Grouper les effets par catégorie
+  const textEffects = effects.filter(e => e.category === 'text' || e.category === 'both');
+  const imageEffects = effects.filter(e => e.category === 'image' || e.category === 'both');
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">Créateur de Scénario</h2>
-        <p className="text-muted-foreground">
-          Créez une expérience immersive avec logo, histoire, effets et slogan
-        </p>
-      </div>
-
-      {/* Logo Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Image className="w-5 h-5" />
-            Logo Animé
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="logo-text">Texte du logo</Label>
-              <Input
-                id="logo-text"
-                data-testid="input-logo-text"
-                placeholder="Nom de votre marque..."
-                value={scenario.logoText}
-                onChange={(e) => setScenario(prev => ({ ...prev, logoText: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label>Image/Logo (optionnel)</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => logoInputRef.current?.click()}
-                  data-testid="button-upload-logo"
-                  className="flex-1"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {scenario.logoImage ? scenario.logoImage.name : 'Importer'}
-                </Button>
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload('logo', e)}
-                  className="hidden"
-                />
-              </div>
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="logo-effect">Effet pour le logo</Label>
-            <Select value={scenario.logoEffect} onValueChange={(value) => setScenario(prev => ({ ...prev, logoEffect: value }))}>
-              <SelectTrigger data-testid="select-logo-effect">
-                <SelectValue placeholder="Choisir un effet..." />
-              </SelectTrigger>
-              <SelectContent>
-                      {logoEffects.map(effect => (
-                        <SelectItem key={effect.id} value={effect.id}>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs px-1 py-0.5 rounded bg-blue-600 text-white">
-                              {effect.category === 'image' ? '🖼️' : effect.category === 'text' ? '✏️' : '🎨'}
-                            </span>
-                            <span>{effect.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Story Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Mini-Histoire Immersive
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="story-text">Texte de l'histoire</Label>
-            <Textarea
-              id="story-text"
-              data-testid="textarea-story-text"
-              placeholder="Racontez votre histoire captivante..."
-              value={scenario.storyText}
-              onChange={(e) => setScenario(prev => ({ ...prev, storyText: e.target.value }))}
-              rows={3}
-            />
-          </div>
-          <div>
-            <Label htmlFor="story-effect">Effet pour l'histoire</Label>
-            <Select value={scenario.storyEffect} onValueChange={(value) => setScenario(prev => ({ ...prev, storyEffect: value }))}>
-              <SelectTrigger data-testid="select-story-effect">
-                <SelectValue placeholder="Choisir un effet..." />
-              </SelectTrigger>
-              <SelectContent>
-                    {textEffects.map(effect => (
-                      <SelectItem key={effect.id} value={effect.id}>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg">
-                            {effect.name.includes('TYPE') || effect.name.includes('WRITE') ? '⌨️' : 
-                             effect.name.includes('ECHO') ? '🔊' : 
-                             effect.name.includes('SPARKLE') ? '✨' : 
-                             effect.name.includes('FIRE') ? '🔥' : '📝'}
-                          </span>
-                          <span>{effect.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Main Visual Section */}
+      {/* Sélection du type de scénario */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Effets Visuels Puissants
+            🎬 Scénarios Officiels
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="main-text">Texte principal</Label>
-              <Input
-                id="main-text"
-                data-testid="input-main-text"
-                placeholder="Votre message principal..."
-                value={scenario.mainText}
-                onChange={(e) => setScenario(prev => ({ ...prev, mainText: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label>Image/Visuel (optionnel)</Label>
-              <div className="flex gap-2">
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {getAllScenarioTypes().map(type => {
+              const template = getScenarioTemplate(type);
+              return (
                 <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => mainInputRef.current?.click()}
-                  data-testid="button-upload-main"
-                  className="flex-1"
+                  key={type}
+                  variant={selectedType === type ? "default" : "outline"}
+                  onClick={() => handleTypeChange(type)}
+                  className="h-auto p-4 flex flex-col items-start gap-2"
+                  data-testid={`scenario-type-${type}`}
                 >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {scenario.mainImage ? scenario.mainImage.name : 'Importer'}
+                  <div className="flex items-center gap-2 w-full">
+                    <span className="text-lg">{template.emoji}</span>
+                    <span className="font-semibold text-sm">{template.name}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-left">
+                    {template.description}
+                  </p>
                 </Button>
-                <input
-                  ref={mainInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload('main', e)}
-                  className="hidden"
-                />
-              </div>
-            </div>
+              );
+            })}
           </div>
-          <div>
-            <Label htmlFor="main-effect">Effet visuel</Label>
-            <Select value={scenario.mainEffect} onValueChange={(value) => setScenario(prev => ({ ...prev, mainEffect: value }))}>
-              <SelectTrigger data-testid="select-main-effect">
-                <SelectValue placeholder="Choisir un effet..." />
-              </SelectTrigger>
-              <SelectContent>
-                      {imageEffects.map(effect => (
+        </CardContent>
+      </Card>
+
+      {/* Configuration du scénario sélectionné */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-lg">{currentTemplate.emoji}</span>
+            Configuration : {currentTemplate.name}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {currentTemplate.description}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {currentTemplate.elements.map((element, index) => (
+            <div key={element.id} className="space-y-4 p-4 border rounded-lg bg-muted/5">
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2 font-medium">
+                  <span className="text-lg">{element.emoji}</span>
+                  {element.label}
+                  {element.required && <span className="text-red-500">*</span>}
+                </Label>
+                <span className="text-xs text-muted-foreground">
+                  {element.duration}ms
+                </span>
+              </div>
+
+              <div className="grid gap-4">
+                {/* Texte */}
+                <div>
+                  <Label htmlFor={`element-text-${element.id}`} className="text-sm">
+                    Texte
+                  </Label>
+                  {element.id === 'debut' || element.id === 'valeurs' || element.id === 'evolution' ? (
+                    <Textarea
+                      id={`element-text-${element.id}`}
+                      placeholder={element.text || `Saisissez le ${element.label.toLowerCase()}...`}
+                      value={scenarioConfig.customElements[element.id]?.text || ''}
+                      onChange={(e) => updateElementText(element.id, e.target.value)}
+                      rows={3}
+                      data-testid={`textarea-${element.id}`}
+                    />
+                  ) : (
+                    <Input
+                      id={`element-text-${element.id}`}
+                      placeholder={element.text || `Saisissez le ${element.label.toLowerCase()}...`}
+                      value={scenarioConfig.customElements[element.id]?.text || ''}
+                      onChange={(e) => updateElementText(element.id, e.target.value)}
+                      data-testid={`input-${element.id}`}
+                    />
+                  )}
+                </div>
+
+                {/* Image (optionnelle pour certains éléments) */}
+                {(element.id === 'boutique' || element.id === 'offre' || element.id === 'signature') && (
+                  <div>
+                    <Label className="text-sm">Image (optionnelle)</Label>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => imageInputRefs.current[element.id]?.click()}
+                        data-testid={`upload-${element.id}`}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Choisir
+                      </Button>
+                      {scenarioConfig.customElements[element.id]?.image && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-green-600">
+                            📷 {scenarioConfig.customElements[element.id]?.image?.name}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeImage(element.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <input
+                        ref={(el) => { imageInputRefs.current[element.id] = el; }}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(element.id, e)}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Effet */}
+                <div>
+                  <Label htmlFor={`element-effect-${element.id}`} className="text-sm">
+                    Effet visuel {element.required && <span className="text-red-500">*</span>}
+                  </Label>
+                  <Select 
+                    value={scenarioConfig.customElements[element.id]?.effectId || ''} 
+                    onValueChange={(value) => updateElementEffect(element.id, value)}
+                  >
+                    <SelectTrigger data-testid={`select-effect-${element.id}`}>
+                      <SelectValue placeholder="Choisir un effet..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* Effets recommandés en premier */}
+                      {(selectedType === 'PREMIUM' ? imageEffects : textEffects).slice(0, 5).map(effect => (
                         <SelectItem key={effect.id} value={effect.id}>
                           <div className="flex items-center space-x-2">
                             <span className="text-lg">
@@ -324,68 +279,45 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
                                effect.name.includes('ELECTRIC') ? '⚡' : 
                                effect.name.includes('CRYSTAL') ? '💎' : 
                                effect.name.includes('PLASMA') ? '🌀' : 
-                               effect.name.includes('MORPH') ? '🔮' : 
-                               effect.name.includes('LIQUID') ? '💧' : 
-                               effect.name.includes('ENERGY') ? '⚡' : '🎭'}
+                               effect.name.includes('TYPE') ? '⌨️' : 
+                               effect.name.includes('GLOW') ? '✨' : '🎭'}
+                            </span>
+                            <span>{effect.name}</span>
+                            <span className="text-xs text-muted-foreground">⭐</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+
+                      <Separator className="my-2" />
+
+                      {/* Tous les autres effets */}
+                      {effects.filter(e => !((selectedType === 'PREMIUM' ? imageEffects : textEffects).slice(0, 5).some(re => re.id === e.id))).map(effect => (
+                        <SelectItem key={effect.id} value={effect.id}>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg">
+                              {effect.name.includes('FIRE') ? '🔥' : 
+                               effect.name.includes('ELECTRIC') ? '⚡' : 
+                               effect.name.includes('CRYSTAL') ? '💎' : 
+                               effect.name.includes('PLASMA') ? '🌀' : 
+                               effect.name.includes('TYPE') ? '⌨️' : 
+                               effect.name.includes('GLOW') ? '✨' : '🎭'}
                             </span>
                             <span>{effect.name}</span>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Slogan Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Type className="w-5 h-5" />
-            Slogan/Signature Finale
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="slogan-text">Texte de conclusion</Label>
-            <Input
-              id="slogan-text"
-              data-testid="input-slogan-text"
-              placeholder="Votre slogan mémorable..."
-              value={scenario.sloganText}
-              onChange={(e) => setScenario(prev => ({ ...prev, sloganText: e.target.value }))}
-            />
-          </div>
-          <div>
-            <Label htmlFor="slogan-effect">Effet de conclusion</Label>
-            <Select value={scenario.sloganEffect} onValueChange={(value) => setScenario(prev => ({ ...prev, sloganEffect: value }))}>
-              <SelectTrigger data-testid="select-slogan-effect">
-                <SelectValue placeholder="Choisir un effet..." />
-              </SelectTrigger>
-              <SelectContent>
-                {textEffects.slice(0, 15).map((effect) => (
-                  <SelectItem key={effect.id} value={effect.id}>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">
-                        {effect.name.includes('GLOW') ? '✨' : 
-                         effect.name.includes('SPARKLE') ? '💫' : 
-                         effect.name.includes('AURA') ? '🌟' : 
-                         effect.name.includes('RAINBOW') ? '🌈' : '🎯'}
-                      </span>
-                      <span>{effect.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
       <Separator />
 
-      {/* Play Button */}
+      {/* Bouton de lancement */}
       <div className="text-center">
         <Button
           onClick={handlePlayScenario}
@@ -401,8 +333,8 @@ export function ScenarioControls({ effects, onScenarioPlay, isPlaying }: Scenari
             </div>
           ) : (
             <div className="flex items-center space-x-2">
-              <span>🚀</span>
-              <span>Lancer le Scénario Complet</span>
+              <span>{currentTemplate.emoji}</span>
+              <span>Lancer le Scénario {currentTemplate.name}</span>
             </div>
           )}
         </Button>
