@@ -1,0 +1,87 @@
+Tu as **absolument raison** ! 😤 
+
+Si chaque élément a son **espace défini** dans le template, il ne devrait **JAMAIS** y avoir de conflit ! C'est comme une mise en page print - chaque bloc a ses coordonnées fixes.
+
+## 🤔 **Le vrai problème**
+
+Le souci, c'est que les **effets JavaScript** ne respectent pas forcément les **zones définies**. Ils :
+- Dessinent où ils veulent sur le Canvas
+- Lancent leurs animations sans connaître le layout
+- Se marchent dessus au niveau du contexte Canvas
+
+## 💡 **La solution : Système de Contraintes**
+
+```javascript
+// Chaque effet doit RESPECTER sa zone
+class ConstrainedEffect {
+  constructor(effect, bounds) {
+    this.effect = effect
+    this.bounds = bounds // { x, y, width, height }
+  }
+  
+  render(ctx) {
+    // FORCER l'effet à rester dans sa zone
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height)
+    ctx.clip() // CRUCIAL : découpe à la zone
+    
+    // Maintenant l'effet peut pas déborder
+    this.effect.render(ctx, this.bounds)
+    
+    ctx.restore()
+  }
+}
+```
+
+## 🎯 **Architecture Template Clean**
+
+```javascript
+const TEMPLATE_LAYOUT = {
+  logo: { x: 50, y: 50, width: 100, height: 100 },
+  title: { x: 0, y: 160, width: 400, height: 60 },
+  subtitle: { x: 0, y: 230, width: 400, height: 40 },
+  cta: { x: 0, y: 300, width: 400, height: 50 }
+}
+
+// Chaque effet est CONTRAINT à sa zone
+effects.forEach(effect => {
+  const zone = TEMPLATE_LAYOUT[effect.target]
+  effect.setBounds(zone) // L'effet DOIT respecter ça
+})
+```
+
+## 🛠️ **Fix immédiat**
+
+**Wrapper tes effets GitHub** pour qu'ils acceptent des contraintes :
+
+```javascript
+// Au lieu de laisser l'effet libre
+effect.render(canvas)
+
+// Force-le dans sa zone
+function renderConstrainedEffect(effect, zone) {
+  const tempCanvas = document.createElement('canvas')
+  tempCanvas.width = zone.width
+  tempCanvas.height = zone.height
+  
+  // Effet rendu dans son canvas dédié
+  effect.render(tempCanvas)
+  
+  // Puis copié à la bonne position
+  mainContext.drawImage(tempCanvas, zone.x, zone.y)
+}
+```
+
+## 🔥 **Test rapide**
+
+Essaie ça avec UN seul effet pour voir :
+1. Crée un rectangle de debug pour visualiser la zone
+2. Force l'effet à rendre SEULEMENT dans cette zone  
+3. Si ça marche → étendre à tous les effets
+
+**Le problème c'est que tes effets GitHub sont-ils "zone-aware" ?** Ou ils dessinent n'importe où sur le Canvas ?
+
+Parce que si c'est ça, il faut juste un **wrapper intelligent** qui les contraint à leur espace alloué.
+
+Tu peux me montrer comment un de tes effets fonctionne actuellement ?
