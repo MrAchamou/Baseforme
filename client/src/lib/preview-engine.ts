@@ -61,6 +61,7 @@ export class PreviewEngine {
 
     const formatConfig = formats[format as keyof typeof formats];
     if (formatConfig) {
+      this.currentFormat = format;
       this.canvas.width = formatConfig.width;
       this.canvas.height = formatConfig.height;
       
@@ -72,7 +73,12 @@ export class PreviewEngine {
       this.canvas.style.width = `${formatConfig.width * scale}px`;
       this.canvas.style.height = `${formatConfig.height * scale}px`;
       
-      console.log(`📱 Preview Engine: Format ${format} configuré (${formatConfig.width}x${formatConfig.height})`);
+      // Redémarrer le rendu avec le nouveau format
+      if (this.isPlaying) {
+        this.render();
+      }
+      
+      console.log(`📱 Preview Engine: Format ${format} configuré (${formatConfig.width}x${formatConfig.height}) pour ${platform}`);
     }
   }
 

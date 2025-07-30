@@ -128,6 +128,13 @@ export function TemplateCreator({ effects }: TemplateCreatorProps) {
     previewEngine.updateFormat(selectedFormat, 'whatsapp');
   }, [selectedFormat]);
 
+  useEffect(() => {
+    if (canvasRef.current) {
+      effectLoader.setCanvas(canvasRef.current);
+      previewEngine.setCanvas(canvasRef.current);
+      previewEngine.updateFormat(selectedFormat, 'whatsapp');
+  }, [selectedFormat]);
+
   const updateContainerSize = () => {
     const container = document.getElementById('effect-container');
     if (container && FORMATS[selectedFormat as keyof typeof FORMATS]) {

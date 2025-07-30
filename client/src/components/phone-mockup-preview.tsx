@@ -334,31 +334,66 @@ export function PhoneMockupPreview({
             </div>
 
             {/* Content Area */}
-            <div className="relative flex-1 overflow-hidden">
-              {/* Logo Area */}
-              {logoPreview && (
-                <div className="absolute top-4 left-4 z-20 bg-white/10 backdrop-blur-sm rounded-lg p-2">
-                  <img
-                    src={logoPreview}
-                    alt="Logo"
-                    className="max-w-12 max-h-12 object-contain"
-                  />
-                </div>
-              )}
-
-              {/* Main Animation Canvas */}
-              <div className="absolute inset-0">
-                <canvas
-                  ref={canvasRef}
-                  width={phoneConfig.width}
-                  height={phoneConfig.height}
-                  className="w-full h-full object-cover"
-                  style={{
-                    transform: 'scale(0.95)',
-                    transformOrigin: 'center'
-                  }}
+          <div className="relative flex-1 overflow-hidden">
+            {/* Logo Area - Plus réaliste selon la plateforme */}
+            {logoPreview && (
+              <div className={`absolute top-4 z-20 rounded-lg p-2 ${
+                selectedNetwork === 'whatsapp' ? 'left-4 bg-black/20 backdrop-blur-sm' :
+                selectedNetwork === 'instagram' ? 'left-4 bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm' :
+                selectedNetwork === 'tiktok' ? 'right-4 bg-white/10 backdrop-blur-sm' :
+                'left-4 bg-white/10 backdrop-blur-sm'
+              }`}>
+                <img
+                  src={logoPreview}
+                  alt="Logo"
+                  className={`object-contain ${
+                    selectedNetwork === 'tiktok' ? 'max-w-8 max-h-8' : 'max-w-12 max-h-12'
+                  }`}
                 />
               </div>
+            )}
+
+            {/* Main Text Overlay - Positionné selon la plateforme */}
+            {mainText && (
+              <div className={`absolute z-30 px-4 ${
+                selectedNetwork === 'whatsapp' ? 'top-1/3 left-0 right-0' :
+                selectedNetwork === 'instagram' ? 'bottom-32 left-0 right-0' :
+                selectedNetwork === 'tiktok' ? 'bottom-40 left-0 right-0' :
+                'top-1/2 left-0 right-0 transform -translate-y-1/2'
+              }`}>
+                <div className={`text-center ${
+                  selectedNetwork === 'whatsapp' ? 'bg-black/40 backdrop-blur-md p-4 rounded-xl' :
+                  selectedNetwork === 'instagram' ? 'bg-gradient-to-t from-black/60 to-transparent p-4 rounded-xl' :
+                  selectedNetwork === 'tiktok' ? 'bg-black/30 backdrop-blur-sm p-3 rounded-lg' :
+                  'bg-black/50 backdrop-blur-md p-4 rounded-xl'
+                }`}>
+                  <h2 className={`text-white font-bold leading-tight ${
+                    selectedNetwork === 'tiktok' ? 'text-lg' :
+                    selectedNetwork === 'instagram' ? 'text-xl' :
+                    'text-2xl'
+                  }`}>
+                    {mainText}
+                  </h2>
+                </div>
+              </div>
+            )}
+
+            {/* Main Animation Canvas - En arrière-plan */}
+            <div className="absolute inset-0 z-10">
+              <canvas
+                ref={canvasRef}
+                width={phoneConfig.width}
+                height={phoneConfig.height}
+                className="w-full h-full object-cover opacity-80"
+                style={{
+                  transform: 'scale(0.98)',
+                  transformOrigin: 'center',
+                  filter: selectedNetwork === 'instagram' ? 'saturate(1.2) contrast(1.1)' :
+                          selectedNetwork === 'tiktok' ? 'contrast(1.3) brightness(0.9)' :
+                          'none'
+                }}
+              />
+            </div>
 
               {/* Secondary Text Overlay */}
               {secondaryText && (
