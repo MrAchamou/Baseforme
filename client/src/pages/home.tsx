@@ -15,7 +15,6 @@ import { ChevronLeft, ChevronRight, Sparkles, Settings, Eye, FileText, Smartphon
 import type { Effect, EffectStats } from '@/types/effects';
 
 export default function Home() {
-  const [effects, setEffects] = useState<Effect[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<string>('16:9');
   const [activeScenario, setActiveScenario] = useState<any>(null);
@@ -58,23 +57,15 @@ export default function Home() {
   }, [effects]);
 
   const handleGenerate = async () => {
-    if (!text.trim()) return;
-
     setIsPlaying(false);
     setActiveScenario(null);
     setCanExport(false);
 
     try {
-      // TODO: Implement smart effect selection logic here
-      // For now, just select a random effect
-      const randomIndex = Math.floor(Math.random() * effects.length);
-      //const effectToUse = effects[randomIndex];
-
-      //setSelectedEffect(effectToUse);
+      // Start basic animation
       setIsPlaying(true);
       setCanExport(true);
       setStats(prev => ({ ...prev, animationsPlayed: prev.animationsPlayed + 1 }));
-
     } catch (error) {
       console.error('Error generating effect:', error);
     }
@@ -356,6 +347,12 @@ export default function Home() {
                       <AnimationCanvas 
                         ref={canvasRef}
                         className="w-full h-full max-w-2xl mx-auto rounded-lg border border-dark-border"
+                        effect={null}
+                        text=""
+                        isPlaying={false}
+                        onPlayPause={() => {}}
+                        onRestart={() => {}}
+                        selectedFormat={selectedFormat}
                       />
                     </div>
                   )}

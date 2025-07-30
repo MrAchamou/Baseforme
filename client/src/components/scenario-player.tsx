@@ -45,10 +45,25 @@ interface ScenarioPlayerProps {
 }
 
 export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: ScenarioPlayerProps) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [effectLoader, setEffectLoader] = useState<EffectLoader | null>(null);
+
+  // Sécurité : vérifier que scenario et scenario.elements existent
+  if (!scenario || !scenario.elements || !Array.isArray(scenario.elements)) {
+    return (
+      <div className="h-96 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-4xl">⚠️</div>
+          <h3 className="text-lg font-semibold">Scénario non valide</h3>
+          <p className="text-sm text-muted-foreground">
+            Veuillez configurer un scénario avant de le lancer
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const steps: ScenarioStep[] = scenario.elements ? 
     // New format with custom elements
@@ -113,7 +128,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
       return;
     }
 
-    setCurrentStep(stepIndex);
+    setCurrentStepIndex(stepIndex);
     setProgress(0);
 
     try {
@@ -209,19 +224,19 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
 
   const playCurrentStep = () => {
     if (!isPlaying) {
-      playStep(currentStep);
+      playStep(currentStepIndex);
     }
   };
 
   const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(prev => prev + 1);
+    if (currentStepIndex < steps.length - 1) {
+      setCurrentStepIndex(prev => prev + 1);
       setProgress(0);
     }
   };
 
   const resetScenario = () => {
-    setCurrentStep(0);
+    setCurrentStepIndex(0);
     setProgress(0);
     setIsPlaying(false);
     // Clear canvas
@@ -247,7 +262,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
         workerScript: '/gif.worker.js'
       });
 
-      const step = steps[currentStep];
+      const step = steps[currentStepIndex];
       const effect = effects.find(e => e.id === step.effectId);
 
       if (!effect) return;
@@ -264,7 +279,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
         } else {
           gif.on('finished', (blob: Blob) => {
             const link = document.createElement('a');
-            link.download = `scenario-step-${currentStep + 1}.gif`;
+            link.download = `scenario-step-${currentStepIndex + 1}.gif`;
             link.href = URL.createObjectURL(blob);
             link.click();
             console.log('✅ Export GIF réussi');
@@ -274,7 +289,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
       };
 
       // Start recording
-      await playStep(currentStep);
+      await playStep(currentStepIndex);
       recordFrame();
 
     } catch (error) {
@@ -306,7 +321,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' });
         const link = document.createElement('a');
-        link.download = `scenario-step-${currentStep + 1}.webm`;
+        link.download = `scenario-step-${currentStepIndex + 1}.webm`;
         link.href = URL.createObjectURL(blob);
         link.click();
         console.log('✅ Export MP4 réussi');
@@ -316,12 +331,12 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
       mediaRecorder.start();
 
       // Play the effect and record for duration
-      await playStep(currentStep);
+      await playStep(currentStepIndex);
 
       // Stop recording after step duration
       setTimeout(() => {
         mediaRecorder.stop();
-      }, steps[currentStep].duration + 500);
+      }, steps[currentStepIndex].duration + 500);
 
     } catch (error) {
       console.error('❌ Erreur lors de l\'export MP4:', error);
@@ -339,12 +354,12 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
       canvasRef.current.toBlob(async (blob) => {
         if (!blob) return;
 
-        const file = new File([blob], `scenario-step-${currentStep + 1}.png`, { type: 'image/png' });
+        const file = new File([blob], `scenario-step-${currentStepIndex + 1}.png`, { type: 'image/png' });
 
         if (navigator.share && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: `Scénario - Étape ${currentStep + 1}`,
+            title: `Scénario - Étape ${currentStepIndex + 1}`,
             text: `${currentStepData?.title}: ${currentStepData?.text}`
           });
         } else {
@@ -393,7 +408,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
     );
   }
 
-  const currentStepData = steps[currentStep];
+  const currentStepData = steps[currentStepIndex];
 
   return (
     <Card>
@@ -412,7 +427,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
           Lecteur de Scénario {scenario.type ? `- ${scenario.type}` : ''}
         </CardTitle>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Étape {currentStep + 1} sur {steps.length}</span>
+          <span>Étape {currentStepIndex + 1} sur {steps.length}</span>
           <span>{currentStepData?.title}</span>
         </div>
       </CardHeader>
@@ -463,7 +478,7 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
           <Button
             variant="outline"
             onClick={nextStep}
-            disabled={isPlaying || currentStep >= steps.length - 1}
+            disabled={isPlaying || currentStepIndex >= steps.length - 1}
             data-testid="button-next-step"
           >
             <SkipForward className="w-4 h-4" />
@@ -520,13 +535,13 @@ export function ScenarioPlayer({ scenario, effects, canvasRef, onComplete }: Sce
           {steps.map((_, index) => (
             <button
               key={index}
-              onClick={() => !isPlaying && setCurrentStep(index)}
+              onClick={() => !isPlaying && setCurrentStepIndex(index)}
               disabled={isPlaying}
               className={`w-3 h-3 rounded-full transition-colors ${
-                index === currentStep 
-                  ? 'bg-primary' 
-                  : index < currentStep 
-                    ? 'bg-primary/50' 
+                index === currentStepIndex
+                  ? 'bg-primary'
+                  : index < currentStepIndex
+                    ? 'bg-primary/50'
                     : 'bg-muted'
               }`}
               data-testid={`step-indicator-${index}`}

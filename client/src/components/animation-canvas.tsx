@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCcw, Maximize2, Loader2 } from 'lucide-react';
 
 interface AnimationCanvasProps {
-  effect: Effect | null;
-  text: string;
-  isPlaying: boolean;
-  onPlayPause: () => void;
-  onRestart: () => void;
-  selectedFormat: string;
+  effect?: Effect | null;
+  text?: string;
+  isPlaying?: boolean;
+  onPlayPause?: () => void;
+  onRestart?: () => void;
+  selectedFormat?: string;
+  className?: string;
 }
 
 const formatMap: Record<string, [number, number]> = {
@@ -21,8 +22,18 @@ const formatMap: Record<string, [number, number]> = {
   "3:4": [810, 1080],
 };
 
-export const AnimationCanvas = React.forwardRef<HTMLCanvasElement, AnimationCanvasProps>(({ className, ...props }, ref) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export const AnimationCanvas = React.forwardRef<HTMLCanvasElement, AnimationCanvasProps>(({ 
+  className, 
+  effect = null, 
+  text = '', 
+  isPlaying = false, 
+  onPlayPause = () => {}, 
+  onRestart = () => {}, 
+  selectedFormat = '16:9',
+  ...props 
+}, ref) => {
+  const internalCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = (ref as React.RefObject<HTMLCanvasElement>) || internalCanvasRef;
   const containerRef = useRef<HTMLDivElement>(null);
   const [isEffectLoaded, setIsEffectLoaded] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
