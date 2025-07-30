@@ -99,17 +99,43 @@ export default function Home() {
     };
 
     const container = document.getElementById("effect-container");
-    if (container) {
+    if (container && formatMap[format]) {
       const [width, height] = formatMap[format];
-      // Scale down for preview while maintaining aspect ratio
-      const scale = Math.min(800 / width, 600 / height, 1);
-      const scaledWidth = width * scale;
-      const scaledHeight = height * scale;
 
+      // Calculate scale to fit within a max container size while maintaining aspect ratio
+      const maxContainerWidth = 600;
+      const maxContainerHeight = 700;
+      const scale = Math.min(maxContainerWidth / width, maxContainerHeight / height, 1);
+
+      const scaledWidth = Math.round(width * scale);
+      const scaledHeight = Math.round(height * scale);
+
+      // Update container dimensions
       container.style.width = `${scaledWidth}px`;
       container.style.height = `${scaledHeight}px`;
-      container.style.maxWidth = "100%";
-      container.style.maxHeight = "70vh";
+      container.style.maxWidth = `${scaledWidth}px`;
+      container.style.maxHeight = `${scaledHeight}px`;
+
+      // Update canvas dimensions
+      if (canvasRef.current) {
+        canvasRef.current.width = width;
+        canvasRef.current.height = height;
+        canvasRef.current.style.width = `${scaledWidth}px`;
+        canvasRef.current.style.height = `${scaledHeight}px`;
+        canvasRef.current.style.display = 'block';
+        canvasRef.current.style.margin = '0 auto';
+      }
+
+      // Update preview engine with new format
+      try {
+        if (window.previewEngine) {
+          window.previewEngine.updateFormat(format, 'whatsapp');
+        }
+      } catch (error) {
+        console.warn('Preview engine update failed:', error);
+      }
+
+      console.log(`🎨 Format changé vers ${format} (${width}x${height}) - Scale: ${scale.toFixed(2)}`);
     }
   };
 
@@ -243,7 +269,7 @@ export default function Home() {
                 <p className="text-sm text-slate-400">Studio de création d'animations</p>
               </div>
             </div>
-            
+
             {/* Navigation & Status */}
             <div className="flex items-center space-x-6">
               <div className="hidden lg:flex items-center space-x-6">
@@ -257,13 +283,13 @@ export default function Home() {
                     )}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center space-x-2 text-sm">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                   <span className="text-slate-300">Système opérationnel</span>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-200 hover:bg-slate-700/50">
                   <Settings className="w-4 h-4" />
@@ -420,32 +446,63 @@ export default function Home() {
                   ) : (
                     <div className="relative">
                       {/* Canvas Principal */}
-                      <div className="h-96 flex items-center justify-center bg-gradient-to-br from-slate-900/50 to-slate-800/50 p-8">
-                        <div className="text-center space-y-6">
-                          <div className="w-24 h-24 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full mx-auto flex items-center justify-center border border-slate-600/50">
-                            <Sparkles className="w-12 h-12 text-slate-400" />
-                          </div>
-                          <div>
-                            <h3 className="text-2xl font-semibold text-slate-300 mb-2">
-                              Votre canvas de création
-                            </h3>
-                            <p className="text-slate-500 max-w-md">
-                              Sélectionnez un scénario ou utilisez les templates pro pour commencer à créer vos animations
-                            </p>
-                          </div>
-                        </div>
-                        <AnimationCanvas 
-                          ref={canvasRef}
-                          className="absolute inset-0 w-full h-full opacity-0"
-                          effect={null}
-                          text=""
-                          isPlaying={false}
-                          onPlayPause={() => {}}
-                          onRestart={() => {}}
-                          selectedFormat={selectedFormat}
-                        />
+                      <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold mb-2">🎨 Votre Canvas de Création</h3>
+                <p className="text-sm text-slate-400">
+                  Espace de travail pour vos animations - Format: {(() => {
+                    const formatNames: Record<string, string> = {
+                      '9:16': 'Stories (9:16)',
+                      '1:1': 'Post carré (1:1)',
+                      '4:5': 'Post portrait (4:5)',
+                      '16:9': 'Paysage (16:9)',
+                      '3:4': 'Portrait (3:4)'
+                    };
+                    return formatNames[selectedFormat] || selectedFormat;
+                  })()}
+                </p>
+              </div>
+
+              <div className="flex justify-center items-center min-h-[400px]">
+                <div 
+                  id="effect-container"
+                  className="relative bg-black border-2 border-slate-600 rounded-lg overflow-hidden shadow-2xl transition-all duration-300"
+                  style={{
+                    // Les dimensions seront définies par handleFormatChange
+                    minWidth: '200px',
+                    minHeight: '200px'
+                  }}
+                >
+                  <canvas
+                    ref={canvasRef}
+                    className="block mx-auto"
+                    style={{ 
+                      display: 'block',
+                      backgroundColor: '#000000'
+                    }}
+                  />
+
+                  {!isPlaying && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                      <div className="text-center text-white">
+                        <div className="text-4xl mb-2">🎬</div>
+                        <p className="text-sm">Canvas prêt pour vos créations</p>
+                        <p className="text-xs text-slate-300 mt-1">Format: {selectedFormat}</p>
                       </div>
-                      
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Indicateur visuel du format */}
+              <div className="mt-4 text-center">
+                <div className="inline-flex items-center space-x-2 px-3 py-1 bg-slate-800 rounded-full text-xs">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span className="text-slate-300">Format actif: {selectedFormat}</span>
+                </div>
+              </div>
+            </div>
+
                       {/* Contrôles Format */}
                       <div className="p-4 border-t border-slate-700/50 bg-slate-800/10">
                         <div className="flex items-center justify-between">
