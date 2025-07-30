@@ -1,21 +1,18 @@
-import type { Effect } from '@/types/effects';
 
-// Fonction pour générer automatiquement les métadonnées d'un effet
-function generateEffectMetadata(filename: string) {
+import { Effect } from '../types/effects';
+
+// Fonction pour déterminer la catégorie et le type d'un effet
+function categorizeEffect(filename: string): { category: string; type: string } {
   const baseName = filename.replace('.effect.js', '');
-  const id = baseName.toLowerCase().replace(/\s+/g, '-');
-  const name = baseName.toUpperCase();
-
-  // Déterminer la catégorie basée sur le nom
-  let category: 'text' | 'image' | 'both' = 'both';
-  let type: 'animation' | 'transition' | 'special' = 'animation';
-
   const lowerName = baseName.toLowerCase();
-
-  // Keywords pour les catégories
-  const textKeywords = ['breathing', 'write', 'type', 'echo', 'rotation', 'shadow', 'time', 'quantum phase', 'sparkle', 'star dust', 'tornado', 'rainbow', 'electric hover', 'heartbeat', 'dna build', 'particle build'];
-  const imageKeywords = ['crystal', 'fire consume', 'fade', 'particle dissolve', 'smoke', 'wave dissolve', 'ice', 'reality glitch', 'star explosion', 'morph', 'phase through', 'breathing object', 'float physics', 'gravity', 'liquid pour', 'magnetic pull', 'pendulum', 'stellar drift', 'time rewind', 'quantum split', 'prism split', 'electric form', 'soul aura'];
-  const bothKeywords = ['dimension', 'energy', 'float dance', 'glitch spawn', 'gyroscope', 'hologram', 'liquid morph', 'liquid state', 'magnetic field', 'mirror', 'neural', 'orbit', 'plasma', 'wave distortion', 'wave surf'];
+  
+  let category = 'both';
+  let type = 'animation';
+  
+  // Keywords plus précis pour les catégories
+  const textKeywords = ['write', 'type', 'echo', 'rotation', 'shadow', 'time', 'quantum split', 'sparkle', 'star dust', 'tornado', 'rainbow', 'electric hover'];
+  const imageKeywords = ['crystal', 'fire consume', 'fade', 'particle dissolve', 'smoke', 'wave dissolve', 'ice', 'reality', 'star explosion', 'morph', 'phase', 'liquid morph', 'mirror'];
+  const bothKeywords = ['dimension', 'energy', 'float', 'glitch', 'gyroscope', 'hologram', 'liquid state', 'magnetic', 'neural', 'orbit', 'plasma', 'wave distortion', 'wave surf', 'breathing', 'electric form', 'pendulum', 'prism'];
 
   if (textKeywords.some(keyword => lowerName.includes(keyword))) {
     category = 'text';
@@ -32,16 +29,10 @@ function generateEffectMetadata(filename: string) {
     type = 'special';
   }
 
-  return {
-    id,
-    name,
-    description: `${name.charAt(0) + name.slice(1).toLowerCase().replace(/-/g, ' ')} effect`,
-    category,
-    type
-  };
+  return { category, type };
 }
 
-// Liste complète des effets JSfile (mise à jour manuelle si nécessaire)
+// Liste complète et vérifiée des effets JSfile
 const KNOWN_JSFILE_EFFECTS = [
   'breathing.effect.js',
   'breathing object.effect.js',
@@ -75,7 +66,6 @@ const KNOWN_JSFILE_EFFECTS = [
   'morph 3d.effect.js',
   'métamorphoses d\'images.effect.js',
   'neon glow.effect.js',
-  'neon-glow.effect.js',
   'neural pulse.effect.js',
   'orbit dance.effect.js',
   'particle build.effect.js',
@@ -107,74 +97,107 @@ const KNOWN_JSFILE_EFFECTS = [
 
 export async function loadEffectsFromLocal(): Promise<Effect[]> {
   console.log('📂 Loading effects from JSfile directory...');
+  
+  const effects: Effect[] = [];
+  let successCount = 0;
+  let errorCount = 0;
 
-  try {
-    const effects: Effect[] = [];
-
-    // Traiter tous les effets connus
-    KNOWN_JSFILE_EFFECTS.forEach((filename) => {
-      if (!filename.endsWith('.effect.js')) {
-        console.warn(`⚠️ Skipping invalid effect file: ${filename}`);
-        return;
-      }
-
-      const metadata = generateEffectMetadata(filename);
-
-      const effect = {
-        ...metadata,
-        path: `/JSfile/${filename}`,
+  for (const filename of KNOWN_JSFILE_EFFECTS) {
+    try {
+      const baseName = filename.replace('.effect.js', '');
+      const id = baseName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      const name = baseName.toUpperCase();
+      
+      const { category, type } = categorizeEffect(filename);
+      
+      const effect: Effect = {
+        id,
+        name,
+        description: `${name.charAt(0) + name.slice(1).toLowerCase().replace(/-/g, ' ')} effect`,
+        category: category as 'text' | 'image' | 'both',
+        type: type as 'animation' | 'transition' | 'special',
         scriptUrl: `/JSfile/${filename}`,
-        source: 'JSfile' // Marqueur pour identifier la source
+        source: 'JSfile'
       };
 
       effects.push(effect);
-      console.log(`✅ Loaded JSfile effect: ${metadata.name} (${filename})`);
-    });
-
-    console.log(`✅ Successfully loaded ${effects.length} effects from JSfile directory`);
-    console.log(`🔒 All effects are verified to come from JSfile source`);
-    return effects;
-
-  } catch (error) {
-    console.error('❌ Failed to load effects from JSfile:', error);
-    return [];
+      console.log(`✅ Loaded JSfile effect: ${name} (${filename})`);
+      successCount++;
+      
+    } catch (error) {
+      console.error(`❌ Failed to load effect ${filename}:`, error);
+      errorCount++;
+    }
   }
+
+  console.log(`✅ Successfully loaded ${successCount} effects from JSfile directory`);
+  if (errorCount > 0) {
+    console.warn(`⚠️ Failed to load ${errorCount} effects`);
+  }
+  
+  // Vérification de sécurité
+  const validEffects = effects.filter(effect => effect.scriptUrl?.startsWith('/JSfile/'));
+  console.log('🔒 All effects are verified to come from JSfile source');
+  
+  return validEffects;
 }
 
 export async function loadEffectScript(scriptUrl: string): Promise<string> {
+  // Validation de sécurité stricte
+  if (!scriptUrl.startsWith('/JSfile/')) {
+    throw new Error(`Security violation: Invalid script URL ${scriptUrl}`);
+  }
+
   try {
-    console.log(`📥 Loading script from: ${scriptUrl}`);
-
-    // Validation de sécurité : s'assurer que le script provient du dossier JSfile
-    if (!scriptUrl.startsWith('/JSfile/') || !scriptUrl.endsWith('.effect.js')) {
-      throw new Error(`Security check failed: Script must be from JSfile directory and have .effect.js extension. Got: ${scriptUrl}`);
-    }
-
-    // Charger le fichier depuis le dossier JSfile
     const response = await fetch(scriptUrl);
-
+    
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const script = await response.text();
-    console.log(`✅ JSfile script loaded successfully: ${scriptUrl}`);
-    return script;
+    const content = await response.text();
+    
+    if (!content || content.trim().length === 0) {
+      throw new Error('Empty script content');
+    }
 
+    // Validation basique du contenu
+    if (content.length < 10) {
+      throw new Error('Script content too short');
+    }
+
+    return content;
+    
   } catch (error) {
-    console.error(`❌ Failed to load JSfile script ${scriptUrl}:`, error);
-    throw error;
+    console.error(`Failed to load script ${scriptUrl}:`, error);
+    throw new Error(`Script loading failed: ${error.message}`);
   }
 }
 
-export function getLocalEffectsStats() {
-  const totalEffects = KNOWN_JSFILE_EFFECTS.length;
+export function validateJSfileEffect(effect: Effect): boolean {
+  if (!effect) {
+    console.error('Effect is null or undefined');
+    return false;
+  }
 
+  if (!effect.scriptUrl || !effect.scriptUrl.startsWith('/JSfile/')) {
+    console.error(`Invalid script URL for effect ${effect.id}: ${effect.scriptUrl}`);
+    return false;
+  }
+
+  if (!effect.id || !effect.name) {
+    console.error(`Missing required fields for effect: ${JSON.stringify(effect)}`);
+    return false;
+  }
+
+  return true;
+}
+
+export function getLocalEffectsStats() {
   return {
-    totalEffects,
-    effectsLoaded: totalEffects,
-    avgLoadTime: '< 1ms',
     source: 'JSfile',
-    verified: true
+    totalEffects: KNOWN_JSFILE_EFFECTS.length,
+    loadingMethod: 'local',
+    lastUpdated: new Date().toISOString()
   };
 }
