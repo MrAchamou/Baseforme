@@ -50,11 +50,28 @@ export default function Home() {
   useEffect(() => {
     const checkGitHubStatus = async () => {
       try {
-        // Tentative de chargement des effets pour vérifier la connexion GitHub
-        await loadEffectsFromGitHub();
-        setGithubStatus('connected');
+        console.log('🔍 Checking GitHub status on page load...');
+        console.log('🔑 VITE_GITHUB_TOKEN present:', !!import.meta.env.VITE_GITHUB_TOKEN);
+        
+        if (!import.meta.env.VITE_GITHUB_TOKEN) {
+          console.warn('⚠️ No GitHub token found - effects loading will be limited');
+          setGithubStatus('error');
+          return;
+        }
+
+        // Test GitHub connection first
+        const { testGitHubConnection } = await import('@/lib/github-api');
+        const isConnected = await testGitHubConnection();
+        
+        if (isConnected) {
+          console.log('✅ GitHub connection successful');
+          setGithubStatus('connected');
+        } else {
+          console.error('❌ GitHub connection failed');
+          setGithubStatus('error');
+        }
       } catch (err) {
-        console.error('Erreur lors de la vérification du statut GitHub:', err);
+        console.error('❌ Error checking GitHub status:', err);
         setGithubStatus('error');
       }
     };

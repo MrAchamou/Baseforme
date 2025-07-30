@@ -39,7 +39,31 @@ export async function testGitHubConnection(): Promise<boolean> {
   try {
     console.log('🔍 Testing GitHub connection...');
     console.log('🔑 Token présent:', !!GITHUB_API_TOKEN);
+    console.log('🔑 Token length:', GITHUB_API_TOKEN ? GITHUB_API_TOKEN.length : 0);
+    console.log('🔑 Token prefix:', GITHUB_API_TOKEN ? GITHUB_API_TOKEN.substring(0, 7) + '...' : 'none');
     console.log('📂 Repository:', `${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`);
+    
+    // Test with user info first to validate token
+    if (GITHUB_API_TOKEN) {
+      console.log('🔍 Testing token validity with user info...');
+      const userResponse = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `token ${GITHUB_API_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        signal: AbortSignal.timeout(10000)
+      });
+      
+      console.log('👤 User API status:', userResponse.status);
+      
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        console.log('✅ Token valide pour l\'utilisateur:', userData.login);
+      } else {
+        console.error('❌ Token invalide ou expiré');
+        return false;
+      }
+    }
     
     const response = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}`,
@@ -49,14 +73,24 @@ export async function testGitHubConnection(): Promise<boolean> {
       }
     );
     
-    console.log('📡 Response status:', response.status);
+    console.log('📡 Repository API status:', response.status);
     
     if (response.status === 403) {
-      console.warn('⚠️ GitHub API rate limit exceeded or token invalid');
+      const remaining = response.headers.get('X-RateLimit-Remaining');
+      const resetTime = response.headers.get('X-RateLimit-Reset');
+      console.warn('⚠️ GitHub API rate limit - Remaining:', remaining, 'Reset:', resetTime);
     } else if (response.status === 404) {
       console.error('❌ Repository not found or no access');
+    } else if (response.status === 401) {
+      console.error('❌ Token invalid or insufficient permissions');
     } else if (response.ok) {
-      console.log('✅ GitHub connection successful');
+      console.log('✅ GitHub repository connection successful');
+      const repoData = await response.json();
+      console.log('📊 Repository info:', {
+        name: repoData.name,
+        private: repoData.private,
+        permissions: repoData.permissions
+      });
     }
     
     return response.ok;
@@ -354,61 +388,81 @@ async function loadSingleEffect(effectName: string, effectPath: string, effects:
 
 async function discoverEffectsFromRepository(): Promise<string[]> {
   try {
-    console.info('Discovering effects from repository structure...');
+    console.info('🔍 Discovering effects from repository structure...');
+    console.info('🔑 Using', GITHUB_API_TOKEN ? 'authenticated' : 'unauthenticated', 'requests');
 
     const response = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/`,
       { 
         headers,
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(15000)
       }
     );
 
+    console.info('📡 Repository contents response:', response.status);
+
     if (!response.ok) {
+      if (response.status === 403) {
+        const remaining = response.headers.get('X-RateLimit-Remaining');
+        console.warn('⚠️ Rate limit hit while discovering - Remaining:', remaining);
+      } else if (response.status === 404) {
+        console.error('❌ Repository not found or no access');
+      }
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 
     const contents = await response.json();
     if (!Array.isArray(contents)) {
+      console.error('❌ Expected array of repository contents, got:', typeof contents);
       throw new Error('Expected array of repository contents');
     }
 
+    console.info(`📁 Found ${contents.length} items in repository root`);
+
     const effectNames: string[] = [];
-    const maxConcurrent = 3;
+    const maxConcurrent = GITHUB_API_TOKEN ? 5 : 2; // More concurrent requests with token
 
     const directories = contents.filter(item => item.type === 'dir');
-    console.info(`Found ${directories.length} directories to check`);
+    console.info(`📂 Found ${directories.length} directories to check for effects`);
+
+    // Log first few directory names for debugging
+    console.info('📂 Sample directories:', directories.slice(0, 5).map(d => d.name));
 
     for (let i = 0; i < directories.length; i += maxConcurrent) {
       const batch = directories.slice(i, i + maxConcurrent);
 
       const promises = batch.map(async (item) => {
         try {
+          console.info(`🔍 Checking directory: ${item.name}`);
           const dirResponse = await fetch(
             `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/contents/${encodeURIComponent(item.name)}`,
             { 
               headers,
-              signal: AbortSignal.timeout(5000)
+              signal: AbortSignal.timeout(8000)
             }
           );
 
           if (dirResponse.ok) {
             const dirContents = await dirResponse.json();
             if (Array.isArray(dirContents)) {
-              const hasJsFile = dirContents.some((file: any) => 
+              const jsFiles = dirContents.filter((file: any) => 
                 file.type === 'file' && 
                 file.name && 
                 file.name.toLowerCase().endsWith('.js')
               );
 
-              if (hasJsFile) {
-                console.info(`✓ Found effect directory: ${item.name}`);
+              if (jsFiles.length > 0) {
+                console.info(`✅ Found effect directory: ${item.name} (${jsFiles.length} JS files)`);
                 return item.name;
+              } else {
+                console.info(`⏭️ Skipping ${item.name} - no JS files found`);
               }
             }
+          } else {
+            console.warn(`⚠️ Failed to check ${item.name}: ${dirResponse.status}`);
           }
         } catch (error) {
-          console.warn(`Failed to check directory ${item.name}:`, error);
+          console.warn(`❌ Error checking directory ${item.name}:`, error);
         }
         return null;
       });
@@ -420,16 +474,23 @@ async function discoverEffectsFromRepository(): Promise<string[]> {
         }
       });
 
+      console.info(`📊 Progress: ${effectNames.length} effects discovered so far`);
+
+      // Delay between batches to respect rate limits
+      const delay = GITHUB_API_TOKEN ? 200 : 1000;
       if (i + maxConcurrent < directories.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
 
-    console.info(`Discovered ${effectNames.length} effect directories`);
+    console.info(`🎉 Successfully discovered ${effectNames.length} effect directories`);
+    if (effectNames.length > 0) {
+      console.info('📋 Effect list:', effectNames.slice(0, 10), effectNames.length > 10 ? '...' : '');
+    }
+    
     return effectNames;
   } catch (error) {
-    console.error('Erreur lors du chargement des effets:', error);
-    // Retourner un tableau vide plutôt que de lancer l'erreur pour plus de robustesse
+    console.error('❌ Error discovering effects from repository:', error);
     return [];
   }
 }
