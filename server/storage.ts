@@ -36,8 +36,3 @@ export class MemStorage implements IStorage {
 }
 
 export const storage = new MemStorage();
-// Placeholder storage interface
-export const storage = {
-  // Add your storage methods here
-  // e.g. insertUser, getUserByUsername, etc.
-};
