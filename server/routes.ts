@@ -28,20 +28,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
-import { Express } from 'express';
-import { createServer } from 'http';
-
-export const registerRoutes = async (app: Express) => {
-  const server = createServer(app);
-
-  // API routes
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
-  });
-
-  app.get('/api/effects', (req, res) => {
-    res.json({ effects: [] });
-  });
-
-  return server;
-};
